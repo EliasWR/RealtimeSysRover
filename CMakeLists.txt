@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
-project(ExampleProject)
+project(RealtimeSysRover)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(ExampleProject main.cpp)
+add_executable(main main.cpp)
