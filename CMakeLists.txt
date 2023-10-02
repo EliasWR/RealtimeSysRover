@@ -3,4 +3,7 @@ project(RealtimeSysRover)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(main main.cpp)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
+
+add_subdirectory(application)
