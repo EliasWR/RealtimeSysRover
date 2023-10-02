@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/styles.css">
+    <title>Robot Control</title>
+</head>
+<body>
+    <div class="container">
+        <button id="btnForward">Move Forward</button>
+        <button id="btnBackward">Move Backward</button>
+        <button id="btnLeft">Turn Left</button>
+        <button id="btnRight">Turn Right</button>
+
+        <div class="sliders">
+            <div>
+                <label for="xSlider">X-Axis:</label>
+                <input type="range" id="xSlider" min="0" max="100" value="50">
+            </div>
+            <div>
+                <label for="ySlider">Y-Axis:</label>
+                <input type="range" id="ySlider" min="0" max="100" value="50">
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/scripts.js"></script>
+</body>
+</html>
