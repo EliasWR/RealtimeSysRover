@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]
+        os: [ubuntu-latest]
         compiler_version: [11]
 
     steps:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Configure and build
         run: |
-          cmake . -B build -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_MANIFEST_FEATURES="imgui;assimp;pugixml" -DTHREEPP_WITH_SVG_FEATURE=ON -DCMAKE_BUILD_TYPE=Release
+          cmake . -B build -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DVCPKG_MANIFEST_FEATURES="imgui;assimp;pugixml" -DCMAKE_BUILD_TYPE=Release
           cmake --build build
 
       - name: Test
@@ -61,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2022]
+        os: [windows-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -92,10 +92,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12]
+        os: [macos-10.15]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Restore artifacts, or run vcpkg, build (and cache artifacts as post step)
         uses: lukka/run-vcpkg@v10
@@ -112,5 +112,5 @@ jobs:
 
       - name: Configure and build
         run: |
-          cmake . -B build -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DTHREEPP_BUILD_EXAMPLES=OFF -DTHREEPP_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE="Release"
+          cmake . -B build -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE="Release"
           cmake --build build
