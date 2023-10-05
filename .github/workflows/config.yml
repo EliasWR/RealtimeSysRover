@@ -92,7 +92,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-10.14]
+        os: [macos-10.13]
 
     steps:
       - uses: actions/checkout@v2
