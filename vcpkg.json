@@ -1,15 +1,7 @@
 {
 	"dependencies": [
 		"boost-asio",
+		"boost-beast",,
 		"nlohmann-json"
-	],
-	"features": {
-		"boost-beast": {
-			"description": "For setting up sockets",
-			"dependencies": [
-				"boost-beast"
-			]
-		}
-	}
-
+	]
 }
