@@ -7,4 +7,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(Catch2 CONFIG REQUIRED)
 
 add_subdirectory(application)
+
+enable_testing()
 add_subdirectory(tests)
+
