@@ -1,0 +1,3 @@
+[submodule "RTS_RoverCode"]
+	path = RTS_RoverCode
+	url = git@github.com:Summengardin/RTS_RoverCode.git
