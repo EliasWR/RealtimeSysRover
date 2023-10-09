@@ -3,7 +3,11 @@ project(RealtimeSysRover)
 
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(Catch2 CONFIG REQUIRED)
 
 add_subdirectory(application)
+
+enable_testing()
+add_subdirectory(tests)
+

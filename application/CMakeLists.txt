@@ -1,7 +1,2 @@
 add_executable(main main.cpp)
-
-target_link_libraries(main
-        PRIVATE
-        Boost::system
-        nlohmann_json::nlohmann_json
-)
+target_link_libraries(main PRIVATE Boost::system)
