@@ -1,6 +1,8 @@
 {
 	"dependencies": [
 		"boost-asio",
-		"catch2"
+		"catch2",
+		"protobuf",
+		"nlohmann-json"
 	]
 }

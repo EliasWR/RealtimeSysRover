@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package proto;
+
+message Person {
+
+    required string firstName = 1;
+    required string lastName = 2;
+    optional int32 age = 3;
+
+}
