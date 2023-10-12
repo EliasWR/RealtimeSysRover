@@ -1,1 +1,1 @@
-ssh MartinElias@10.25.46.50
+ssh MartinElias@10.25.46.36
