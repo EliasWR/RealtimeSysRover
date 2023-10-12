@@ -1,5 +1,4 @@
-add_executable(main main.cpp
-        ../src/proto_helper.hpp)
+add_executable(main main.cpp "${CMAKE_SOURCE_DIR}/src/proto_helper.hpp")
 target_link_libraries(main PRIVATE Boost::system)
 target_link_libraries(main PRIVATE protobuf::libprotobuf)
 
