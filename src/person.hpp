@@ -1,3 +1,6 @@
+#ifndef REALTIMESYSROVER_PERSON_HPP
+#define REALTIMESYSROVER_PERSON_HPP
+
 #include <string>
 #include <optional>
 #include <utility>
@@ -44,3 +47,5 @@ private:
     std::string lastName_;
     std::optional<int> age_;
 };
+
+#endif

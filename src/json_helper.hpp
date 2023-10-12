@@ -6,8 +6,6 @@
 
 #include "nlohmann/json.hpp"
 
-namespace ais2203 {
-
     Person fromJson(const std::string& json) {
         auto data = nlohmann::json::parse(json);
 
@@ -33,7 +31,5 @@ namespace ais2203 {
 
         return data.dump();
     }
-
-}
 
 #endif //SERIALIZATION_DEMO_JSON_HELPER_HPP
