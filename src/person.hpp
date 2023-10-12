@@ -48,4 +48,12 @@ private:
     std::optional<int> age_;
 };
 
+bool operator==(const Person &person1, const Person &person2) {
+    bool resultFirstname = person1.getFirstName() == person2.getFirstName();
+    bool resultLastname = person1.getLastName() == person2.getLastName();
+    bool resultAge = person1.getAge() == person2.getAge();
+    return resultFirstname && resultLastname && resultAge;
+}
+
+
 #endif
