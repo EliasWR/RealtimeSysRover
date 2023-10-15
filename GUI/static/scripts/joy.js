@@ -70,10 +70,10 @@ let StickStatus =
  *  autoReturnToCenter {Bool} (optional) - Sets the behavior of the stick, whether or not, it should return to zero position when released (Default value is True and return to zero)
  * @param callback {StickStatus} -
 */
-var JoyStick = (function(container, parameters, callback)
+let JoyStick = (function(container, parameters, callback)
 {
     parameters = parameters || {};
-    var title = (typeof parameters.title === "undefined" ? "joystick" : parameters.title),
+    let title = (typeof parameters.title === "undefined" ? "joystick" : parameters.title),
         width = (typeof parameters.width === "undefined" ? 0 : parameters.width),
         height = (typeof parameters.height === "undefined" ? 0 : parameters.height),
         internalFillColor = (typeof parameters.internalFillColor === "undefined" ? "#00AA00" : parameters.internalFillColor),
@@ -86,34 +86,34 @@ var JoyStick = (function(container, parameters, callback)
     callback = callback || function(StickStatus) {};
 
     // Create Canvas element and add it in the Container object
-    var objContainer = document.getElementById(container);
+    let objContainer = document.getElementById(container);
 
     // Fixing Unable to preventDefault inside passive event listener due to target being treated as passive in Chrome [Thanks to https://github.com/artisticfox8 for this suggestion]
     objContainer.style.touchAction = "none";
 
-    var canvas = document.createElement("canvas");
+    let canvas = document.createElement("canvas");
     canvas.id = title;
     if(width === 0) { width = objContainer.clientWidth; }
     if(height === 0) { height = objContainer.clientHeight; }
     canvas.width = width;
     canvas.height = height;
     objContainer.appendChild(canvas);
-    var context=canvas.getContext("2d");
+    let context=canvas.getContext("2d");
 
-    var pressed = 0; // Bool - 1=Yes - 0=No
-    var circumference = 2 * Math.PI;
-    var internalRadius = (canvas.width-((canvas.width/2)+10))/2;
-    var maxMoveStick = internalRadius + 5;
-    var externalRadius = internalRadius + 30;
-    var centerX = canvas.width / 2;
-    var centerY = canvas.height / 2;
-    var directionHorizontalLimitPos = canvas.width / 10;
-    var directionHorizontalLimitNeg = directionHorizontalLimitPos * -1;
-    var directionVerticalLimitPos = canvas.height / 10;
-    var directionVerticalLimitNeg = directionVerticalLimitPos * -1;
+    let pressed = 0; // Bool - 1=Yes - 0=No
+    let circumference = 2 * Math.PI;
+    let internalRadius = (canvas.width-((canvas.width/2)+10))/2;
+    let maxMoveStick = internalRadius ;
+    let externalRadius = internalRadius + 30;
+    let centerX = canvas.width / 2;
+    let centerY = canvas.height / 2;
+    let directionHorizontalLimitPos = canvas.width / 10;
+    let directionHorizontalLimitNeg = directionHorizontalLimitPos * -1;
+    let directionVerticalLimitPos = canvas.height / 10;
+    let directionVerticalLimitNeg = directionVerticalLimitPos * -1;
     // Used to save current position of stick
-    var movedX=centerX;
-    var movedY=centerY;
+    let movedX=centerX;
+    let movedY = centerY;
 
     // Check if the device support the touch or not
     if("ontouchstart" in document.documentElement)
@@ -153,14 +153,31 @@ var JoyStick = (function(container, parameters, callback)
      */
     function drawInternal()
     {
+        let dx = movedX - centerX;
+        let dy = movedY - centerY;
+
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if(distance > maxMoveStick) {
+            // Normalize the direction vector
+            let normalizedX = dx / distance;
+            let normalizedY = dy / distance;
+
+            // Adjust the point to be on the circle's boundary
+            movedX = centerX + normalizedX * maxMoveStick;
+            movedY = centerY + normalizedY * maxMoveStick;
+        }
         context.beginPath();
+        /*
         if(movedX<internalRadius) { movedX=maxMoveStick; }
-        if((movedX+internalRadius) > canvas.width) { movedX = canvas.width-(maxMoveStick); }
+        if((movedX+internalRadius) > canvas.width)
+        { movedX = canvas.width-(maxMoveStick); }
         if(movedY<internalRadius) { movedY=maxMoveStick; }
-        if((movedY+internalRadius) > canvas.height) { movedY = canvas.height-(maxMoveStick); }
+        if((movedY+internalRadius) > canvas.height)
+        { movedY = canvas.height-(maxMoveStick); }
+*/
         context.arc(movedX, movedY, internalRadius, 0, circumference, false);
         // create radial gradient
-        var grd = context.createRadialGradient(centerX, centerY, 5, centerX, centerY, 200);
+        let grd = context.createRadialGradient(centerX, centerY, 5, centerX, centerY, 200);
         // Light color
         grd.addColorStop(0, internalFillColor);
         // Dark color
@@ -204,37 +221,32 @@ var JoyStick = (function(container, parameters, callback)
             drawInternal();
 
             // Set attribute of callback
-            StickStatus.xPosition = movedX;
-            StickStatus.yPosition = movedY;
-            StickStatus.x = (100*((movedX - centerX)/maxMoveStick)).toFixed();
-            StickStatus.y = ((100*((movedY - centerY)/maxMoveStick))*-1).toFixed();
-            StickStatus.cardinalDirection = getCardinalDirection();
+            updateStickStatus();
             callback(StickStatus);
         }
     }
 
     function onTouchEnd(event)
     {
-        pressed = 0;
-        // If required reset position store variable
-        if(autoReturnToCenter)
+        if(pressed === 1)
         {
-            movedX = centerX;
-            movedY = centerY;
-        }
-        // Delete canvas
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        // Redraw object
-        drawExternal();
-        drawInternal();
+            pressed = 0;
+            // If required reset position store variable
+            if(autoReturnToCenter)
+            {
+                movedX = centerX;
+                movedY = centerY;
+            }
+            // Delete canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            // Redraw object
+            drawExternal();
+            drawInternal();
 
-        // Set attribute of callback
-        StickStatus.xPosition = movedX;
-        StickStatus.yPosition = movedY;
-        StickStatus.x = (100*((movedX - centerX)/maxMoveStick)).toFixed();
-        StickStatus.y = ((100*((movedY - centerY)/maxMoveStick))*-1).toFixed();
-        StickStatus.cardinalDirection = getCardinalDirection();
-        callback(StickStatus);
+            // Set attribute of callback
+            updateStickStatus();
+            callback(StickStatus);
+        }
     }
 
     /**
@@ -270,11 +282,7 @@ var JoyStick = (function(container, parameters, callback)
             drawInternal();
 
             // Set attribute of callback
-            StickStatus.xPosition = movedX;
-            StickStatus.yPosition = movedY;
-            StickStatus.x = (100*((movedX - centerX)/maxMoveStick)).toFixed();
-            StickStatus.y = ((100*((movedY - centerY)/maxMoveStick))*-1).toFixed();
-            StickStatus.cardinalDirection = getCardinalDirection();
+            updateStickStatus();
             callback(StickStatus);
         }
     }
@@ -295,14 +303,19 @@ var JoyStick = (function(container, parameters, callback)
             drawInternal();
 
             // Set attribute of callback
-            StickStatus.xPosition = movedX;
-            StickStatus.yPosition = movedY;
-            StickStatus.x = (100 * ((movedX - centerX) / maxMoveStick)).toFixed();
-            StickStatus.y = ((100 * ((movedY - centerY) / maxMoveStick)) * -1).toFixed();
-            StickStatus.cardinalDirection = getCardinalDirection();
+            updateStickStatus();
             callback(StickStatus);
         }
     }
+
+    function updateStickStatus() {
+        StickStatus.xPosition = movedX;
+        StickStatus.yPosition = movedY;
+        StickStatus.x = (100*((movedX - centerX)/maxMoveStick)).toFixed();
+        StickStatus.y = ((100*((movedY - centerY)/maxMoveStick))*-1).toFixed();
+        StickStatus.cardinalDirection = getCardinalDirection();
+    }
+
 
     function getCardinalDirection()
     {

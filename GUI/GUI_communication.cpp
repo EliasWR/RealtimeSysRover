@@ -2,17 +2,36 @@
 // Created by Martin on 03.10.2023.
 //
 
-#include "test_GUI.hpp"
+#include "GUI_communication.hpp"
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
-#include <thread>
 #include <iostream>
+#include <thread>
 
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 using udp = boost::asio::ip::udp;
+
+std::vector<std::string> splitString(const std::string &str, char delimiter) {
+  std::vector<std::string> tokens;
+  std::stringstream ss(str);
+  std::string token;
+
+  while (std::getline(ss, token, delimiter)) {
+    tokens.push_back(token);
+  }
+
+  return tokens;
+}
+
+
+int message_parser(const std::string& message) {
+
+}
+
+
 
 void do_session(tcp::socket socket) {
   try {
@@ -54,4 +73,6 @@ int main(int argc, char* argv[]) {
     std::cerr << "Error: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  return EXIT_SUCCESS;
 }
