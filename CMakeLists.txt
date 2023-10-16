@@ -9,7 +9,6 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Catch2 CONFIG REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
 
 add_subdirectory(application)
 add_subdirectory(GUI)
