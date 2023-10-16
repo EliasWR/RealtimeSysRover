@@ -92,11 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     
     let Joy1 = new JoyStick('joystick-left', {}, function(stickData) {
-        sendCommand(`x_axis_rover_${Math.floor(stickData.x)}`);
-        sendCommand(`y_axis_rover_${Math.floor(stickData.y)}`);
+        sendCommand('joystick_rover_' + Math.floor(stickData.x) + '_' + Math.floor(stickData.y)
     });
     let Joy2 = new JoyStick('joystick-right', {}, function(stickData) {
-        sendCommand(`x_axis_camera_${Math.floor(stickData.x)}`);
-        sendCommand(`y_axis_camera_${Math.floor(stickData.y)}`);
+        sendCommand('joystick_camera_' + Math.floor(stickData.x) + '_' + Math.floor(stickData.y)
     });
 });
