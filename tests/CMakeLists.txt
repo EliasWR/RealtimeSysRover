@@ -1,21 +1,26 @@
 function(add_test_executable name)
     add_executable(${name} ${name}.cpp)
     target_link_libraries(${name} PRIVATE Catch2::Catch2WithMain)
-    target_include_directories(${name} PRIVATE "${PROJECT_SOURCE_DIR}/src")
+    target_include_directories(${name} PRIVATE "${CMAKE_SOURCE_DIR}/include")
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
-add_test_executable(testProject)
-add_test_executable(testSerialization)
+add_test_executable(test_project)
+add_test_executable(test_serialization)
+#add_test_executable(test_tcp)
 
 # PROTOBUF
-target_link_libraries(testSerialization PRIVATE protobuf::libprotobuf)
+target_link_libraries(test_serialization PRIVATE protobuf::libprotobuf)
 
-target_include_directories(testSerialization PRIVATE "${CMAKE_SOURCE_DIR}/protobuf")
-target_link_libraries(testSerialization PRIVATE
+target_include_directories(test_serialization PRIVATE "${CMAKE_SOURCE_DIR}/protobuf")
+target_link_libraries(test_serialization PRIVATE
         proto_msg
         nlohmann_json::nlohmann_json
 )
+
+
+
+
 
 #add_executable(testProject testproject.cpp)
 #target_link_libraries(testProject PRIVATE Catch2::Catch2WithMain)

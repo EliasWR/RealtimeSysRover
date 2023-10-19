@@ -7,6 +7,7 @@ execute_process(
         COMMAND ${protoc}
         "-I=${CMAKE_CURRENT_SOURCE_DIR}"
         "--cpp_out=${generatedDir}"
+        "--python_out=${generatedDir}"
         "${CMAKE_CURRENT_SOURCE_DIR}/Person.proto"
 )
 
