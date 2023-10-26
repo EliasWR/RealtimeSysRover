@@ -8,6 +8,13 @@ execute_process(
         "-I=${CMAKE_CURRENT_SOURCE_DIR}"
         "--cpp_out=${generatedDir}"
         "--python_out=${CMAKE_SOURCE_DIR}/protobuf"
+        "${CMAKE_CURRENT_SOURCE_DIR}/person.proto"
+)
+execute_process(
+        COMMAND ${protoc}
+        "-I=${CMAKE_CURRENT_SOURCE_DIR}"
+        "--cpp_out=${generatedDir}"
+        "--python_out=${CMAKE_SOURCE_DIR}/protobuf"
         "${CMAKE_CURRENT_SOURCE_DIR}/my_messages.proto"
 )
 
