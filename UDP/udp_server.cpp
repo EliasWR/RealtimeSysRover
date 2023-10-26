@@ -1,6 +1,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
-#include "../cmake-build-debug/generated/my_messages.pb.h"
+#include "my_messages.pb.h"
 //#include "my_messages.pb.h"
 
 using boU = boost::asio::ip::udp;
