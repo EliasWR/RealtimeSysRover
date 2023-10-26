@@ -27,7 +27,7 @@ std::tuple<float_t, float_t> message_parser(const std::string& message) {
         float_t y = std::stof(tokens[2]);
         // TODO: Calulate speed and heading
         std::tuple<float_t, float_t> movement_instruction = {0, 0};
-        return (movement_instruction)
+        return (movement_instruction);
       }
 
     }
