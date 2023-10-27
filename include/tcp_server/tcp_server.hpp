@@ -1,61 +1,61 @@
-#ifndef REALTIMESYSROVER_TCP_SERVER_HPP
-#define REALTIMESYSROVER_TCP_SERVER_HPP
+#ifndef REALTIMESYSROVER_TCP_SERVER2_HPP
+#define REALTIMESYSROVER_TCP_SERVER2_HPP
 
-#ifndef SESSION_HPP
-#define SESSION_HPP
+#include "network_helper.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
+#include <string>
 #include <functional>
-#include <iostream>
-#include <thread>
-#include <memory>
-#include <vector>
-
-#include "network_helper.hpp"
 
 namespace beast = boost::beast;
 namespace asio = boost::asio;
 
 using tcp = boost::asio::ip::tcp;
-using udp = boost::asio::ip::udp;
+
 
 class Connection {
+public:
+  explicit Connection(tcp::socket socket);
+  void start();
+  std::string getIPv4();
+  using Callback = std::function<void(Connection& conn, const std::string& request, std::string& response)>;
+
+  void setCallback(Callback& callback);
+  tcp::socket& socket();
+
 private:
-  beast::websocket::stream<tcp::socket> _socket;
-  std::function<std::string(beast::flat_buffer &)> _handler;
-  std::jthread _thread;
+  tcp::socket _socket;
+  Callback _callback;
 
   int _recieveSize();
-
-
-public:
-  explicit Connection(asio::io_context &);
-  explicit Connection(asio::io_context &, const std::function<std::string()>&);
-  ~Connection();
-  void start();
-  void write(const std::string &msg);
-  std::string recieveMessage();
 };
+
 
 
 class TCPServer {
-private:
-  int _port;
-  asio::io_context _ioc;
-  tcp::acceptor _acceptor;
-
-  std::function<std::string()> _handler;
-  std::jthread _thread;
-  std::atomic<bool> _stop_all{false};
-
 public:
-  TCPServer(int port);
+  TCPServer(unsigned short port, std::size_t thread_pool_size);
+  TCPServer(unsigned short port);
   void start();
-  int stop();
+  void stop();
+  bool is_running() const;
+
+  virtual void set_callback(Connection::Callback callback);
+
+private:
+  void accept();
+
+  unsigned short _port;
+  std::jthread _ioc_thread;
+  asio::io_context _io_context;
+  tcp::acceptor _acceptor;
+  Connection::Callback _callback;
+  std::unique_ptr<asio::thread_pool> _thread_pool;
+  std::atomic<bool> _is_running;
+  std::unique_ptr<std::thread> _acceptor_thread;
 };
 
-#endif// SESSION_HPP
 
 
-#endif//REALTIMESYSROVER_TCP_SERVER_HPP
+#endif//REALTIMESYSROVER__TCP_SERVER2_HPP

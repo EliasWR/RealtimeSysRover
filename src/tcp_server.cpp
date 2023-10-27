@@ -1,127 +1,110 @@
+#include "tcp_server/tcp_server.hpp"
+#include <iostream>
 #include <utility>
 
-#include "tcp_server/tcp_server.hpp"
-#include "helpers.hpp"
+// Connection Implementation
+Connection::Connection(tcp::socket socket) : _socket(std::move(socket)) {}
 
-/*
- *  Connection
- */
-
-Connection::Connection(asio::io_context &ioc)
-    : Connection(ioc, [](beast::buffer &buffer) {
-        std::cout << "Received: " << beast::make_printable(buffer.data()) << std::endl;
-        return std::string(buffer.data());
-      }) {
-}
-
-Connection::Connection(asio::io_context &ioc, const std::function<std::string()>& handler)
-    : _socket(ioc),
-      _handler(std::move(handler)){}
+void Connection::setCallback(Callback& callback) {
+  _callback = callback;
 }
 
 void Connection::start() {
-  _thread = std::jthread([ & ]() {
-    try
-    {
-      _socket.accept();
-      while (true)
-      {
-        auto msg = recvMessage();
-        _handler(msg);
-      }
-    }
-    catch (const beast::system_error &e)
-    {
-      if (e.code() != beast::websocket::error::closed)
-        std::cerr << "Session Error: " << e.code().message() << std::endl;
-    }
-    catch (const std::exception &e)
-    {
-      std::cerr << "Session Error: " << e.what() << std::endl;
-    }
-  });
 
+
+
+  std::vector<char> data(8192);
+  boost::system::error_code error;
+  size_t length = _socket.read_some(asio::buffer(data), error);
+
+  if (!error) {
+    std::string request(data.begin(), data.begin() + length);
+    std::string response;
+
+    if (_callback) {
+      _callback(*this, request, response);
+    }
+
+    asio::write(_socket, asio::buffer(response), error);
+  }
+  _socket.close();
 }
-
-
-void Connection::write(const std::string &msg) {
-  int msgSize = static_cast<int>(msg.size());
-
-  _socket.send(boost::asio::buffer(int_to_bytes(msgSize), 4));
-  _socket.send(boost::asio::buffer(msg));
-}
-
 
 int Connection::_recieveSize() {
   std::array<unsigned char, 4> buf{};
   boost::asio::read(_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
   return bytes_to_int(buf);
 }
-
-std::string Connection::recieveMessage() {
-
-  int len = _recieveSize();
-
-  boost::asio::streambuf buf;
-  boost::system::error_code err;
-  boost::asio::read(_socket, buf, boost::asio::transfer_exactly(len), err);
-
-  if (err) {
-    throw boost::system::system_error(err);
-  }
-
-  std::string data(boost::asio::buffer_cast<const char *>(buf.data()), len);
-  return data;
+std::string Connection::getIPv4() {
+    return _socket.remote_endpoint().address().to_string();
+}
+tcp::socket &Connection::socket() {
+    return _socket;
 }
 
-
-Connection::~Connection() {
-  if (_thread.joinable())
-    _thread.join();
-}
-
-
-/*
- *  TCPServer
- *  For now only accepting ipv4
- */
-
-TCPServer::TCPServer(int port)
+// TCPServer Implementation
+TCPServer::TCPServer(unsigned short port): TCPServer(port, 4) {}
+TCPServer::TCPServer(unsigned short port, std::size_t thread_pool_size)
     : _port(port),
-      _ioc(),
-      _acceptor(_ioc, tcp::endpoint(tcp::v4(), port)) {
+      _acceptor(_io_context, tcp::endpoint(tcp::v4(), port)),
+      _thread_pool(std::make_unique<boost::asio::thread_pool>(thread_pool_size)),
+      _is_running(false) {}
+
+void TCPServer::set_callback(Connection::Callback callback) {
+  _callback = std::move(callback);
 }
 
+void TCPServer::accept() {
+  if (!_is_running) return; // If the server isn't running, don't continue accepting clients
+
+  try{
+    while (_is_running)
+    {
+      std::cout << "Waiting for connection on port " << _port << "..." << std::endl;
+
+      auto socket = _acceptor.accept();
+      auto connection = std::make_shared<Connection>(std::move(socket));
+      std::cout << "Connected to client at " << connection->getIPv4() << std::endl;
+
+      connection->setCallback(_callback);
+
+      asio::post(*_thread_pool, [connection]() {
+        try {
+          connection->start();
+        } catch (const std::exception& e) {
+          std::cerr << "Exception in connection: " << e.what() << "\n";
+        }
+      });
+    }
+  }
+  catch (const boost::system::system_error& e)
+  {}
+  catch (const std::exception& e)
+  {
+    std::cerr << "Exception while accepting: " << e.what() << "\n";
+  }
+}
 
 void TCPServer::start() {
-  _thread = std::jthread([ & ]() {
-    _ioc.run();
-    std::vector<std::unique_ptr<Connection>> connections;
+  _is_running = true;
+  std::cout << "Serving TCP connections at ip: " << _acceptor.local_endpoint().address().to_string();
+  std::cout << "on port: " << _port << std::endl;
 
-    try {
-      while (true) {
-        auto socket_ptr = std::make_unique<tcp::socket>(_ioc);
-        _acceptor.accept(*socket_ptr);
-
-        auto connection_ptr = std::make_unique<Connection>(_ioc);
-
-        connections.emplace_back(std::move(connection_ptr));
-        connections.back()->start();
-      }
-    }
-
-    catch (const std::exception &e) {
-      std::cerr << "Server Error: " << e.what() << std::endl;
-    }
-  });
+  _acceptor_thread = std::make_unique<std::thread>(&TCPServer::accept, this);
 }
 
-int TCPServer::stop() {
-  _stop_all = true;
-  if (_thread.joinable()) {
-    _thread.join();
-    return 0;
+void TCPServer::stop() {
+  _is_running = false;
+  _acceptor.close();
+  if (_acceptor_thread->joinable()) {
+    _acceptor_thread->join();
   }
-
-  return 0;
+  _thread_pool->join();
 }
+
+bool TCPServer::is_running() const {
+  return _is_running;
+}
+
+
+

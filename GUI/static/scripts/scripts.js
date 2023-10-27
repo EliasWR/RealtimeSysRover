@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // GUI is a client in terms of communicating with the c++ server
-    let server_ip = '192.168.0.100';
+    // let server_ip = '192.168.0.100';
+    let server_ip = {{ server_ip }};
     let server_port = '12345';
     const socket = new WebSocket('ws://' + server_ip + ':' + server_port + '/');
 
@@ -92,9 +93,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     let Joy1 = new JoyStick('joystick-left', {}, function (stickData) {
-        sendCommand('joystick_rover_' + Math.floor(stickData.x) + '_' + Math.floor(stickData.y)
+        sendCommand('joystick_rover_' + Math.floor(stickData.x) + '_' + Math.floor(stickData.y));
     });
     let Joy2 = new JoyStick('joystick-right', {}, function (stickData) {
-        sendCommand('joystick_camera_' + Math.floor(stickData.x) + '_' + Math.floor(stickData.y)
+        sendCommand('joystick_camera_' + Math.floor(stickData.x) + '_' + Math.floor(stickData.y));
     });
 });

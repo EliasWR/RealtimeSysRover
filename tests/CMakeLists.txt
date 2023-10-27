@@ -7,6 +7,7 @@ endfunction()
 
 add_test_executable(test_project)
 add_test_executable(test_serialization)
+add_test_executable(test_GUI_helpers)
 #add_test_executable(test_tcp)
 
 # PROTOBUF
@@ -18,6 +19,8 @@ target_link_libraries(test_serialization PRIVATE
         nlohmann_json::nlohmann_json
 )
 
+
+target_include_directories(test_GUI_helpers PRIVATE "${CMAKE_SOURCE_DIR}/GUI")
 
 
 

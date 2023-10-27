@@ -4,27 +4,26 @@
 #include <opencv2/opencv.hpp>
 
 namespace asio = boost::asio;
-using asio::ip::tcp;
+using asio::ip::udp;
 using namespace std;
+
 int main() {
   asio::io_context io_context;
 
-  tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8000));
+  udp::socket socket(io_context, udp::endpoint(udp::v4(), 8000));
 
-  tcp::socket socket(io_context);
-
-  std::cout << "Waiting for connection on port 8000..." << std::endl;
-  acceptor.accept(socket);
-
+  std::cout << "Listening for data on port 8000..." << std::endl;
 
   while (true) {
+    udp::endpoint sender_endpoint;  // To store client information
+        
     uint32_t image_len;
-    asio::read(socket, asio::buffer(&image_len, sizeof(image_len)));
+    socket.receive_from(asio::buffer(&image_len, sizeof(image_len)), sender_endpoint);
 
     if (image_len == 0) break;
 
     vector<uint8_t> image_data(image_len);
-    asio::read(socket, asio::buffer(image_data));
+    socket.receive_from(asio::buffer(image_data), sender_endpoint);
 
     cv::Mat img = cv::imdecode(image_data, cv::IMREAD_COLOR);
     if (img.empty()) {
