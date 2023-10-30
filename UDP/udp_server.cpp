@@ -27,6 +27,7 @@ int main() {
 
         // Print or process received message
         std::cout << "Received video feed message: " << video_feed.messagefeed() << std::endl;
+        std::cout << "Received video feed with size: " << video_feed.messagefeed().size() << " bytes" << std::endl;
 
         // Process video frame and determine instruction
         Instruction instruction;
