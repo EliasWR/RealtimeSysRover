@@ -4,6 +4,7 @@
 		"boost-beast",
 		"catch2",
 		"protobuf",
-		"nlohmann-json"
+		"nlohmann-json",
+		"opencv4"
 	]
 }

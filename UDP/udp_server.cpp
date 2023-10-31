@@ -1,7 +1,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include "my_messages.pb.h"
-//#include "my_messages.pb.h"
 
 using boU = boost::asio::ip::udp;
 namespace boA = boost::asio;
@@ -26,7 +25,7 @@ int main() {
         video_feed.ParseFromArray(recv_buffer, len);
 
         // Print or process received message
-        std::cout << "Received video feed message: " << video_feed.messagefeed() << std::endl;
+        // std::cout << "Received video feed message: " << video_feed.messagefeed() << std::endl;
         std::cout << "Received video feed with size: " << video_feed.messagefeed().size() << " bytes" << std::endl;
 
         // Process video frame and determine instruction
@@ -39,6 +38,7 @@ int main() {
 
         // Send instruction back to client
         mySocket.send_to(boA::buffer(serialized_instruction), remote_endpoint);
+
     }
 
     return 0;
