@@ -7,6 +7,7 @@
 #include <boost/beast.hpp>
 #include <string>
 #include <functional>
+#include <chrono>
 
 namespace beast = boost::beast;
 namespace asio = boost::asio;
@@ -32,6 +33,7 @@ protected:
   std::unique_ptr<tcp::socket> _socket;
   Callback _callback;
   std::jthread _thread;
+  std::chrono::steady_clock::time_point _last_msg_time;
 
 };
 
@@ -45,9 +47,13 @@ public:
   bool is_running() const;
 
   virtual void set_callback(Connection::Callback callback);
+  void writeToClient(size_t client_index , const std::string& msg);
+  void writeToAllClients(const std::string& msg);
 
 protected:
   virtual void accept();
+
+  std::vector<std::unique_ptr<Connection>> _clients;
 
   std::jthread _ioc_thread;
   asio::io_context _io_context;
@@ -58,6 +64,7 @@ protected:
 
   unsigned short _port;
   std::atomic<bool> _is_running{false};
+
 };
 
 

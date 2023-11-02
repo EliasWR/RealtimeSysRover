@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function sendCommand(command) {
-        console.log(command);
+        
         /*
         const message = YourGeneratedMessageClass.create({
             // ... your data
@@ -30,39 +30,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (socket.readyState === WebSocket.OPEN) {
             //socket.send(buffer);
-            
-
-            // Convert the message string to a blob if it's not already in binary format
-            var messageBlob = new Blob([command]);
-
-            // Wait until the blob is fully converted to a binary buffer
-            var reader = new FileReader();
-            reader.onloadend = function() {
-                // Get the ArrayBuffer from the reader
-                var arrayBuffer = reader.result;
-                var messageLength = arrayBuffer.byteLength;
-
-                // Create a new ArrayBuffer for 4 bytes
-                var lengthBuffer = new ArrayBuffer(4);
-
-                // Create a DataView to interact with the buffer
-                var view = new DataView(lengthBuffer);
-
-                // Write the length of your message to the buffer
-                // Assuming the system is little-endian you could use view.setUint32(0, messageLength, true);
-                // If you know the server is expecting big-endian, use false
-                view.setUint32(0, messageLength, true);
-
-                // Send the length buffer
-                socket.send(lengthBuffer);
-
-                // Now send the actual message
-                socket.send(arrayBuffer);
-            };
-
-            // Start reading the blob as binary
-            reader.readAsArrayBuffer(messageBlob);
-
+            console.log(command);
+            socket.send(command);
+        }
+        else {
+            console.log('Connection is not open');
         }
     }
 

@@ -37,12 +37,15 @@ void WSConnection::setCallback(Callback& callback)
 
 int WSConnection::receiveMessageSize()
 {
-    std::array<unsigned char, 4> buf{};
-    try{
-        _ws.accept();
-    }
+    beast::flat_buffer buffer;
+    _ws.read(buffer);
+    std::stringstream ss;
+    ss << beast::make_printable(buffer.data());
+    std::string request = ss.str();
+    std::cout << "Received message: " << request << std::endl;
+    return bytes_to_int(buf);
 
-    boost::asio::read(*_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
+
     return bytes_to_int(buf);
 }
 
@@ -66,7 +69,7 @@ void WS_TCPServer::accept()
 
                 std::cout << "Accepted connection from: " << socket->remote_endpoint().address().to_string() << std::endl;
 
-                auto connection = std::make_unique<WS_TCPConnection>(std::move(socket));
+                auto connection = std::make_unique<WSConnection>(std::move(*socket));
                 std::cout << "Created connection" << std::endl;
                 connection->setCallback(_callback);
                 std::cout << "Set callback" << std::endl;

@@ -15,14 +15,15 @@ namespace websocket = beast::websocket;
 using tcp = boost::asio::ip::tcp;
 
 
-class TCPConnection {
+class WSConnection
+{
 private:
   websocket::stream<tcp::socket> _socket;
 
 public:
   using Callback = std::function<void(const std::string& request, std::string& response)>;
 
-  explicit TCPConnection(tcp::socket socket) : _socket(std::move(socket)) {}
+  explicit WSConnection(tcp::socket socket) : _socket(std::move(socket)) {}
 
   void start() {
 
@@ -47,6 +48,19 @@ public:
     _callback = std::move(callback);
   }
 
+  int receiveMessageSize(){
+    beast::flat_buffer buffer;
+    _socket.read_some(buffer, 4);
+    std::stringstream ss;
+    ss << beast::make_printable(buffer.data());
+    std::string data = ss.str();
+    try{
+      return std::stoi(data);
+    } catch (const std::exception& e) {
+      std::cerr << "Error: " << e.what() << std::endl;
+    }
+  }
+
   virtual void on_message(beast::flat_buffer& buffer) {
     if (_callback)
     {
@@ -67,39 +81,44 @@ private:
   Callback _callback;
 };
 
-class TCPServer {
+class WSServer
+{
 private:
-  asio::io_context ioc_;
-  tcp::acceptor acceptor_;
-  TCPConnection::Callback _callback;
+  asio::io_context _ioc;
+  tcp::acceptor _acceptor;
+  std::jthread _acceptor_thread;
+  WSConnection::Callback _callback;
 
 public:
-  explicit TCPServer(unsigned short port)
-      : ioc_(1), acceptor_(ioc_, {asio::ip::make_address("0.0.0.0"), port}) {}
+  explicit WSServer(unsigned short port)
+      : _ioc(1), _acceptor(_ioc, {asio::ip::make_address("0.0.0.0"), port}) {}
 
-  void set_callback(TCPConnection::Callback callback) {
+  void set_callback(WSConnection::Callback callback) {
     _callback = std::move(callback);
   }
 
   void run() {
-    std::cout << "Serving TCP connections on port " << acceptor_.local_endpoint().port() << std::endl;
-    try {
-      while(true) {
-        std::cout << "Waiting for connection..." << std::endl;
-        tcp::socket socket{ioc_};
-        acceptor_.accept(socket); //blocking operation
-        std::cout << "Connected to client at " << socket.remote_endpoint().address().to_string() << std::endl;
-        std::jthread([&, sock = std::move(socket)]() mutable {
-          TCPConnection session(std::move(sock));
-          if (_callback){
-            session.set_callback(_callback);
-          }
-          session.start();
-        }).detach();
-      }
-    } catch (const std::exception& e) {
-      std::cerr << "Server Error: " << e.what() << std::endl;
-    }
+    std::cout << "Serving Websocket connections on port " << _acceptor.local_endpoint().port() << std::endl;
+    _acceptor_thread = std::jthread([&]{
+        try {
+            while(true) {
+                std::cout << "Waiting for connection..." << std::endl;
+                tcp::socket socket{_ioc};
+                _acceptor.accept(socket); //blocking operation
+                std::cout << "Connected to client at " << socket.remote_endpoint().address().to_string() << std::endl;
+                std::jthread([&, sock = std::move(socket)]() mutable {
+                    WSConnection session(std::move(sock));
+                    if (_callback){
+                        session.set_callback(_callback);
+                    }
+                    session.start();
+                }).detach();
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Server Error: " << e.what() << std::endl;
+        }
+    });
+
   }
 };
 

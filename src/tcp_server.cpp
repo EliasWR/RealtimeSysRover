@@ -1,6 +1,7 @@
 #include "tcp_server/tcp_server.hpp"
 #include <iostream>
 #include <utility>
+#include <chrono>
 
 // MessageHandler Implementation
 
@@ -12,6 +13,7 @@ Connection::Connection(std::unique_ptr<tcp::socket> socket) : _socket(std::move(
         std::cout << "Received request: " << request << std::endl;
         response = "Hello from server!";
     };
+    _last_msg_time = std::chrono::steady_clock::now();
 }
 
 void Connection::setCallback(Callback& callback) {
@@ -55,27 +57,37 @@ std::string Connection::receiveMessage() {
     int len = receiveMessageSize();
     boost::asio::streambuf buf;
     boost::system::error_code err;
-    asio::read(*_socket, buf, err);
+    //asio::read(*_socket, buf, err);
 
-    //boost::asio::read(*_socket, buf, boost::asio::transfer_exactly(len), err);
+    boost::asio::read(*_socket, buf, boost::asio::transfer_exactly(len), err);
 
     if (err) {
         throw boost::system::system_error(err);
     }
-    std::string data(boost::asio::buffer_cast<const char *>(buf.data()));
+    //std::string data(boost::asio::buffer_cast<const char *>(buf.data()));
 
-    std::cout << "Received message: " << data << std::endl;
 
-    //std::string data(boost::asio::buffer_cast<const char *>(buf.data()), len);
+
+    std::string data(boost::asio::buffer_cast<const char *>(buf.data()), len);
     return data;
 }
 
 
 void Connection::writeMsg(const std::string &msg) {
-    int msgSize = static_cast<int>(msg.size());
+    if (msg.empty()) {
+        return;
+    }
 
-    _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
-    _socket->send(boost::asio::buffer(msg));
+    auto now = std::chrono::steady_clock::now();
+    if (now - _last_msg_time > std::chrono::milliseconds(10)) {
+        int msgSize = static_cast<int>(msg.size());
+
+        _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
+        _socket->send(boost::asio::buffer(msg));
+
+        _last_msg_time = now;
+    }
+
 }
 
 
@@ -85,7 +97,8 @@ void Connection::writeMsg(const std::string &msg) {
 TCPServer_::TCPServer_(unsigned short port):
       _port(port),
       _acceptor(_io_context, tcp::endpoint(tcp::v4(), port)),
-      _is_running(false) {}
+      _is_running(false)
+      {}
 
 void TCPServer_::set_callback(Connection::Callback callback) {
   _callback = std::move(callback);
@@ -101,7 +114,6 @@ void TCPServer_::accept() {
 
 
   _acceptor_thread = std::jthread([&] {
-      std::vector<std::unique_ptr<Connection>> connections;
       try {
           while(_is_running) {
 
@@ -116,7 +128,7 @@ void TCPServer_::accept() {
                 std::cout << "Set callback" << std::endl;
                 connection->run();
                 std::cout << "Started connection" << std::endl;
-                connections.push_back(std::move(connection));
+                _clients.push_back(std::move(connection));
 
 
           }
@@ -131,6 +143,8 @@ void TCPServer_::accept() {
 
   auto _ = _acceptor_thread.get_id();
 }
+
+
 
 void TCPServer_::start() {
   _is_running = true;
@@ -150,6 +164,29 @@ void TCPServer_::stop() {
 bool TCPServer_::is_running() const {
   return _is_running;
 }
+
+void TCPServer_::writeToClient(size_t client_index, const std::string &msg)
+{
+  std::cout << _clients.size() << " clients connected" << std::endl;
+  if (_clients.size() >= client_index + 1)
+  {
+    std::cout << "Writing to client " << client_index << ": " << msg << std::endl;
+    _clients[client_index]->writeMsg(msg);
+  }
+}
+
+void TCPServer_::writeToAllClients(const std::string &msg)
+{
+
+    std::cout << _clients.size() << " clients connected" << std::endl;
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+        std::cout << "Writing to client " << i << ": " << msg << std::endl;
+        _clients[i]->writeMsg(msg);
+    }
+}
+
+
 
 
 

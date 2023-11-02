@@ -73,15 +73,20 @@ std::string joystick_to_raw_motors(int joy_x, int joy_y){
 
 
 
-void message_handler(const std::string &message) {
+std::string message_handler(const std::string &message) {
     std::vector<std::string> tokens = splitString(message, '_');
 
     auto command = tokens[ 0 ];
 
-    json rover_message;
+    json rover_message = {
+            {"command", ""},
+            {"left_motor", ""},
+            {"right_motor", ""},
+            {"heading", ""},
+            {"speed", ""}
+    };
 
     if (command == "stop"){
-    std::cout << "Stopping" << std::endl;
     rover_message["command"] = "stop";
     rover_message["left_motor"] = "0_0";
     rover_message["right_motor"] = "0_0";
@@ -92,19 +97,15 @@ void message_handler(const std::string &message) {
     } else {
       rover_message["command"] = "move";
       if (tokens[ 1 ] == "forward") {
-        std::cout << "Moving forward" << std::endl;
         rover_message["heading"] = "0";
         rover_message["speed"] = "255";
       } else if (tokens[ 1 ] == "backward") {
-        std::cout << "Moving backward" << std::endl;
         rover_message["heading"] = "180";
         rover_message["speed"] = "255";
       } else if (tokens[ 1 ] == "left") {
-        std::cout << "Moving left" << std::endl;
         rover_message["heading"] = "270";
         rover_message["speed"] = "255";
       } else if (tokens[ 1 ] == "right") {
-        std::cout << "Moving right" << std::endl;
         rover_message["heading"] = "90";
         rover_message["speed"] = "255";
       } else {
@@ -144,6 +145,7 @@ void message_handler(const std::string &message) {
         std::cout << "Message: " << message << std::endl;
     }
 
+    return rover_message.dump();
     std::cout << "Message: " << rover_message.dump(2) << std::endl;
 }
 
