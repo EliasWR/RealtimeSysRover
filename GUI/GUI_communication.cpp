@@ -7,7 +7,7 @@
 namespace websocket = boost::beast::websocket;
 
 int main() {
-  TCPServer server(12345);
+  TCPServer_ server(12345);
   std::string command = "This is command!";
   std::cout << "command: " << command << std::endl;
 
@@ -32,7 +32,7 @@ int main() {
     }
 */
 
-
+    std::cout << "I am callback!" << std::endl;
     message_handler(msg);
     response = "ok";
   });

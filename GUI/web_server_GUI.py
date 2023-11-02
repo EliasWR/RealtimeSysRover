@@ -19,4 +19,6 @@ def index():
     server_ip = get_ip_address()
     return render_template('index.html', server_ip = server_ip)
 
-app.run(debug=True, host=get_ip_address, port=5000)
+
+if __name__ == '__main__':
+    app.run(debug=True, host=get_ip_address(), port=5000)

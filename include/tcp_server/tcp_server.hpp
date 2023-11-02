@@ -16,44 +16,48 @@ using tcp = boost::asio::ip::tcp;
 
 class Connection {
 public:
-  explicit Connection(tcp::socket socket);
-  void start();
+  explicit Connection(std::unique_ptr<tcp::socket> socket);
+  virtual void run();
   std::string getIPv4();
-  using Callback = std::function<void(Connection& conn, const std::string& request, std::string& response)>;
+  //using Callback = std::function<void(Connection& conn, const std::string& request, std::string& response)>;
+  using Callback = std::function<void(const std::string& request, std::string& response)>;
 
   void setCallback(Callback& callback);
-  tcp::socket& socket();
+  int receiveMessageSize();
+  std::string receiveMessage();
+  void writeMsg(const std::string& msg);
+  std::unique_ptr<tcp::socket>& getSocket() { return _socket; }
 
-private:
-  tcp::socket _socket;
+protected:
+  std::unique_ptr<tcp::socket> _socket;
   Callback _callback;
+  std::jthread _thread;
 
-  int _recieveSize();
 };
 
 
 
-class TCPServer {
+class TCPServer_ {
 public:
-  TCPServer(unsigned short port, std::size_t thread_pool_size);
-  TCPServer(unsigned short port);
+  explicit TCPServer_(unsigned short port);
   void start();
   void stop();
   bool is_running() const;
 
   virtual void set_callback(Connection::Callback callback);
 
-private:
-  void accept();
+protected:
+  virtual void accept();
 
-  unsigned short _port;
   std::jthread _ioc_thread;
   asio::io_context _io_context;
   tcp::acceptor _acceptor;
+  std::jthread _acceptor_thread;
+  std::unique_ptr<boost::asio::thread_pool> _thread_pool;
   Connection::Callback _callback;
-  std::unique_ptr<asio::thread_pool> _thread_pool;
-  std::atomic<bool> _is_running;
-  std::unique_ptr<std::thread> _acceptor_thread;
+
+  unsigned short _port;
+  std::atomic<bool> _is_running{false};
 };
 
 
