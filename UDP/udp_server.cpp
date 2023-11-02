@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <boost/asio.hpp>
 #include <opencv2/opencv.hpp>
@@ -12,7 +13,8 @@ int main() {
     boA::io_context io_context;
     boU::socket mySocket(io_context, boU::endpoint(boU::v4(), port));
 
-    cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE); // Create a window for display.
+    std::cout << "Server is listening on port " << port << std::endl;
+    // cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE); // Create a window for display.
 
     while (true) {
         // Receive message from client
@@ -35,7 +37,7 @@ int main() {
         }
 
         // Display the frame
-        cv::imshow("VideoFeed", decoded_frame);
+        // cv::imshow("VideoFeed", decoded_frame);
 
         // Check for 'q' key to quit
         if (cv::waitKey(1) == 'q') {
@@ -58,3 +60,50 @@ int main() {
 
     return 0;
 }
+*/
+
+#include <iostream>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
+
+using boost::asio::ip::udp;
+
+int main() {
+    try {
+        boost::asio::io_service io_service;
+
+        // Local endpoint (here we are specifying the port)
+        udp::endpoint local_endpoint(udp::v4(), 8080);
+
+        // Socket creation
+        udp::socket socket(io_service, local_endpoint);
+
+        std::cout << "UDP server is running on port 8080..." << std::endl;
+
+        while (true) {
+            boost::array<char, 1024> recv_buf;
+            udp::endpoint remote_endpoint;
+            boost::system::error_code error;
+
+            // Waiting for the incoming data.
+            size_t len = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
+
+            if (error && error != boost::asio::error::message_size) {
+                throw boost::system::system_error(error);
+            }
+
+            std::cout << "Received message: " << std::string(recv_buf.data(), len) << std::endl;
+
+            // Send a reply. This step is optional; we're just sending a confirmation back.
+            std::string message = "Message received";
+            boost::system::error_code ignored_error;
+            socket.send_to(boost::asio::buffer(message), remote_endpoint, 0, ignored_error);
+        }
+    }
+    catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    }
+
+    return 0;
+}
+
