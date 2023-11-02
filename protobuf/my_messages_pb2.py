@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11my_messages.proto\"5\n\tVideoFeed\x12\x18\n\x0bmessageFeed\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x0e\n\x0c_messageFeed\"E\n\x0bInstruction\x12\x1f\n\x12messageInstruction\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x15\n\x13_messageInstructionb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11my_messages.proto\"5\n\tVideoFeed\x12\x18\n\x0bmessageFeed\x18\x01 \x01(\x0cH\x00\x88\x01\x01\x42\x0e\n\x0c_messageFeed\"E\n\x0bInstruction\x12\x1f\n\x12messageInstruction\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x15\n\x13_messageInstructionb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'my_messages_pb2', globals())
