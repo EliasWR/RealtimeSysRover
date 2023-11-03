@@ -3,9 +3,6 @@
 #include <iostream>
 #include <utility>
 
-// MessageHandler Implementation
-
-
 // Connection Implementation
 Connection::Connection(std::unique_ptr<tcp::socket> socket) :
     _socket(std::move(socket)) {
@@ -21,7 +18,7 @@ void Connection::setCallback(Callback &callback) {
 }
 
 void Connection::run() {
-  _thread = std::jthread([ & ] {
+  _thread = std::jthread([&] {
     try {
       while (true) {
         auto msg = receiveMessage();
@@ -91,20 +88,18 @@ void TCPServer_::set_callback(Connection::Callback callback) {
   _callback = std::move(callback);
 }
 
-void TCPServer_::accept() {
-  if (!_is_running) {
-    return;
-  }
+void TCPServer_::start() {
+  _is_running = true;
   std::cout << "TCP Server running on port: " << _port << std::endl;
 
-  _acceptor_thread = std::jthread([ & ] {
+  _acceptor_thread = std::jthread([&] {
     try {
       while (_is_running) {
 
         auto socket = std::make_unique<tcp::socket>(_io_context);
         _acceptor.accept(*socket);
 
-        std::cout << "Accepted connection from: " << socket->remote_endpoint().address().to_string() << std::endl;
+        std::cout << "TCP Connection accepted with: " << socket->remote_endpoint().address().to_string() << std::endl;
 
         auto connection = std::make_unique<Connection>(std::move(socket));
         connection->setCallback(_callback);
@@ -112,19 +107,15 @@ void TCPServer_::accept() {
         _clients.push_back(std::move(connection));
       }
     } catch (const boost::system::system_error &e) {
-      std::cerr << "Exception while accepting (Boost system error): " << e.what() << "\n";
+        std::cerr << "Exception while accepting (Boost system error): " << e.code() << std::endl;
     } catch (const std::exception &e) {
-      std::cerr << "Exception while accepting: " << e.what() << "\n";
+        std::cerr << "Exception while accepting: " << e.what() << std::endl;
     }
   });
 
   auto _ = _acceptor_thread.get_id();// For making CLion happy about unused variable _acceptor_thread
 }
 
-void TCPServer_::start() {
-  _is_running = true;
-  accept();
-}
 
 void TCPServer_::stop() {
   if (_is_running) {
@@ -142,7 +133,7 @@ bool TCPServer_::is_running() const {
 void TCPServer_::writeToClient(size_t client_index, const std::string &msg) {
   if (_clients.size() >= client_index + 1) {
     std::cout << "Writing to client " << client_index << ": " << msg << std::endl;
-    _clients[ client_index ]->writeMsg(msg);
+    _clients[client_index]->writeMsg(msg);
   } else {
     throw std::out_of_range("Client index out of range");
   }
@@ -151,6 +142,6 @@ void TCPServer_::writeToClient(size_t client_index, const std::string &msg) {
 void TCPServer_::writeToAllClients(const std::string &msg) {
   for (size_t i = 0; i < _clients.size(); i++) {
     std::cout << "Writing to client " << i << ": " << msg << std::endl;
-    _clients[ i ]->writeMsg(msg);
+    _clients[i]->writeMsg(msg);
   }
 }

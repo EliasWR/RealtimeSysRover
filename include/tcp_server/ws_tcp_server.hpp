@@ -84,6 +84,7 @@ private:
   tcp::acceptor _acceptor;
   std::jthread _acceptor_thread;
   WSConnection::Callback _callback;
+  std::atomic<bool> _is_running{false};
 
 public:
   explicit WSServer(unsigned short port) :
@@ -94,15 +95,20 @@ public:
     _callback = std::move(callback);
   }
 
-  void run() {
+  void start() {
+    _is_running = true;
     std::cout << "Serving Websocket connections on port " << _acceptor.local_endpoint().port() << std::endl;
-    _acceptor_thread = std::jthread([ & ] {
+
+    _acceptor_thread = std::jthread([&] {
       try {
-        while (true) {
+        while (_is_running) {
+
           tcp::socket socket{_ioc};
           _acceptor.accept(socket);//blocking operation
-          std::cout << "Connected to client at " << socket.remote_endpoint().address().to_string() << std::endl;
-          std::jthread([ &, sock = std::move(socket) ]() mutable {
+
+          std::cout << "Websocket connected to client at " << socket.remote_endpoint().address().to_string() << std::endl;
+
+          std::jthread([&, sock = std::move(socket)]() mutable {
             WSConnection session(std::move(sock));
             if (_callback) {
               session.set_callback(_callback);
@@ -110,9 +116,23 @@ public:
             session.start();
           }).detach();
         }
+      } catch (const beast::system_error &e) {
+        if (e.code() != websocket::error::closed) {
+          std::cerr << "Boost System Error: " << e.code() << std::endl;
+        }
       } catch (const std::exception &e) {
         std::cerr << "Server Error: " << e.what() << std::endl;
       }
     });
   }
+
+    void stop() {
+        if (_is_running) {
+        std::cout << "Stopping Websocket Server..";
+        _is_running = false;
+        _acceptor.close();
+        std::cout << "DONE" << std::endl;
+        }
+    }
 };
+

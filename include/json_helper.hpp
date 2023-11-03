@@ -9,11 +9,11 @@
 Person fromJson(const std::string &json) {
   auto data = nlohmann::json::parse(json);
 
-  std::string firstName = data[ "firstName" ];
-  std::string lastName = data[ "lastName" ];
+  std::string firstName = data["firstName"];
+  std::string lastName = data["lastName"];
   std::optional<int> age;
   if (data.contains("age")) {
-    age = data[ "age" ].get<int>();
+    age = data["age"].get<int>();
   }
 
   return {firstName, lastName, age};
@@ -22,11 +22,11 @@ Person fromJson(const std::string &json) {
 std::string toJson(const Person &p) {
 
   nlohmann::json data;
-  data[ "firstName" ] = p.getFirstName();
-  data[ "lastName" ] = p.getLastName();
+  data["firstName"] = p.getFirstName();
+  data["lastName"] = p.getLastName();
   auto age = p.getAge();
   if (age) {
-    data[ "age" ] = *age;
+    data["age"] = *age;
   }
 
   return data.dump();

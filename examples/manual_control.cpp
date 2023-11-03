@@ -1,3 +1,5 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include "gui_helper.hpp"
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server.hpp"
@@ -23,46 +25,51 @@ void tcp_server() {
 
   server.start();
 
-
   std::cout << "Press a key + 'enter' to continue..." << std::endl;
-  while (std::cin.get() != '\n') {
-  }
+  while (std::cin.get() != '\n') {}
 
   server.stop();
 }
 
-// Function to handle commands from the GUI and add them to the queue
-void guiCommandHandler(const std::string &msg) {
-  // Parse and validate the command from the GUI
-  // If it's a command for the Raspberry Pi, enqueue it
-}
-
 int main() {
-  SafeQueue<std::string> commandQueue;
+  SafeQueue<std::string> command_queue;
 
   auto WebsocketServer = WSServer(12345);
   WebsocketServer.set_callback([&](const std::string &msg, std::string &response) {
     auto command = message_handler(msg);
-    commandQueue.enqueue(command);
+    command_queue.enqueue(command);
   });
   WebsocketServer.start();
 
   auto TCPServer = TCPServer_(9091);
   TCPServer.start();
 
-  auto j = std::thread([&] {
-    while (true) {
-      std::string cmd = commandQueue.dequeue();
-      std::cout << cmd << std::endl;
-      TCPServer.writeToAllClients(cmd);
+  auto internal_comm_thread = std::thread([&] {
+    while (true){
+      auto cmd = command_queue.dequeue();
+      if (cmd.has_value()){
+        std::cout << cmd.value() << std::endl;
+        TCPServer.writeToAllClients(cmd.value());
+      } else {
+        break;
+      }
     }
   });
 
   std::cout << "Press a key + 'enter' to end..." << std::endl;
-  while (std::cin.get() != '\n') {  }
+  while (std::cin.get() != '\n') {
+  }
+  std::cout << "Stopping..." << std::endl;
 
-  j.join();
+  WebsocketServer.stop();
   TCPServer.stop();
+  command_queue.stop();
+
+  std::cout << "Joining..." << std::endl;
+  internal_comm_thread.join();
+
+  std::cout << "Joined" << std::endl;
+
 
   return 0;
 }

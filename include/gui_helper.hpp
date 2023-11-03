@@ -71,7 +71,7 @@ std::string joystick_to_raw_motors(int joy_x, int joy_y) {
 std::string message_handler(const std::string &message) {
   std::vector<std::string> tokens = splitString(message, '_');
 
-  auto command = tokens[ 0 ];
+  auto command = tokens[0];
 
   json rover_message = {
     {"command", ""},
@@ -81,26 +81,26 @@ std::string message_handler(const std::string &message) {
     {"speed", ""}};
 
   if (command == "stop") {
-    rover_message[ "command" ] = "stop";
-    rover_message[ "left_motor" ] = "0_0";
-    rover_message[ "right_motor" ] = "0_0";
+    rover_message["command"] = "stop";
+    rover_message["left_motor"] = "0_0";
+    rover_message["right_motor"] = "0_0";
   } else if (command == "move") {
     if (tokens.size() != 2) {
       throw std::runtime_error("Invalid move message");
     } else {
-      rover_message[ "command" ] = "move";
-      if (tokens[ 1 ] == "forward") {
-        rover_message[ "heading" ] = "0";
-        rover_message[ "speed" ] = "255";
-      } else if (tokens[ 1 ] == "backward") {
-        rover_message[ "heading" ] = "180";
-        rover_message[ "speed" ] = "255";
-      } else if (tokens[ 1 ] == "left") {
-        rover_message[ "heading" ] = "270";
-        rover_message[ "speed" ] = "255";
-      } else if (tokens[ 1 ] == "right") {
-        rover_message[ "heading" ] = "90";
-        rover_message[ "speed" ] = "255";
+      rover_message["command"] = "move";
+      if (tokens[1] == "forward") {
+        rover_message["heading"] = "0";
+        rover_message["speed"] = "255";
+      } else if (tokens[1] == "backward") {
+        rover_message["heading"] = "180";
+        rover_message["speed"] = "255";
+      } else if (tokens[1] == "left") {
+        rover_message["heading"] = "270";
+        rover_message["speed"] = "255";
+      } else if (tokens[1] == "right") {
+        rover_message["heading"] = "90";
+        rover_message["speed"] = "255";
       } else {
         std::cout << "Invalid move command" << std::endl;
       }
@@ -109,17 +109,17 @@ std::string message_handler(const std::string &message) {
     if (tokens.size() != 4) {
       throw std::runtime_error("Invalid joystick message");
     } else {
-      if (tokens[ 1 ] == "rover") {
-        rover_message[ "command" ] = "move";
-        int joy_x = std::stoi(tokens[ 2 ]);
-        int joy_y = std::stoi(tokens[ 3 ]);
+      if (tokens[1] == "rover") {
+        rover_message["command"] = "move";
+        int joy_x = std::stoi(tokens[2]);
+        int joy_y = std::stoi(tokens[3]);
         auto h_and_s = joystick_to_heading_and_speed(joy_x, joy_y);
         auto as_vector = splitString(h_and_s, '_');
-        rover_message[ "heading" ] = as_vector[ 0 ];
-        rover_message[ "speed" ] = as_vector[ 1 ];
-      } else if (tokens[ 1 ] == "camera") {
-        int joy_x = std::stoi(tokens[ 2 ]);
-        int joy_y = std::stoi(tokens[ 3 ]);
+        rover_message["heading"] = as_vector[0];
+        rover_message["speed"] = as_vector[1];
+      } else if (tokens[1] == "camera") {
+        int joy_x = std::stoi(tokens[2]);
+        int joy_y = std::stoi(tokens[3]);
         std::cout << "Joystick: " << joy_x << ", " << joy_y << std::endl;
         std::cout << "Camera: " << joystick_to_heading_and_speed(joy_x, joy_y) << std::endl;
       } else {

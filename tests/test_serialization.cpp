@@ -5,7 +5,7 @@
 
 std::vector<Person> testProto(const std::vector<Person> &persons) {
   std::vector<Person> list{};
-  for (const auto &p: persons) {
+  for (const auto &p : persons) {
     auto serialized = toProto(p);
     auto deserialized = fromProto(serialized);
     list.push_back(deserialized);
@@ -15,7 +15,7 @@ std::vector<Person> testProto(const std::vector<Person> &persons) {
 
 std::vector<Person> testJson(const std::vector<Person> &persons) {
   std::vector<Person> list{};
-  for (const auto &p: persons) {
+  for (const auto &p : persons) {
     auto serialized = toJson(p);
     auto deserialized = fromJson(serialized);
     list.push_back(deserialized);
@@ -32,7 +32,7 @@ TEST_CASE("jsonTest") {
   auto serializedPersons = testJson(testPersons);
 
   for (int i = 0; i < testPersons.size(); i++) {
-    result = result && (serializedPersons[ i ] == testPersons[ i ]);
+    result = result && (serializedPersons[i] == testPersons[i]);
   }
 
   REQUIRE(result);
@@ -47,7 +47,7 @@ TEST_CASE("protoTest") {
   auto serializedPersons = testProto(testPersons);
 
   for (int i = 0; i < testPersons.size(); i++) {
-    result = result && (serializedPersons[ i ] == testPersons[ i ]);
+    result = result && (serializedPersons[i] == testPersons[i]);
   }
 
   REQUIRE(result);

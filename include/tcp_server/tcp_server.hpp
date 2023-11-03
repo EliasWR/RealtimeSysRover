@@ -50,7 +50,6 @@ public:
   void writeToAllClients(const std::string &msg);
 
 protected:
-  virtual void accept();
 
   std::vector<std::unique_ptr<Connection>> _clients;
 
