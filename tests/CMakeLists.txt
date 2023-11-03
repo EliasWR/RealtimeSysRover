@@ -22,7 +22,10 @@ target_link_libraries(test_serialization PRIVATE
 
 target_include_directories(test_GUI_helpers PRIVATE "${CMAKE_SOURCE_DIR}/GUI")
 
-
+add_executable(test_tcp_NO_CATCH test_tcp_NO_CATCH.cpp)
+target_link_libraries(test_tcp_NO_CATCH tcp_server_lib)
+target_include_directories(test_tcp_NO_CATCH PUBLIC
+        "${CMAKE_SOURCE_DIR}/include")
 
 
 #add_executable(testProject testproject.cpp)

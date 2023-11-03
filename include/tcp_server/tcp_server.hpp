@@ -5,15 +5,14 @@
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
-#include <string>
-#include <functional>
 #include <chrono>
+#include <functional>
+#include <string>
 
 namespace beast = boost::beast;
 namespace asio = boost::asio;
 
 using tcp = boost::asio::ip::tcp;
-
 
 class Connection {
 public:
@@ -21,23 +20,23 @@ public:
   virtual void run();
   std::string getIPv4();
   //using Callback = std::function<void(Connection& conn, const std::string& request, std::string& response)>;
-  using Callback = std::function<void(const std::string& request, std::string& response)>;
+  using Callback = std::function<void(const std::string &request, std::string &response)>;
 
-  void setCallback(Callback& callback);
+  void setCallback(Callback &callback);
   int receiveMessageSize();
   std::string receiveMessage();
-  void writeMsg(const std::string& msg);
-  std::unique_ptr<tcp::socket>& getSocket() { return _socket; }
+  void writeMsg(const std::string &msg);
+
+  std::unique_ptr<tcp::socket> &getSocket() {
+    return _socket;
+  }
 
 protected:
   std::unique_ptr<tcp::socket> _socket;
   Callback _callback;
   std::jthread _thread;
   std::chrono::steady_clock::time_point _last_msg_time;
-
 };
-
-
 
 class TCPServer_ {
 public:
@@ -47,8 +46,8 @@ public:
   bool is_running() const;
 
   virtual void set_callback(Connection::Callback callback);
-  void writeToClient(size_t client_index , const std::string& msg);
-  void writeToAllClients(const std::string& msg);
+  void writeToClient(size_t client_index, const std::string &msg);
+  void writeToAllClients(const std::string &msg);
 
 protected:
   virtual void accept();
@@ -64,9 +63,7 @@ protected:
 
   unsigned short _port;
   std::atomic<bool> _is_running{false};
-
 };
-
 
 
 #endif//REALTIMESYSROVER__TCP_SERVER2_HPP

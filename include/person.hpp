@@ -9,10 +9,10 @@
 class Person {
 
 public:
-  Person(std::string firstName, std::string lastName, std::optional<int> age = std::nullopt)
-      : firstName_(std::move(firstName)),
-        lastName_(std::move(lastName)),
-        age_(age) {
+  Person(std::string firstName, std::string lastName, std::optional<int> age = std::nullopt) :
+      firstName_(std::move(firstName)),
+      lastName_(std::move(lastName)),
+      age_(age) {
   }
 
   [[nodiscard]] std::string getFirstName() const {

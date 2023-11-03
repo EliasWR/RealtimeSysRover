@@ -1,7 +1,7 @@
-#include <iostream>
-#include <vector>
 #include <boost/asio.hpp>
+#include <iostream>
 #include <opencv2/opencv.hpp>
+#include <vector>
 
 namespace asio = boost::asio;
 using asio::ip::udp;
@@ -15,8 +15,8 @@ int main() {
   std::cout << "Listening for data on port 8000..." << std::endl;
 
   while (true) {
-    udp::endpoint sender_endpoint;  // To store client information
-        
+    udp::endpoint sender_endpoint;// To store client information
+
     uint32_t image_len;
     socket.receive_from(asio::buffer(&image_len, sizeof(image_len)), sender_endpoint);
 
@@ -34,7 +34,7 @@ int main() {
     cout << "Image is " << img.cols << "x" << img.rows << endl;
 
     cv::imshow("Received Image", img);
-    cv::waitKey(1);  // Display the image for a short duration. Adjust as necessary.
+    cv::waitKey(1);// Display the image for a short duration. Adjust as necessary.
   }
 
   return 0;

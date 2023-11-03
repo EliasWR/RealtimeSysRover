@@ -1,11 +1,12 @@
-#include <iostream>
-#include <vector>
 #include <boost/asio.hpp>
+#include <iostream>
 #include <opencv2/opencv.hpp>
+#include <vector>
 
 namespace asio = boost::asio;
 using asio::ip::tcp;
 using namespace std;
+
 int main() {
   asio::io_context io_context;
 
@@ -35,7 +36,7 @@ int main() {
     cout << "Image is " << img.cols << "x" << img.rows << endl;
 
     cv::imshow("Received Image", img);
-    cv::waitKey(1);  // Display the image for a short duration. Adjust as necessary.
+    cv::waitKey(1);// Display the image for a short duration. Adjust as necessary.
   }
 
   return 0;

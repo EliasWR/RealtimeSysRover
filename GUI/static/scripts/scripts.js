@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function sendCommand(command) {
-        
+
         /*
         const message = YourGeneratedMessageClass.create({
             // ... your data
@@ -32,8 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
             //socket.send(buffer);
             console.log(command);
             socket.send(command);
-        }
-        else {
+        } else {
             console.log('Connection is not open');
         }
     }
