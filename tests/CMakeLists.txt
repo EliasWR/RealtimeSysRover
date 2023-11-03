@@ -7,7 +7,7 @@ endfunction()
 
 add_test_executable(test_project)
 add_test_executable(test_serialization)
-add_test_executable(test_GUI_helpers)
+add_test_executable(test_gui_helper)
 #add_test_executable(test_tcp)
 
 # PROTOBUF
@@ -20,7 +20,7 @@ target_link_libraries(test_serialization PRIVATE
 )
 
 
-target_include_directories(test_GUI_helpers PRIVATE "${CMAKE_SOURCE_DIR}/GUI")
+target_include_directories(test_gui_helper PRIVATE "${CMAKE_SOURCE_DIR}/GUI")
 
 add_executable(test_tcp_NO_CATCH test_tcp_NO_CATCH.cpp)
 target_link_libraries(test_tcp_NO_CATCH tcp_server_lib)
