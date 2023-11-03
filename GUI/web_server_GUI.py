@@ -12,7 +12,9 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    server_ip = get_ip_address()
+    return render_template('index.html', server_ip=server_ip)
+
 
 if __name__ == '__main__':
     try:

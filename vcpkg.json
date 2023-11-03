@@ -1,10 +1,10 @@
 {
-	"dependencies": [
-		"boost-asio",
-		"boost-beast",
-		"catch2",
-		"protobuf",
-		"nlohmann-json",
-		"opencv4"
-	]
+  "dependencies": [
+    "boost-asio",
+    "boost-beast",
+    "catch2",
+    "protobuf",
+    "nlohmann-json",
+    "opencv"
+  ]
 }
