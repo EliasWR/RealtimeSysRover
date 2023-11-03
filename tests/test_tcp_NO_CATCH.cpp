@@ -38,7 +38,7 @@ void guiCommandHandler(const std::string &msg) {
 }
 
 int main() {
-  SafeQueue commandQueue;
+  SafeQueue<std::string> commandQueue;
 
   auto WebsocketServer = WSServer(12345);
   WebsocketServer.set_callback([ & ](const std::string &msg, std::string &response) {

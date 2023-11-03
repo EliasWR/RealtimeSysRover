@@ -6,28 +6,29 @@
 
 // Thread-safe queue
 
+template<typename T>
 class SafeQueue {
 private:
-  std::queue<std::string> queue;
+  std::queue<T> queue;
   mutable std::mutex m;
-  std::condition_variable c;
+  std::condition_variable cv;
 
 public:
   SafeQueue() {
   }
 
-  void enqueue(std::string t) {
+  void enqueue(T t) {
     std::lock_guard<std::mutex> lock(m);
     queue.push(t);
-    c.notify_one();
+    cv.notify_one();
   }
 
   std::string dequeue() {
     std::unique_lock<std::mutex> lock(m);
     while (queue.empty()) {
-      c.wait(lock);
+      cv.wait(lock);
     }
-    std::string val = queue.front();
+    T val = queue.front();
     queue.pop();
     return val;
   }
