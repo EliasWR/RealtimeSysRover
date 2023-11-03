@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message VideoFeed {
+    optional bytes messageFeed = 1;
+}
+
+message Instruction {
+    optional string messageInstruction = 1;
+}
