@@ -16,6 +16,7 @@ add_subdirectory(src)
 add_subdirectory(GUI)
 add_subdirectory(protobuf)
 add_subdirectory(examples)
+add_subdirectory(UDP)
 
 enable_testing()
 add_subdirectory(tests)
