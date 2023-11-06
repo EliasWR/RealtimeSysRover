@@ -11,7 +11,7 @@ MAX_UDP_PACKET_SIZE = 65507  # Maximum size of a UDP packet
 cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
-    print("Could not open webcam!")
+    print("Could not open camera!")
     exit()
 
 while True:

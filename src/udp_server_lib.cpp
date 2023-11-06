@@ -1,25 +1,23 @@
-#include <iostream>
-#include <boost/asio.hpp>
-#include <opencv2/opencv.hpp>
+#include "udp_server/udp_server.hpp"
 #include "my_messages.pb.h"
 
-using boU = boost::asio::ip::udp;
-namespace boA = boost::asio;
+using udp = boost::asio::ip::udp;
+namespace asio = boost::asio;
 
 const int port = 8080;
 
 int main() {
-    boA::io_context io_context;
-    boU::socket mySocket(io_context, boU::endpoint(boU::v4(), port));
+    asio::io_context io_context;
+    udp::socket mySocket(io_context, udp::endpoint(udp::v4(), port));
 
     std::cout << "Server is listening on port " << port << std::endl;
     cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE); // Create a window for display.
 
     while (true) {
         // Receive message from client
-        boU::endpoint remote_endpoint;
+        udp::endpoint remote_endpoint;
         std::vector<char> recv_buffer(65507); // Increase buffer size for maximum UDP packet size
-        size_t len = mySocket.receive_from(boA::buffer(recv_buffer), remote_endpoint);
+        size_t len = mySocket.receive_from(asio::buffer(recv_buffer), remote_endpoint);
 
         // Deserialize message using protobuf
         VideoFeed video_feed;
@@ -52,7 +50,7 @@ int main() {
         instruction.SerializeToString(&serialized_instruction);
 
         // Send instruction back to client
-        mySocket.send_to(boA::buffer(serialized_instruction), remote_endpoint);
+        mySocket.send_to(asio::buffer(serialized_instruction), remote_endpoint);
     }
 
     cv::destroyWindow("VideoFeed"); // Clean up the window
