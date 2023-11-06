@@ -7,5 +7,4 @@ target_include_directories(main PRIVATE
 target_link_libraries(main PRIVATE
         Boost::system
         protobuf::libprotobuf
-        proto_msg
         nlohmann_json::nlohmann_json)
