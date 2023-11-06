@@ -10,7 +10,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system) # beast and asio are header-only
 find_package(Catch2 CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV CONFIG REQUIRED)
 
 add_subdirectory(application)
 add_subdirectory(src)
