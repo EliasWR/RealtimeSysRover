@@ -7,7 +7,6 @@ Connection::Connection(std::unique_ptr<tcp::socket> socket) :
     std::cout << "Received request: " << request << std::endl;
     response = "Hello from server!";
   };
-  _last_msg_time = std::chrono::steady_clock::now();
 }
 
 void Connection::setCallback(Callback &callback) {
@@ -64,16 +63,10 @@ std::string Connection::receiveMessage() {
 }
 
 void Connection::writeMsg(const std::string &msg) {
-  auto now = std::chrono::steady_clock::now();
-
-  if (now - _last_msg_time > std::chrono::milliseconds(10)) {
     int msgSize = static_cast<int>(msg.size());
 
     _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
     _socket->send(boost::asio::buffer(msg));
-
-    _last_msg_time = now;
-  }
 }
 
 // TCPServer Implementation
