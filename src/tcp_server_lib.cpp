@@ -1,7 +1,4 @@
 #include "tcp_server/tcp_server_lib.hpp"
-#include <chrono>
-#include <iostream>
-#include <utility>
 
 // Connection Implementation
 Connection::Connection(std::unique_ptr<tcp::socket> socket) :
@@ -28,10 +25,12 @@ void Connection::run() {
       }
     } catch (const std::exception &ex) {
       std::cerr << "[socket_handler] " << ex.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown exception caught in thread.\n";
     }
   });
 
-  auto _ = _thread.get_id();
+  auto _ = _thread.get_id(); // Make thread not appear unused
 }
 
 std::string Connection::getIPv4() {

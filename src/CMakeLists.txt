@@ -17,6 +17,7 @@ foreach(target ${targets})
     # If additional configuration is needed for the udp_server_lib specifically
     if(${target} STREQUAL "udp_server_lib")
         target_include_directories(${target} PRIVATE proto_c)
+        target_link_libraries(${target} PRIVATE proto_c)
         target_link_libraries(${target} PRIVATE ${OpenCV_LIBS})
     endif()
 endforeach()

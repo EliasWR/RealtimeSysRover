@@ -8,6 +8,8 @@
 #include <chrono>
 #include <functional>
 #include <string>
+#include <iostream>
+#include <utility>
 
 namespace beast = boost::beast;
 namespace asio = boost::asio;
