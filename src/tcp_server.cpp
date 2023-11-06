@@ -10,7 +10,6 @@ Connection::Connection(std::unique_ptr<tcp::socket> socket) :
     std::cout << "Received request: " << request << std::endl;
     response = "Hello from server!";
   };
-  _last_msg_time = std::chrono::steady_clock::now();
 }
 
 void Connection::setCallback(Callback &callback) {
@@ -65,16 +64,11 @@ std::string Connection::receiveMessage() {
 }
 
 void Connection::writeMsg(const std::string &msg) {
-  auto now = std::chrono::steady_clock::now();
+  int msgSize = static_cast<int>(msg.size());
 
-  if (now - _last_msg_time > std::chrono::milliseconds(10)) {
-    int msgSize = static_cast<int>(msg.size());
+  _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
+  _socket->send(boost::asio::buffer(msg));
 
-    _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
-    _socket->send(boost::asio::buffer(msg));
-
-    _last_msg_time = now;
-  }
 }
 
 // TCPServer Implementation
@@ -140,8 +134,13 @@ void TCPServer_::writeToClient(size_t client_index, const std::string &msg) {
 }
 
 void TCPServer_::writeToAllClients(const std::string &msg) {
-  for (size_t i = 0; i < _clients.size(); i++) {
-    std::cout << "Writing to client " << i << ": " << msg << std::endl;
-    _clients[i]->writeMsg(msg);
+  try {
+    for (size_t i = 0; i < _clients.size(); i++) {
+      std::cout << "Writing to client " << i << ": " << msg << std::endl;
+      _clients[i]->writeMsg(msg);
+    }
   }
+    catch (const std::exception &e) {
+        std::cerr << "Exception while writing to all clients: " << e.what() << std::endl;
+    }
 }
