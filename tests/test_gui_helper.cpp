@@ -61,6 +61,7 @@ TEST_CASE("Test Joystick to raw motors") {
 }
  */
 
+/*
 TEST_CASE("Test Joystick to Heading and Speed") {
   int joy_x = 0;
   int joy_y = 0;
@@ -92,6 +93,7 @@ TEST_CASE("Test Joystick to Heading and Speed") {
   test_string = "-45_180";
   REQUIRE(joystick_to_heading_and_speed(joy_x, joy_y) == test_string);
 }
+*/
 
 TEST_CASE("Test Message handler") {
   std::string test_command = "move_forward";

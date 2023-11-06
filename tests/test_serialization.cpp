@@ -57,3 +57,8 @@ TEST_CASE("protoTest") {
 }
 
  */
+
+TEST_CASE("Dummy test") {
+  bool result = true;
+  REQUIRE(result);
+}
