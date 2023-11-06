@@ -15,9 +15,9 @@ target_link_libraries(test_serialization PRIVATE protobuf::libprotobuf)
 
 target_include_directories(test_serialization PRIVATE "${CMAKE_SOURCE_DIR}/protobuf")
 target_link_libraries(test_serialization PRIVATE
-        proto_msg
         nlohmann_json::nlohmann_json
 )
+
 
 
 target_include_directories(test_gui_helper PRIVATE "${CMAKE_SOURCE_DIR}/GUI")
