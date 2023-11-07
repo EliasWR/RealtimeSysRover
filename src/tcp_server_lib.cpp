@@ -24,8 +24,6 @@ void Connection::run() {
       }
     } catch (const std::exception &ex) {
       std::cerr << "[socket_handler] " << ex.what() << std::endl;
-    } catch (...) {
-        std::cerr << "Unknown exception caught in thread.\n";
     }
   });
 
@@ -63,10 +61,11 @@ std::string Connection::receiveMessage() {
 }
 
 void Connection::writeMsg(const std::string &msg) {
-    int msgSize = static_cast<int>(msg.size());
+  int msgSize = static_cast<int>(msg.size());
 
-    _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
-    _socket->send(boost::asio::buffer(msg));
+  _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
+  _socket->send(boost::asio::buffer(msg));
+
 }
 
 // TCPServer Implementation
@@ -132,8 +131,13 @@ void TCPServer_::writeToClient(size_t client_index, const std::string &msg) {
 }
 
 void TCPServer_::writeToAllClients(const std::string &msg) {
-  for (size_t i = 0; i < _clients.size(); i++) {
-    std::cout << "Writing to client " << i << ": " << msg << std::endl;
-    _clients[i]->writeMsg(msg);
+  try {
+    for (size_t i = 0; i < _clients.size(); i++) {
+      std::cout << "Writing to client " << i << ": " << msg << std::endl;
+      _clients[i]->writeMsg(msg);
+    }
   }
+    catch (const std::exception &e) {
+        std::cerr << "Exception while writing to all clients: " << e.what() << std::endl;
+    }
 }

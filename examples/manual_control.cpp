@@ -1,4 +1,5 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <chrono>
 
 #include "gui_helper.hpp"
 #include "safe_queue/safe_queue.hpp"
@@ -54,11 +55,27 @@ int main() {
   udp_server();
 
   auto internal_comm_thread = std::thread([&] {
+    auto last_msg_time = std::chrono::steady_clock::now();
     while (true){
+      auto now = std::chrono::steady_clock::now();
       auto cmd = command_queue.dequeue();
       if (cmd.has_value()){
-        std::cout << cmd.value() << std::endl;
-        TCPServer.writeToAllClients(cmd.value());
+
+        json j = json::parse(cmd.value());
+
+        if (j["command"] == "stop") {
+          std::cout << "j is:  " << j << std::endl;
+          last_msg_time = now;
+          TCPServer.writeToAllClients(cmd.value());
+
+        }
+
+        else if(now - last_msg_time > std::chrono::milliseconds(10)){
+          std::cout << "j is:  " << j << std::endl;
+          last_msg_time = now;
+          TCPServer.writeToAllClients(cmd.value());
+        }
+
       } else {
         break;
       }
