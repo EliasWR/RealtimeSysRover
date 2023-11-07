@@ -5,9 +5,10 @@
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
-#include <chrono>
 #include <functional>
 #include <string>
+#include <iostream>
+#include <utility>
 
 namespace beast = boost::beast;
 namespace asio = boost::asio;
@@ -35,7 +36,6 @@ protected:
   std::unique_ptr<tcp::socket> _socket;
   Callback _callback;
   std::jthread _thread;
-  std::chrono::steady_clock::time_point _last_msg_time;
 };
 
 class TCPServer_ {

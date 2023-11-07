@@ -1,7 +1,4 @@
-#include "tcp_server/tcp_server.hpp"
-#include <chrono>
-#include <iostream>
-#include <utility>
+#include "tcp_server/tcp_server_lib.hpp"
 
 // Connection Implementation
 Connection::Connection(std::unique_ptr<tcp::socket> socket) :
@@ -30,7 +27,7 @@ void Connection::run() {
     }
   });
 
-  auto _ = _thread.get_id();
+  auto _ = _thread.get_id(); // Make thread not appear unused
 }
 
 std::string Connection::getIPv4() {
