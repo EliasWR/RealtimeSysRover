@@ -1,6 +1,5 @@
 import socket
 import cv2
-import numpy as np
 from protobuf.my_messages_pb2 import VideoFeed, Instruction  # Generated from protoc
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

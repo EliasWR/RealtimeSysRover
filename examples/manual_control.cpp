@@ -4,7 +4,6 @@
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server_lib.hpp"
 #include "tcp_server/ws_tcp_server.hpp"
-#include "udp_server/udp_server.hpp"
 
 #include <iostream>
 
@@ -32,11 +31,7 @@ void tcp_server() {
   server.stop();
 }
 
-void udp_server () {
-    const int port = 8080;
-    UDPServer server(port);
-    server.start();
-}
+
 
 int main() {
   SafeQueue<std::string> command_queue;
@@ -51,7 +46,7 @@ int main() {
   auto TCPServer = TCPServer_(9091);
   TCPServer.start();
 
-  udp_server();
+
 
   auto internal_comm_thread = std::thread([&] {
     while (true){
