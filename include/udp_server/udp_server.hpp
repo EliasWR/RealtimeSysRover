@@ -15,9 +15,9 @@ public:
     ~UDPServer();
 
 private:
-    void receiveMessage();
-    void displayFrame(const cv::Mat& frame);
+    std::string receiveMessage();
     void sendMessage(const std::string& message, const boost::asio::ip::udp::endpoint& remote_endpoint);
+    void standardResponse (const udp::endpoint& remote_endpoint);
 
     boost::asio::io_context _io_context;
     boost::asio::ip::udp::socket _socket;

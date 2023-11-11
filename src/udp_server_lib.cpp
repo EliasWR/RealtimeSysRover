@@ -26,37 +26,27 @@ void UDPServer::start() {
         }
     });
     auto _ = _thread.get_id(); // Make thread not appear unused
-
-    cv::destroyWindow("VideoFeed");
 }
 
-void UDPServer::receiveMessage() {
+std::string UDPServer::receiveMessage() {
     udp::endpoint remote_endpoint;
     std::vector<char> recv_buffer(65507);
     size_t len = _socket.receive_from(asio::buffer(recv_buffer), remote_endpoint);
 
-    VideoFeed video_feed;
-    video_feed.ParseFromArray(recv_buffer.data(), len);
+    std::string message(recv_buffer.begin(), recv_buffer.begin() + len);
 
-    std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
-    cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
+    // std::cout << "Received message: " << message << std::endl;
+    // standardResponse(remote_endpoint);
 
-    if (!decoded_frame.empty()) {
-        displayFrame(decoded_frame);
-    } else {
-        std::cerr << "Decoded frame is empty or cannot be decoded." << std::endl;
-    }
-
-    Instruction instruction;
-    instruction.set_messageinstruction("This is a response from the server.");
-    std::string serialized_instruction;
-    instruction.SerializeToString(&serialized_instruction);
-
-    sendMessage(serialized_instruction, remote_endpoint);
+    return message;
 }
 
-void UDPServer::displayFrame(const cv::Mat& frame) {
-    cv::imshow("VideoFeed", frame);
+void UDPServer::standardResponse (const udp::endpoint& remote_endpoint){
+    Instruction instruction;
+    instruction.set_messageinstruction("Message received.");
+    std::string serialized_instruction;
+    instruction.SerializeToString(&serialized_instruction);
+    sendMessage(serialized_instruction, remote_endpoint);
 }
 
 void UDPServer::sendMessage(const std::string& message, const udp::endpoint& remote_endpoint) {
