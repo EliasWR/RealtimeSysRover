@@ -5,19 +5,20 @@
 #include <functional>
 #include <boost/asio.hpp>
 #include <opencv2/opencv.hpp>
+#include "message_handling/message_handler.hpp"
 #include "my_messages.pb.h"
 
 using udp = boost::asio::ip::udp;
 
-class VideoFeedHandler {
+class VideoFeedHandler : public MessageHandler {
 public:
     VideoFeedHandler ();
-    void displayFrame (std::string frame);
+    void displayFrame (std::string& frame);
+    virtual void handleMessage(const std::string& message) override;
     ~VideoFeedHandler();
 
 private:
-    std::jthread _thread;
-    VideoFeed _video_feed;
+    std::unique_ptr<VideoFeed> _video_feed;
 };
 
 #endif // VIDEO_FEED_HANDLER_HPP

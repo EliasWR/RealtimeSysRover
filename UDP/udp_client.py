@@ -36,24 +36,20 @@ while True:
             print("Failed to encode image!")
             break
 
-        # Serialize frame data to protobuf
         video_feed = VideoFeed()
         video_feed.messageFeed = buffer.tobytes()
         serialized_video_feed = video_feed.SerializeToString()
 
-        # Check if the serialized data fits in one UDP packet
         if len(serialized_video_feed) <= MAX_UDP_PACKET_SIZE:
             break
-        scale_factor -= 0.1  # Reduce scale factor
+        scale_factor -= 0.1
 
-        if scale_factor <= 0.1:  # Prevent too small frames
+        if scale_factor <= 0.1:
             print("Frame too large to fit into UDP packet even after reducing resolution.")
             break
 
-    # Send serialized video feed to the server
     sock.sendto(serialized_video_feed, server_address)
 
-    # Receive instruction from server
     serialized_instruction, _ = sock.recvfrom(MAX_UDP_PACKET_SIZE)
     instruction = Instruction()
     instruction.ParseFromString(serialized_instruction)

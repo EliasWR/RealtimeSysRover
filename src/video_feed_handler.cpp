@@ -1,9 +1,31 @@
-#include "../include/udp_server/Video_Feed_Handler.hpp"
-#include <iostream>
+#include "udp_server/Video_Feed_Handler.hpp"
 
-VideoFeedHandler::VideoFeedHandler() {
+VideoFeedHandler::VideoFeedHandler() : _video_feed(std::make_unique<VideoFeed>()) {
     cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE);
 }
+
+void VideoFeedHandler::displayFrame(std::string& frame) {
+    _video_feed->ParseFromArray(frame.data(), frame.length());
+
+    std::vector<uchar> encoded_frame(_video_feed->messagefeed().begin(), _video_feed->messagefeed().end());
+    cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
+
+    if (!decoded_frame.empty()) {
+        cv::imshow("VideoFeed", decoded_frame);
+        cv::waitKey(1);
+    } else {
+        std::cerr << "Decoded frame is empty or cannot be decoded." << std::endl;
+    }
+}
+
+void VideoFeedHandler::handleMessage(const std::string& message) {
+    displayFrame(const_cast<std::string &>(message));
+}
+
+VideoFeedHandler::~VideoFeedHandler () {
+    cv::destroyWindow("VideoFeed");
+}
+
 /*
     VideoFeed video_feed;
     video_feed.ParseFromArray(recv_buffer.data(), len);
@@ -18,18 +40,6 @@ VideoFeedHandler::VideoFeedHandler() {
     }
 
  */
-
-
-void VideoFeedHandler::displayFrame (std::string frame){
-    size_t len = frame.length();
-    _video_feed.ParseFromArray(frame, len);
-    std::vector<uchar> encoded_frame(_video_feed.messagefeed().begin(), _video_feed.messagefeed().end());
-    cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
-}
-
-VideoFeedHandler::~VideoFeedHandler () {
-    cv::destroyWindow("VideoFeed");
-}
 
 /*
  // Threader
