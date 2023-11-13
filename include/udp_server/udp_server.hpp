@@ -4,7 +4,7 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <opencv2/opencv.hpp>
-#include "../message_handling/message_handler.hpp"
+#include "message_handling/message_handler.hpp"
 
 using udp = boost::asio::ip::udp;
 namespace asio = boost::asio;
