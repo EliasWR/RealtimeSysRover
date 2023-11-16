@@ -70,9 +70,7 @@ void Connection::writeMsg(const std::string &msg) {
 
 Connection::~Connection() {
   _socket.close();
-  if (_thread.joinable()) {
-      _thread.join();
-  }
+  _thread.join();
 }
 
 // TCPServer Implementation
