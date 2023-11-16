@@ -1,29 +1,60 @@
 import socket
-
-from protobuf.my_messages_pb2 import VideoFeed, Instruction  # Generated from protoc
+import cv2
+from protobuf.my_messages_pb2 import VideoFeed, Instruction
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('127.0.0.1', 8080)
-MAX_UDP_PACKET_SIZE = 65507  # Maximum UDP packet size
+MAX_UDP_PACKET_SIZE = 65507
+
+cap = cv2.VideoCapture(0)
+
+if not cap.isOpened():
+    print("Could not open camera!")
+    exit()
 
 while True:
-    # Capture video frame
-    video_feed = VideoFeed()
-    video_feed.messageFeed = "This is a test message from the client."
+    ret, frame = cap.read()
 
-    # Serialize video frame message
-    serialized_video_feed = video_feed.SerializeToString()
+    if not ret:
+        print("Failed to grab frame!")
+        break
 
-    # Send video frame to server
+    # cv2.imshow("Webcam", frame)
+
+    scale_factor = 1.0
+    while True:
+        dim = (int(frame.shape[1] * scale_factor), int(frame.shape[0] * scale_factor))
+        resized_frame = cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
+
+        is_success, buffer = cv2.imencode(".jpg", resized_frame)
+
+        if not is_success:
+            print("Failed to encode image!")
+            break
+
+        video_feed = VideoFeed()
+        video_feed.messageFeed = buffer.tobytes()
+        serialized_video_feed = video_feed.SerializeToString()
+
+        if len(serialized_video_feed) <= MAX_UDP_PACKET_SIZE:
+            break
+        scale_factor -= 0.1
+
+        if scale_factor <= 0.1:
+            print("Frame too large to fit into UDP packet even after reducing resolution.")
+            break
+
     sock.sendto(serialized_video_feed, server_address)
 
-    # Receive instruction from server
     serialized_instruction, _ = sock.recvfrom(MAX_UDP_PACKET_SIZE)
     instruction = Instruction()
     instruction.ParseFromString(serialized_instruction)
 
-    # Execute instruction on robot
-    # Print received instruction
     print("Received instruction:", instruction.messageInstruction)
 
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
 sock.close()

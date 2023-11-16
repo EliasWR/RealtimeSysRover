@@ -4,46 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'styles/styles.css') }}">
+    <script type="text/javascript">
+        let server_ip = "{{ server_ip }}";
+    </script>
     <script src="{{ url_for('static', filename= 'scripts/scripts.js') }}"></script>
     <title>Robot Control</title>
 </head>
 <body>
-    <div class="container">
-        <div class="button-wrapper">
-            <div class="fwd">
-                <button id="btnForward"><img src="{{ url_for('static', filename='images/arrow_fwd.png') }}" alt="Move forward"></button>
-            </div>
-            <div class="turn-left">
-                <button id="btnLeft"><img src="{{ url_for('static', filename='images/arrow_turn_left.png') }}" alt="Turn left"></button>
-            </div>
-            <div class="stop">
-                <button id="btnStop"><img src="{{ url_for('static', filename='images/stop.png') }}" alt="Stop"></button>
-            </div>
-            <div class="turn-right">
-                <button id="btnRight"><img src="{{ url_for('static', filename='images/arrow_turn_right.png') }}" alt="Turn right"></button>
-            </div>
-            <div class="around-left">
-                <button id="btnALeft"><img src="{{ url_for('static', filename='images/arrow_turn_around_left.png') }}" alt="Turn around left"></button>
-            </div>
-            <div class="around-right">
-                <button id="btnARight"><img src="{{ url_for('static', filename='images/arrow_turn_around_right.png') }}" alt="Turn around right"></button>
-            </div>
-            <div class="bwd">
-                <button id="btnBackward"><img src="{{ url_for('static', filename='images/arrow_bwd.png') }}" alt="Move backward"></button>
-            </div>
+<div class="container">
+    <div class="button-wrapper">
+        <div class="fwd">
+            <button id="btnForward"><img src="{{ url_for('static', filename='images/arrow_fwd.png') }}"
+                                         alt="Move forward"></button>
         </div>
-        <div class="joy-wrapper">
-            <!-- Rover -->
-            <div class="joystick" id="joystick-left"></div>
-            <div class="joystick-title" id="joystick-left-title">Rover Control</div>
-            <!-- Camera -->
-            <div class="joystick" id="joystick-right"></div>
-            <div class="joystick-title" id="joystick-right-title">Camera Control</div>
+        <div class="turn-left">
+            <button id="btnLeft"><img src="{{ url_for('static', filename='images/arrow_turn_left.png') }}"
+                                      alt="Turn left"></button>
         </div>
-
+        <div class="stop">
+            <button id="btnStop"><img src="{{ url_for('static', filename='images/stop.png') }}" alt="Stop"></button>
+        </div>
+        <div class="turn-right">
+            <button id="btnRight"><img src="{{ url_for('static', filename='images/arrow_turn_right.png') }}"
+                                       alt="Turn right"></button>
+        </div>
+        <div class="around-left">
+            <button id="btnALeft"><img src="{{ url_for('static', filename='images/arrow_turn_around_left.png') }}"
+                                       alt="Turn around left"></button>
+        </div>
+        <div class="around-right">
+            <button id="btnARight"><img src="{{ url_for('static', filename='images/arrow_turn_around_right.png') }}"
+                                        alt="Turn around right"></button>
+        </div>
+        <div class="bwd">
+            <button id="btnBackward"><img src="{{ url_for('static', filename='images/arrow_bwd.png') }}"
+                                          alt="Move backward"></button>
+        </div>
+    </div>
+    <div class="joy-wrapper">
+        <!-- Rover -->
+        <div class="joystick" id="joystick-left"></div>
+        <div class="joystick-title" id="joystick-left-title">Rover Control</div>
+        <!-- Camera -->
+        <div class="joystick" id="joystick-right"></div>
+        <div class="joystick-title" id="joystick-right-title">Camera Control</div>
     </div>
 
-    <script src="{{ url_for('static', filename= 'scripts/joy.js') }}"></script>
+</div>
+
+<script src="{{ url_for('static', filename= 'scripts/joy.js') }}"></script>
 
 
 </body>

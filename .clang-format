@@ -6,7 +6,7 @@ AlignOperands: DontAlign
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: Never
+AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Always
@@ -26,15 +26,16 @@ BraceWrapping:
   BeforeCatch: false
   BeforeElse: false
   IndentBraces: false
-  SplitEmptyFunction: true
-  SplitEmptyRecord: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: false
-BreakConstructorInitializers: BeforeColon
-BreakInheritanceList: BeforeColon
+BreakConstructorInitializers: AfterColon
+BreakInheritanceList: AfterColon
 ColumnLimit: 0
 CompactNamespaces: false
 ContinuationIndentWidth: 2
+EmptyLineBeforeAccessModifier: Always
 IndentCaseLabels: true
 IndentPPDirectives: None
 IndentWidth: 2
@@ -45,6 +46,7 @@ ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
 PointerAlignment: Right
 ReflowComments: false
+SeparateDefinitionBlocks: Always
 SpaceAfterCStyleCast: true
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: false
@@ -53,13 +55,13 @@ SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
-SpaceBeforeRangeBasedForLoopColon: false
+SpaceBeforeRangeBasedForLoopColon: true
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 0
 SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
-SpacesInSquareBrackets: true
+SpacesInSquareBrackets: false
 TabWidth: 4
 UseTab: Never
