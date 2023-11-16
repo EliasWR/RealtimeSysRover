@@ -1,5 +1,4 @@
 #include "tcp_server/ws_server_lib.hpp"
-#include <iostream>
 
 WSConnection::WSConnection(tcp::socket socket) : _socket(std::move(socket)) {
 }
