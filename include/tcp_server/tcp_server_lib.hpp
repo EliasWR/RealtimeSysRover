@@ -45,15 +45,12 @@ public:
   void writeToClient(size_t client_index, const std::string &msg);
   void writeToAllClients(const std::string &msg);
 
-protected:
-
+private:
   std::vector<std::unique_ptr<Connection>> _clients;
 
-  std::jthread _ioc_thread;
   asio::io_context _io_context;
   tcp::acceptor _acceptor;
   std::jthread _acceptor_thread;
-  std::unique_ptr<boost::asio::thread_pool> _thread_pool;
   Connection::Callback _callback;
 
   unsigned short _port;

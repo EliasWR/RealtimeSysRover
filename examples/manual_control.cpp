@@ -4,7 +4,7 @@
 #include "gui_helper.hpp"
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server_lib.hpp"
-#include "tcp_server/ws_tcp_server.hpp"
+#include "tcp_server/ws_server_lib.hpp"
 
 #include <iostream>
 

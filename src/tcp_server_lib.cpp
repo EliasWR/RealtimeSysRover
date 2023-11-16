@@ -106,41 +106,34 @@ void TCPServer::start() {
 
       }
     } catch (const boost::system::system_error &e) {
-        std::cerr << "Exception while accepting (Boost system error): " << e.code() << std::endl;
+        std::cerr << "[TCPServer] Exception while accepting (Boost system error): " << e.code() << std::endl;
     } catch (const std::exception &e) {
-        std::cerr << "Exception while accepting: " << e.what() << std::endl;
+        std::cerr << "[TCPServer] Exception while accepting: " << e.what() << std::endl;
     }
   });
-
-  auto _ = _acceptor_thread.get_id();// For making CLion happy about unused variable _acceptor_thread
 }
 
 
 void TCPServer::stop() {
   if (_is_running) {
-    std::cout << "Stopping TCP Server..\n";
-    {
-      std::unique_lock<std::mutex> lock(_m);
+      std::cout << "Stopping TCP Server..\n";
       _is_running = false;
-    }
 
-    std::cout << "Closing acceptor..\n";
-    _acceptor.close();
-    _acceptor_thread.join();
+      _acceptor.cancel();
+      _acceptor.close();
+      _acceptor_thread.join();
 
-    std::cout << "Closing clients..\n";
-    {
-      std::unique_lock<std::mutex> lock(_m);
-      for (auto &client : _clients) {
-        client->~Connection();
+      {
+        std::unique_lock<std::mutex> lock(_m);
+        for (auto &client : _clients) {
+          client->~Connection();
+        }
+        _clients.clear();
       }
-      _clients.clear();
-    }
 
-    std::cout << "Closing io_context..\n";
-    _io_context.stop();
+      _io_context.stop();
 
-    std::cout << "DONE" << std::endl;
+      std::cout << "DONE" << std::endl;
   }
 }
 
