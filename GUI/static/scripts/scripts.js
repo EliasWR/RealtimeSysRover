@@ -10,26 +10,20 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Connected to the server');
     };
 
+    socket.onopen = function () {
+        console.log('Disconnected from the server');
+    };
+
     socket.onerror = function (error) {
         console.log(`WebSocket Error: ${error}`);
     };
 
+    socket.onmessage = function (e) {
+        console.log('Recieved: ' + e.data);
+    };  
+
     function sendCommand(command) {
-
-        /*
-        const message = YourGeneratedMessageClass.create({
-            // ... your data
-        });
-
-        const buffer = YourGeneratedMessageClass.encode(message).finish();
-
-        // To decode
-        const decodedMessage = YourGeneratedMessageClass.decode(buffer);
-
-        */
-
         if (socket.readyState === WebSocket.OPEN) {
-            //socket.send(buffer);
             console.log(command);
             socket.send(command);
         } else {

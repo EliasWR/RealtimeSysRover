@@ -36,6 +36,7 @@ void tcp_server() {
 
 int main() {
   SafeQueue<std::string> command_queue;
+  std::atomic<bool> stop{false};
 
   auto WebsocketServer = WSServer(12345);
   WebsocketServer.set_callback([&](const std::string &msg, std::string &response) {
@@ -51,28 +52,19 @@ int main() {
 
   auto internal_comm_thread = std::thread([&] {
     auto last_msg_time = std::chrono::steady_clock::now();
-    while (true){
+    while (!stop){
       auto now = std::chrono::steady_clock::now();
       auto cmd = command_queue.dequeue();
-      if (cmd.has_value()){
-
+      if (cmd.has_value()) {
         json j = json::parse(cmd.value());
 
         if (j["command"] == "stop") {
-          std::cout << "j is:  " << j << std::endl;
           last_msg_time = now;
           TCPServer.writeToAllClients(cmd.value());
-
-        }
-
-        else if(now - last_msg_time > std::chrono::milliseconds(10)){
-          std::cout << "j is:  " << j << std::endl;
+        } else if (now - last_msg_time > std::chrono::milliseconds(10)) {
           last_msg_time = now;
           TCPServer.writeToAllClients(cmd.value());
         }
-
-      } else {
-        break;
       }
     }
   });
@@ -81,10 +73,10 @@ int main() {
   while (std::cin.get() != '\n') {
   }
   std::cout << "Stopping..." << std::endl;
+  stop = true;
 
   WebsocketServer.stop();
   TCPServer.stop();
-  command_queue.stop();
 
   std::cout << "Joining..." << std::endl;
   internal_comm_thread.join();

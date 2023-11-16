@@ -8,6 +8,7 @@
         let server_ip = "{{ server_ip }}";
     </script>
     <script src="{{ url_for('static', filename= 'scripts/scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename= 'scripts/joy.js') }}"></script>
     <title>Robot Control</title>
 </head>
 <body>
@@ -49,10 +50,18 @@
         <div class="joystick" id="joystick-right"></div>
         <div class="joystick-title" id="joystick-right-title">Camera Control</div>
     </div>
+    
+    <div id="sensorData">
+        <p>Temperature: <span id="temperature">--</span>°C</p>
+        <p>Humidity: <span id="humidity">--</span>%</p>
+        <!-- Add more sensors as needed -->
+    </div>
 
+    <div class="camera-wrapper">
+        <video id="cameraFeed" autoplay playsinline></video>
+    </div>
+    
 </div>
-
-<script src="{{ url_for('static', filename= 'scripts/joy.js') }}"></script>
 
 
 </body>
