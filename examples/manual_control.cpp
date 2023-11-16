@@ -18,7 +18,7 @@ void websocket_server() {
 }
 
 void tcp_server() {
-  TCPServer_ server(12345);
+  TCPServer server(12345);
   server.set_callback([](const std::string &msg, std::string &response) {
     std::cout << "Message received: " << msg << std::endl;
     response = "I got , " + msg + "!\n";
@@ -45,7 +45,7 @@ int main() {
   });
   WebsocketServer.start();
 
-  auto TCPServer = TCPServer_(9091);
+  auto TCPServer = TCPServer(9091);
   TCPServer.start();
 
 
