@@ -19,7 +19,7 @@ while True:
         print("Failed to grab frame!")
         break
 
-    # cv2.imshow("Webcam", frame)
+    cv2.imshow("Webcam", frame)
 
     scale_factor = 1.0
     while True:

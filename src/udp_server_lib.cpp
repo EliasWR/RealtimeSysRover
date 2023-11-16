@@ -29,12 +29,12 @@ void UDPServer<T>::start() {
 }
 
 template<class T>
-std::pair<std::string, udp::endpoint> UDPServer<T>::receiveMessage() {
+std::pair<std::vector<char>, udp::endpoint> UDPServer<T>::receiveMessage() {
     udp::endpoint remote_endpoint;
     std::vector<char> recv_buffer(65507);
     size_t len = _socket.receive_from(asio::buffer(recv_buffer), remote_endpoint);
 
-    std::string message(recv_buffer.begin(), recv_buffer.begin() + len);
+    std::vector<char> message(recv_buffer.begin(), recv_buffer.begin() + len);
     return std::make_pair(message, remote_endpoint);
 }
 

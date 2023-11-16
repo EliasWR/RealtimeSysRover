@@ -19,7 +19,7 @@ public:
 
 private:
     std::unique_ptr<MessageHandler> _messageHandler;
-    std::pair<std::string, udp::endpoint> receiveMessage();
+    std::pair<std::vector<char>, udp::endpoint> receiveMessage();
     void sendMessage(const std::string& message, const boost::asio::ip::udp::endpoint& remote_endpoint);
     void standardResponse(const udp::endpoint& remote_endpoint);
 

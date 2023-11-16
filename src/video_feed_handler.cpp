@@ -4,8 +4,8 @@ VideoFeedHandler::VideoFeedHandler() : _video_feed(std::make_unique<VideoFeed>()
     cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE);
 }
 
-void VideoFeedHandler::displayFrame(std::string& frame) {
-    _video_feed->ParseFromArray(frame.data(), frame.length());
+void VideoFeedHandler::displayFrame(std::vector<char>& frame) {
+    _video_feed->ParseFromArray(frame.data(), frame.size());
 
     std::vector<uchar> encoded_frame(_video_feed->messagefeed().begin(), _video_feed->messagefeed().end());
     cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
@@ -18,8 +18,8 @@ void VideoFeedHandler::displayFrame(std::string& frame) {
     }
 }
 
-void VideoFeedHandler::handleMessage(const std::string& message) {
-    displayFrame(const_cast<std::string &>(message));
+void VideoFeedHandler::handleMessage(const std::vector<char>& message) {
+    displayFrame(const_cast<std::vector<char> &>(message));
 }
 
 VideoFeedHandler::~VideoFeedHandler () {
