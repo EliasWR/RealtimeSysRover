@@ -95,21 +95,23 @@ button img {
     grid-column-gap: 0px;
     grid-row-gap: 0px;
 }*/
+
+
+.joystick {
+    width: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .joy-wrapper {
     width: 100%; /* Full width */
     margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two equal columns */
-    grid-template-rows: 10vh auto; /* First row takes half of viewport height */
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    grid-template-rows: max-content auto; /* First row takes half of viewport height */
     gap: 10px; /* Spacing between grid items */
-}
-
-.joystick {
-    width: 100%;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 #joystick-right {
@@ -153,7 +155,7 @@ button img {
     .joy-wrapper{
         /*grid-template-columns: 1fr; /* Single column layout on small screens */
         
-        grid-template-rows: 25vh auto; /* Adjust row sizes for smaller screens */
+        /*grid-template-rows: 100vh auto; /* Adjust row sizes for smaller screens */
 
     }
     .joystick-title {
