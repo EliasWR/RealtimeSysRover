@@ -1,14 +1,11 @@
 #include "udp_server/udp_server.hpp"
 #include "my_messages.pb.h"
-#include "udp_server/video_feed_handler.hpp"
 
 using udp = boost::asio::ip::udp;
 namespace asio = boost::asio;
 
-template class UDPServer<VideoFeedHandler>;
-
-template<class T>
-UDPServer<T>::UDPServer(int port, std::unique_ptr<T> handler)
+template <class T>
+UDPServer<T>::UDPServer(int port, std::unique_ptr<MessageHandler> handler)
         : _port(port), _socket(_io_context, udp::endpoint(udp::v4(), _port)), _messageHandler(std::move(handler)) {}
 
 template<class T>
@@ -60,3 +57,4 @@ UDPServer<T>::~UDPServer() {
     _socket.close();
     _io_context.stop();
 }
+
