@@ -3,7 +3,7 @@ import cv2
 from protobuf.my_messages_pb2 import VideoFeed, Instruction
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('127.0.0.1', 8080)
+server_address = ('10.22.192.34', 8080)
 MAX_UDP_PACKET_SIZE = 65507
 
 cap = cv2.VideoCapture(0)
