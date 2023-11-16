@@ -45,8 +45,8 @@ int main() {
   });
   WebsocketServer.start();
 
-  auto TCPServer = TCPServer(9091);
-  TCPServer.start();
+  auto TCP = TCPServer(9091);
+  TCP.start();
 
 
 
@@ -60,10 +60,10 @@ int main() {
 
         if (j["command"] == "stop") {
           last_msg_time = now;
-          TCPServer.writeToAllClients(cmd.value());
+          TCP.writeToAllClients(cmd.value());
         } else if (now - last_msg_time > std::chrono::milliseconds(10)) {
           last_msg_time = now;
-          TCPServer.writeToAllClients(cmd.value());
+          TCP.writeToAllClients(cmd.value());
         }
       }
     }
@@ -76,7 +76,7 @@ int main() {
   stop = true;
 
   WebsocketServer.stop();
-  TCPServer.stop();
+  TCP.stop();
 
   std::cout << "Joining..." << std::endl;
   internal_comm_thread.join();

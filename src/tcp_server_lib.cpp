@@ -68,6 +68,13 @@ void Connection::writeMsg(const std::string &msg) {
 
 }
 
+Connection::~Connection() {
+  _socket.close();
+  if (_thread.joinable()) {
+      _thread.join();
+  }
+}
+
 // TCPServer Implementation
 TCPServer::TCPServer(unsigned short port) :
     _port(port),
@@ -111,15 +118,30 @@ void TCPServer::start() {
 
 void TCPServer::stop() {
   if (_is_running) {
-    std::cout << "Stopping TCP Server..";
-    _is_running = false;
+    std::cout << "Stopping TCP Server..\n";
+    {
+      std::unique_lock<std::mutex> lock(_m);
+      _is_running = false;
+    }
+
+    std::cout << "Closing acceptor..\n";
     _acceptor.close();
+    _acceptor_thread.join();
+
+    std::cout << "Closing clients..\n";
+    {
+      std::unique_lock<std::mutex> lock(_m);
+      for (auto &client : _clients) {
+        client->~Connection();
+      }
+      _clients.clear();
+    }
+
+    std::cout << "Closing io_context..\n";
+    _io_context.stop();
+
     std::cout << "DONE" << std::endl;
   }
-}
-
-bool TCPServer::is_running() const {
-  return _is_running;
 }
 
 void TCPServer::writeToClient(size_t client_index, const std::string &msg) {

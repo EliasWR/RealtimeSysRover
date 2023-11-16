@@ -18,6 +18,7 @@ using tcp = boost::asio::ip::tcp;
 class Connection {
 public:
   explicit Connection(tcp::socket socket);
+    ~Connection();
   void run();
   std::string getIPv4();
   //using Callback = std::function<void(Connection& conn, const std::string& request, std::string& response)>;
@@ -39,7 +40,6 @@ public:
   explicit TCPServer(unsigned short port);
   void start();
   void stop();
-  bool is_running() const;
 
   virtual void set_callback(Connection::Callback callback);
   void writeToClient(size_t client_index, const std::string &msg);
@@ -57,6 +57,7 @@ protected:
   Connection::Callback _callback;
 
   unsigned short _port;
+  std::mutex _m;
   std::atomic<bool> _is_running{false};
 };
 
