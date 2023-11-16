@@ -42,7 +42,7 @@ public:
 private:
   asio::io_context _ioc;
   tcp::acceptor _acceptor;
-  std::jthread _acceptor_thread;
+  std::thread _acceptor_thread;
   WSConnection::Callback _callback;
   std::mutex _m;
   std::atomic<bool> _is_running{false};

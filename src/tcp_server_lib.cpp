@@ -14,7 +14,7 @@ void Connection::setCallback(Callback &callback) {
 }
 
 void Connection::run() {
-  _thread = std::jthread([&] {
+  _thread = std::thread([&] {
     try {
       while (true) {
         auto msg = receiveMessage();
@@ -90,7 +90,7 @@ void TCPServer::start() {
   _is_running = true;
   std::cout << "TCP Server running on port: " << _port << std::endl;
 
-  _acceptor_thread = std::jthread([&] {
+  _acceptor_thread = std::thread([&] {
     try {
       while (_is_running) {
 

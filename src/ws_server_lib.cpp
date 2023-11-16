@@ -63,7 +63,7 @@ void WSServer::start() {
   _is_running = true;
   std::cout << "Serving Websocket connections on port " << _acceptor.local_endpoint().port() << std::endl;
 
-  _acceptor_thread = std::jthread([&] {
+  _acceptor_thread = std::thread([&] {
     try {
       while (_is_running) {
 
@@ -72,7 +72,7 @@ void WSServer::start() {
 
         std::cout << "Websocket connected to client at " << socket.remote_endpoint().address().to_string() << std::endl;
 
-        std::jthread([&, sock = std::move(socket)]() mutable {
+        std::thread([&, sock = std::move(socket)]() mutable {
           WSConnection session(std::move(sock));
           if (_callback) {
             session.set_callback(_callback);

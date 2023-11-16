@@ -32,7 +32,7 @@ public:
 private:
   tcp::socket _socket;
   Callback _callback;
-  std::jthread _thread;
+  std::thread _thread;
 };
 
 class TCPServer {
@@ -50,7 +50,7 @@ private:
 
   asio::io_context _io_context;
   tcp::acceptor _acceptor;
-  std::jthread _acceptor_thread;
+  std::thread _acceptor_thread;
   Connection::Callback _callback;
 
   unsigned short _port;
