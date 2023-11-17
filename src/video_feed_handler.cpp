@@ -1,6 +1,8 @@
 #include "udp_server/Video_Feed_Handler.hpp"
 
-VideoFeedHandler::VideoFeedHandler() : _video_feed(VideoFeed()) {
+VideoFeedHandler::VideoFeedHandler() : _video_feed(VideoFeed()){};
+
+void VideoFeedHandler::openWindow() {
     cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE);
 }
 

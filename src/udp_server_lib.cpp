@@ -13,6 +13,7 @@ void UDPServer<T>::start() {
     std::cout << "Server is listening on port " << _port << std::endl;
 
     _thread = std::jthread([&] {
+        cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE);
         try {
             while (true) {
                 auto [message, len, endpoint] = receiveMessage();
@@ -35,7 +36,7 @@ std::tuple<std::vector<char>, size_t, udp::endpoint> UDPServer<T>::receiveMessag
     std::vector<char> recv_buffer(65507);
     size_t len = _socket.receive_from(asio::buffer(recv_buffer), remote_endpoint);
     std::cout << "Message received." << std::endl;
-    // std::vector<char> message(recv_buffer.begin(), recv_buffer.begin() + len);
+    std::vector<char> message(recv_buffer.begin(), recv_buffer.begin() + len);
     return std::make_tuple(recv_buffer, len, remote_endpoint);
 }
 

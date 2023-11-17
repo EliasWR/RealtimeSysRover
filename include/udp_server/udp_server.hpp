@@ -23,9 +23,9 @@ private:
     void sendMessage(const std::string& message, const boost::asio::ip::udp::endpoint& remote_endpoint);
     void standardResponse(const udp::endpoint& remote_endpoint);
 
+    int _port;
     asio::io_context _io_context;
     udp::socket _socket;
-    int _port;
     std::jthread _thread;
 };
 

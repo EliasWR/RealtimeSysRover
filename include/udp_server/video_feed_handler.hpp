@@ -13,6 +13,7 @@ using udp = boost::asio::ip::udp;
 class VideoFeedHandler : public MessageHandler {
 public:
     VideoFeedHandler ();
+    void openWindow ();
     void displayFrame (const std::vector<char>& frame, size_t& len);
     virtual void handleMessage(const std::vector<char>& message, size_t& len) override;
     ~VideoFeedHandler();
