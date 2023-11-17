@@ -1,5 +1,23 @@
 #include <iostream>
 #include "udp_server/udp_server.hpp"
+
+void start_udp_server () {
+    const int port = 8080;
+    auto server = std::make_unique<UDPServer>(port);
+    server->start();
+}
+
+int main() {
+    start_udp_server();
+
+    std::cout << "Press a key + 'enter' to end..." << std::endl;
+    while (std::cin.get() != '\n') {}
+    std::cout << "Stopping camera feed" << std::endl;
+}
+
+/*
+#include <iostream>
+#include "udp_server/udp_server.hpp"
 #include "message_handling/message_handler.hpp"
 #include "udp_server/video_feed_handler.hpp"
 
@@ -17,7 +35,8 @@ int main() {
     std::cout << "Press a key + 'enter' to end..." << std::endl;
     while (std::cin.get() != '\n') {}
     std::cout << "Stopping camera feed" << std::endl;
-    /*
+
+
     int port = 8080;
     asio::io_context io_context;
     udp::socket mySocket(io_context, udp::endpoint(udp::v4(), port));
@@ -56,5 +75,5 @@ int main() {
     }
     cv::destroyWindow("VideoFeed"); // Clean up the window
     return 0;
-     */
 }
+*/

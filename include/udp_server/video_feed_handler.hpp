@@ -2,6 +2,32 @@
 #define VIDEO_FEED_HANDLER_HPP
 
 #include <iostream>
+#include <boost/asio.hpp>
+#include <opencv2/opencv.hpp>
+#include "message_handling/message_handler.hpp"
+#include "my_messages.pb.h"
+
+
+class VideoFeedHandler : public MessageHandler {
+public:
+    VideoFeedHandler ();
+    void handleMessage (const std::vector<char>& message, size_t& len) override;
+    void displayFrame (const std::vector<char>& frame, size_t& len);
+    ~VideoFeedHandler();
+private:
+    VideoFeed _video_feed;
+};
+
+
+#endif // VIDEO_FEED_HANDLER_HPP
+
+
+
+/*
+#ifndef VIDEO_FEED_HANDLER_HPP
+#define VIDEO_FEED_HANDLER_HPP
+
+#include <iostream>
 #include <functional>
 #include <boost/asio.hpp>
 #include <opencv2/opencv.hpp>
@@ -22,3 +48,4 @@ private:
 };
 
 #endif // VIDEO_FEED_HANDLER_HPP
+*/

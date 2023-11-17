@@ -1,4 +1,31 @@
 #include "udp_server/udp_server.hpp"
+
+UDPServer::UDPServer(int port) : _port(port), _socket(_io_context, udp::endpoint(udp::v4(), _port)) {}
+
+void UDPServer::start() {
+    std::cout << "Server is listening on port " << _port << std::endl;
+    _thread = std::thread ([&]{
+        try {
+            while (true) {
+                // TODO Implement thread here
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Exception caught in thread: " << e.what() << '\n';
+        } catch (...) {
+            std::cerr << "Unknown exception caught in thread.\n";
+        }
+    });
+}
+
+UDPServer::~UDPServer() {
+    _socket.close();
+    _io_context.stop();
+    _thread.join();
+}
+/*
+
+
+#include "udp_server/udp_server.hpp"
 #include "my_messages.pb.h"
 
 using udp = boost::asio::ip::udp;
@@ -59,4 +86,4 @@ UDPServer<T>::~UDPServer() {
     _socket.close();
     _io_context.stop();
 }
-
+*/

@@ -1,3 +1,35 @@
+
+#ifndef REALTIMESYSROVER_UDP_SERVER_HPP
+#define REALTIMESYSROVER_UDP_SERVER_HPP
+
+#include <iostream>
+#include <boost/asio.hpp>
+#include <opencv2/opencv.hpp>
+#include "message_handling/message_handler.hpp"
+#include "udp_server/video_feed_handler.hpp"
+#include "my_messages.pb.h"
+
+using udp = boost::asio::ip::udp;
+namespace asio = boost::asio;
+
+class UDPServer {
+public:
+    UDPServer(int port);
+    void start();
+    ~UDPServer();
+
+
+private:
+    asio::io_context _io_context;
+    udp::socket _socket;
+    int _port;
+    std::thread _thread;
+    MessageHandler _messageHandler;
+};
+
+#endif //REALTIMESYSROVER_UDP_SERVER_HPP
+
+/*
 #ifndef REALTIMESYSROVER_UDP_SERVER2_HPP
 #define REALTIMESYSROVER_UDP_SERVER2_HPP
 
@@ -32,3 +64,5 @@ private:
 template class UDPServer<VideoFeedHandler>;
 
 #endif //REALTIMESYSROVER_UDP_SERVER2_HPP
+
+*/

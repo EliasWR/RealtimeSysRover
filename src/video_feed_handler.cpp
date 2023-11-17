@@ -1,3 +1,6 @@
+
+
+/*
 #include "udp_server/Video_Feed_Handler.hpp"
 
 VideoFeedHandler::VideoFeedHandler() : _video_feed(VideoFeed()) {
@@ -25,6 +28,7 @@ void VideoFeedHandler::handleMessage(const std::vector<char>& message, size_t& l
 VideoFeedHandler::~VideoFeedHandler () {
     cv::destroyWindow("VideoFeed");
 }
+*/
 
 /*
     VideoFeed video_feed;
