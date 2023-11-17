@@ -15,8 +15,8 @@ void UDPServer<T>::start() {
     _thread = std::jthread([&] {
         try {
             while (true) {
-                auto [message, endpoint] = receiveMessage();
-                _messageHandler->handleMessage(message);
+                auto [message, len, endpoint] = receiveMessage();
+                _messageHandler->handleMessage(message, len);
                 standardResponse(endpoint);
             }
         } catch (const std::exception& e) {
@@ -29,13 +29,14 @@ void UDPServer<T>::start() {
 }
 
 template<class T>
-std::pair<std::vector<char>, udp::endpoint> UDPServer<T>::receiveMessage() {
+std::tuple<std::vector<char>, size_t, udp::endpoint> UDPServer<T>::receiveMessage() {
     udp::endpoint remote_endpoint;
+
     std::vector<char> recv_buffer(65507);
     size_t len = _socket.receive_from(asio::buffer(recv_buffer), remote_endpoint);
-
-    std::vector<char> message(recv_buffer.begin(), recv_buffer.begin() + len);
-    return std::make_pair(message, remote_endpoint);
+    std::cout << "Message received." << std::endl;
+    // std::vector<char> message(recv_buffer.begin(), recv_buffer.begin() + len);
+    return std::make_tuple(recv_buffer, len, remote_endpoint);
 }
 
 template<class T>
@@ -45,6 +46,7 @@ void UDPServer<T>::standardResponse(const udp::endpoint& remote_endpoint) {
     std::string serialized_instruction;
     instruction.SerializeToString(&serialized_instruction);
     sendMessage(serialized_instruction, remote_endpoint);
+    std::cout << "Response sent." << std::endl;
 }
 
 template<class T>

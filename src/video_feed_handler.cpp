@@ -1,13 +1,13 @@
 #include "udp_server/Video_Feed_Handler.hpp"
 
-VideoFeedHandler::VideoFeedHandler() : _video_feed(std::make_unique<VideoFeed>()) {
+VideoFeedHandler::VideoFeedHandler() : _video_feed(VideoFeed()) {
     cv::namedWindow("VideoFeed", cv::WINDOW_AUTOSIZE);
 }
 
-void VideoFeedHandler::displayFrame(std::vector<char>& frame) {
-    _video_feed->ParseFromArray(frame.data(), frame.size());
+void VideoFeedHandler::displayFrame (const std::vector<char>& frame, size_t& len) {
+    _video_feed.ParseFromArray(frame.data(), len);
 
-    std::vector<uchar> encoded_frame(_video_feed->messagefeed().begin(), _video_feed->messagefeed().end());
+    std::vector<uchar> encoded_frame(_video_feed.messagefeed().begin(), _video_feed.messagefeed().end());
     cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
 
     if (!decoded_frame.empty()) {
@@ -18,8 +18,8 @@ void VideoFeedHandler::displayFrame(std::vector<char>& frame) {
     }
 }
 
-void VideoFeedHandler::handleMessage(const std::vector<char>& message) {
-    displayFrame(const_cast<std::vector<char> &>(message));
+void VideoFeedHandler::handleMessage(const std::vector<char>& message, size_t& len) {
+    displayFrame(message, len);
 }
 
 VideoFeedHandler::~VideoFeedHandler () {

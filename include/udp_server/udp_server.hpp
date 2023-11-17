@@ -19,12 +19,12 @@ public:
 
 private:
     std::unique_ptr<MessageHandler> _messageHandler;
-    std::pair<std::vector<char>, udp::endpoint> receiveMessage();
+    std::tuple<std::vector<char>, size_t, udp::endpoint> receiveMessage();
     void sendMessage(const std::string& message, const boost::asio::ip::udp::endpoint& remote_endpoint);
     void standardResponse(const udp::endpoint& remote_endpoint);
 
-    boost::asio::io_context _io_context;
-    boost::asio::ip::udp::socket _socket;
+    asio::io_context _io_context;
+    udp::socket _socket;
     int _port;
     std::jthread _thread;
 };
