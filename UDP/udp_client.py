@@ -46,7 +46,7 @@ while True:
             break
 
     sock.sendto(serialized_video_feed, server_address)
-    print("Sent frame to server on ", server_address)
+    # print("Sent frame to server on ", server_address)
     try:
         serialized_instruction, _ = sock.recvfrom(MAX_UDP_PACKET_SIZE)
     except Exception as e:
@@ -55,7 +55,7 @@ while True:
     instruction = Instruction()
     instruction.ParseFromString(serialized_instruction)
 
-    print("Received instruction:", instruction.messageInstruction)
+    # print("Received instruction:", instruction.messageInstruction)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

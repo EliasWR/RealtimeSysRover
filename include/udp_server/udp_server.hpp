@@ -3,14 +3,12 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
-#include <opencv2/opencv.hpp>
 #include "message_handling/message_handler.hpp"
 #include "udp_server/video_feed_handler.hpp"
 
 using udp = boost::asio::ip::udp;
 namespace asio = boost::asio;
 
-template<class T>
 class UDPServer {
 public:
     UDPServer(int port, std::unique_ptr<MessageHandler> handler);
@@ -26,9 +24,7 @@ private:
     int _port;
     asio::io_context _io_context;
     udp::socket _socket;
-    std::jthread _thread;
+    std::thread _thread;
 };
-
-template class UDPServer<VideoFeedHandler>;
 
 #endif //REALTIMESYSROVER_UDP_SERVER2_HPP
