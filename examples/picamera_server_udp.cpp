@@ -1,12 +1,11 @@
 #include <iostream>
 #include "udp_server/udp_server.hpp"
-#include "message_handling/message_handler.hpp"
 #include "udp_server/video_feed_handler.hpp"
 
-std::unique_ptr<UDPServer<VideoFeedHandler>> start_udp_server () {
+std::unique_ptr<UDPServer> start_udp_server () {
     const int port = 8080;
     auto handler = std::make_unique<VideoFeedHandler>();
-    auto server = std::make_unique<UDPServer<VideoFeedHandler>>(port, std::move(handler));
+    auto server = std::make_unique<UDPServer>(port, std::move(handler));
     server->start();
     return server;
 }

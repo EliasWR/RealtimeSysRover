@@ -3,6 +3,7 @@ import cv2
 from protobuf.my_messages_pb2 import VideoFeed, Instruction
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# server_address = ('10.22.192.34', 8080)
 server_address = ('127.0.0.1', 8080)
 MAX_UDP_PACKET_SIZE = 65507
 
@@ -45,12 +46,16 @@ while True:
             break
 
     sock.sendto(serialized_video_feed, server_address)
-
-    serialized_instruction, _ = sock.recvfrom(MAX_UDP_PACKET_SIZE)
+    # print("Sent frame to server on ", server_address)
+    try:
+        serialized_instruction, _ = sock.recvfrom(MAX_UDP_PACKET_SIZE)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        break
     instruction = Instruction()
     instruction.ParseFromString(serialized_instruction)
 
-    print("Received instruction:", instruction.messageInstruction)
+    # print("Received instruction:", instruction.messageInstruction)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

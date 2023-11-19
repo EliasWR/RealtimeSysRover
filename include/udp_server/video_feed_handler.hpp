@@ -2,7 +2,6 @@
 #define VIDEO_FEED_HANDLER_HPP
 
 #include <iostream>
-#include <functional>
 #include <boost/asio.hpp>
 #include <opencv2/opencv.hpp>
 #include "message_handling/message_handler.hpp"
@@ -13,12 +12,13 @@ using udp = boost::asio::ip::udp;
 class VideoFeedHandler : public MessageHandler {
 public:
     VideoFeedHandler ();
-    void displayFrame (std::string& frame);
-    virtual void handleMessage(const std::string& message) override;
+    void openWindow () override;
+    void displayFrame (const std::vector<char>& frame, size_t& len);
+    void handleMessage(const std::vector<char>& message, size_t& len) override;
     ~VideoFeedHandler();
 
 private:
-    std::unique_ptr<VideoFeed> _video_feed;
+    VideoFeed _video_feed;
 };
 
 #endif // VIDEO_FEED_HANDLER_HPP
