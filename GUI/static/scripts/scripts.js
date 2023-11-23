@@ -31,6 +31,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // -- Switch between manual and autonomous mode --
+    const checkbox = document.querySelector('.switch input[type="checkbox"]');
+    const switchTitle = document.querySelector('.switch-container .switch-title');
+
+    checkbox.addEventListener('change', function() {
+    if (this.checked) {
+      switchTitle.textContent = 'Autonomous';
+      sendCommand('mode_autonomous')
+    } else {
+      switchTitle.textContent = 'Manual'; 
+      sendCommand('mode_manual')
+    }
+  });
+
+
+    // -- Buttons --
+
     let pressed = ("ontouchstart" in document.documentElement) ? 'touchstart' : 'mousedown';
     let released = ("ontouchstart" in document.documentElement) ? 'touchend' : 'mouseup';
 
@@ -88,6 +105,8 @@ document.addEventListener('DOMContentLoaded', function () {
         sendCommand('stop');
     });
 
+
+    // -- Joysticks --
 
     let Joy1 = new JoyStick('joystick-left', {}, function (stickData) {
         sendCommand('joystick_rover_' + Math.floor(stickData.x) + '_' + Math.floor(stickData.y));
