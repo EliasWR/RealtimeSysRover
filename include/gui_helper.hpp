@@ -2,6 +2,7 @@
 #ifndef REALTIMESYSROVER_GUI_HELPER_HPP
 #define REALTIMESYSROVER_GUI_HELPER_HPP
 
+/*
 
 #include <numbers>
 #include <iostream>
@@ -225,4 +226,5 @@ std::string message_handler(const std::string &message) {
   std::cout << "Message: " << rover_message.dump(2) << std::endl;
 }
 
+ */
 #endif//REALTIMESYSROVER_GUI_HELPER_HPP

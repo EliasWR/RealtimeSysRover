@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "tcp_server/ws_server_lib.hpp"
 
 WSConnection::WSConnection(tcp::socket socket) : _socket(std::move(socket)) {
@@ -19,6 +21,10 @@ void WSConnection::start() {
   }
 }
 
+void WSConnection::set_message_handler(std::shared_ptr<MessageHandler> handler) {
+  _message_handler = std::move(handler);
+}
+
 void WSConnection::set_callback(Callback callback) {
   _callback = std::move(callback);
 }
@@ -33,16 +39,20 @@ int WSConnection::receiveMessageSize() {
     return std::stoi(data);
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;
+    return 0;
   }
 }
 
 void WSConnection::on_message(beast::flat_buffer &buffer) {
-  if (_callback) {
+  if (_message_handler) {
     std::stringstream ss;
     ss << beast::make_printable(buffer.data());
     std::string request = ss.str();
-    std::string response;
-    _callback(request, response);
+    auto message = std::vector<char>(request.begin(), request.end());
+
+    std::vector<char> response;
+    _message_handler->handleMessage(message, response, 0);
+
     _socket.write(asio::buffer(response));
     //std::cout << "Callback, received message: " << beast::make_printable(buffer.data()) << std::endl;
   } else {
@@ -54,8 +64,8 @@ WSServer::WSServer(unsigned short port)
     : _ioc(1), _acceptor(_ioc, {asio::ip::make_address("0.0.0.0"), port}) {
 }
 
-void WSServer::set_callback(WSConnection::Callback callback) {
-  _callback = std::move(callback);
+void WSServer::set_message_handler(std::shared_ptr<MessageHandler> handler){
+  _message_handler = std::move(handler);
 }
 
 void WSServer::start() {
@@ -73,9 +83,7 @@ void WSServer::start() {
 
         std::thread([&, sock = std::move(socket)]() mutable {
           WSConnection session(std::move(sock));
-          if (_callback) {
-            session.set_callback(_callback);
-          }
+          session.set_message_handler(_message_handler);
           session.start();
         }).detach();
       }

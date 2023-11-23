@@ -17,6 +17,7 @@ target_include_directories(picamera_server_udp PUBLIC
 
 add_executable(manual_control manual_control.cpp)
 target_link_libraries(manual_control PUBLIC
+        command_handler_lib
         tcp_server_lib
         ws_server_lib)
 target_include_directories(manual_control PUBLIC

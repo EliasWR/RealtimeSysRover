@@ -1,33 +1,30 @@
+#include <utility>
+
 #include "tcp_server/tcp_server_lib.hpp"
 
 // Connection Implementation
-Connection::Connection(tcp::socket socket) :
+Connection::Connection(tcp::socket socket, std::shared_ptr<MessageHandler> handler) :
     _socket(std::move(socket)) {
-  _callback = [](const std::string &request, std::string &response) {
-    std::cout << "Received request: " << request << std::endl;
-    response = "Hello from server!";
-  };
+    _message_handler = std::move(handler);
 }
 
-void Connection::setCallback(Callback &callback) {
-  _callback = callback;
-}
 
 void Connection::run() {
   _thread = std::thread([&] {
     try {
       while (true) {
         auto msg = receiveMessage();
-        std::string response{};
-        _callback(msg, response);
-        writeMsg(response);
+        auto msg_vec = std::vector<char>(msg.begin(), msg.end());
+        _message_handler->handleMessage(msg_vec, static_cast<int>(0));
       }
     } catch (const std::exception &ex) {
       std::cerr << "[socket_handler] " << ex.what() << std::endl;
     }
   });
+}
 
-  auto _ = _thread.get_id(); // Make thread not appear unused
+void Connection::set_message_handler(std::shared_ptr<MessageHandler> handler) {
+  _message_handler = std::move(handler);
 }
 
 std::string Connection::getIPv4() {
@@ -74,14 +71,11 @@ Connection::~Connection() {
 }
 
 // TCPServer Implementation
-TCPServer::TCPServer(unsigned short port) :
+TCPServer::TCPServer(int port, std::unique_ptr<MessageHandler> handler) :
     _port(port),
     _acceptor(_io_context, tcp::endpoint(tcp::v4(), port)),
-    _is_running(false) {
-}
-
-void TCPServer::set_callback(Connection::Callback callback) {
-  _callback = std::move(callback);
+    _is_running(false),
+    _message_handler(std::move(handler)) {
 }
 
 void TCPServer::start() {
@@ -97,9 +91,9 @@ void TCPServer::start() {
 
         std::cout << "TCP Connection accepted with: " << socket.remote_endpoint().address().to_string() << std::endl;
 
-        auto connection = std::make_unique<Connection>(std::move(socket));
+        auto connection = std::make_unique<Connection>(std::move(socket), _message_handler);
         _clients.push_back(std::move(connection));
-        _clients.back()->setCallback(_callback);
+        _clients.back()->set_message_handler(_message_handler);
         _clients.back()->run();
 
       }

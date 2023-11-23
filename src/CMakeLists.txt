@@ -9,9 +9,17 @@ target_include_directories(video_feed_handler PUBLIC
         "${CMAKE_SOURCE_DIR}/include"
         "${CMAKE_BINARY_DIR}/generated"
         proto_c)
-target_link_libraries(video_feed_handler PRIVATE
+target_link_libraries(video_feed_handler PUBLIC
         ${OpenCV_LIBS}
         proto_c)
+
+# Command Handler
+add_library(command_handler_lib STATIC command_handler.cpp)
+target_include_directories(command_handler_lib PUBLIC
+        "${CMAKE_SOURCE_DIR}/include")
+target_link_libraries(command_handler_lib PUBLIC
+        nlohmann_json::nlohmann_json)
+
 
 # TCP server
 target_include_directories(tcp_server_lib PUBLIC
