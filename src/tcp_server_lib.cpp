@@ -1,7 +1,7 @@
 #include "tcp_server/tcp_server_lib.hpp"
 
 // Connection Implementation
-Connection::Connection(std::unique_ptr<tcp::socket> socket) :
+Connection::Connection(tcp::socket socket) :
     _socket(std::move(socket)) {
   _callback = [](const std::string &request, std::string &response) {
     std::cout << "Received request: " << request << std::endl;
@@ -14,7 +14,7 @@ void Connection::setCallback(Callback &callback) {
 }
 
 void Connection::run() {
-  _thread = std::jthread([&] {
+  _thread = std::thread([&] {
     try {
       while (true) {
         auto msg = receiveMessage();
@@ -24,8 +24,6 @@ void Connection::run() {
       }
     } catch (const std::exception &ex) {
       std::cerr << "[socket_handler] " << ex.what() << std::endl;
-    } catch (...) {
-        std::cerr << "Unknown exception caught in thread.\n";
     }
   });
 
@@ -33,12 +31,12 @@ void Connection::run() {
 }
 
 std::string Connection::getIPv4() {
-  return _socket->remote_endpoint().address().to_string();
+  return _socket.remote_endpoint().address().to_string();
 }
 
 int Connection::receiveMessageSize() {
   std::array<unsigned char, 4> buf{};
-  boost::asio::read(*_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
+  boost::asio::read(_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
   return bytes_to_int(buf);
 }
 
@@ -50,7 +48,7 @@ std::string Connection::receiveMessage() {
   boost::system::error_code err;
   //asio::read(*_socket, buf, err);
 
-  boost::asio::read(*_socket, buf, boost::asio::transfer_exactly(len), err);
+  boost::asio::read(_socket, buf, boost::asio::transfer_exactly(len), err);
 
   if (err) {
     throw boost::system::system_error(err);
@@ -63,66 +61,81 @@ std::string Connection::receiveMessage() {
 }
 
 void Connection::writeMsg(const std::string &msg) {
-    int msgSize = static_cast<int>(msg.size());
+  int msgSize = static_cast<int>(msg.size());
 
-    _socket->send(boost::asio::buffer(int_to_bytes(msgSize), 4));
-    _socket->send(boost::asio::buffer(msg));
+  _socket.send(boost::asio::buffer(int_to_bytes(msgSize), 4));
+  _socket.send(boost::asio::buffer(msg));
+
+}
+
+Connection::~Connection() {
+  _socket.close();
+  _thread.join();
 }
 
 // TCPServer Implementation
-TCPServer_::TCPServer_(unsigned short port) :
+TCPServer::TCPServer(unsigned short port) :
     _port(port),
     _acceptor(_io_context, tcp::endpoint(tcp::v4(), port)),
     _is_running(false) {
 }
 
-void TCPServer_::set_callback(Connection::Callback callback) {
+void TCPServer::set_callback(Connection::Callback callback) {
   _callback = std::move(callback);
 }
 
-void TCPServer_::start() {
+void TCPServer::start() {
   _is_running = true;
   std::cout << "TCP Server running on port: " << _port << std::endl;
 
-  _acceptor_thread = std::jthread([&] {
+  _acceptor_thread = std::thread([&] {
     try {
       while (_is_running) {
 
-        auto socket = std::make_unique<tcp::socket>(_io_context);
-        _acceptor.accept(*socket);
+        auto socket = tcp::socket(_io_context);
+        _acceptor.accept(socket);
 
-        std::cout << "TCP Connection accepted with: " << socket->remote_endpoint().address().to_string() << std::endl;
+        std::cout << "TCP Connection accepted with: " << socket.remote_endpoint().address().to_string() << std::endl;
 
         auto connection = std::make_unique<Connection>(std::move(socket));
-        connection->setCallback(_callback);
-        connection->run();
         _clients.push_back(std::move(connection));
+        _clients.back()->setCallback(_callback);
+        _clients.back()->run();
+
       }
     } catch (const boost::system::system_error &e) {
-        std::cerr << "Exception while accepting (Boost system error): " << e.code() << std::endl;
+        std::cerr << "[TCPServer] Exception while accepting (Boost system error): " << e.code() << std::endl;
     } catch (const std::exception &e) {
-        std::cerr << "Exception while accepting: " << e.what() << std::endl;
+        std::cerr << "[TCPServer] Exception while accepting: " << e.what() << std::endl;
     }
   });
-
-  auto _ = _acceptor_thread.get_id();// For making CLion happy about unused variable _acceptor_thread
 }
 
 
-void TCPServer_::stop() {
+void TCPServer::stop() {
   if (_is_running) {
-    std::cout << "Stopping TCP Server..";
-    _is_running = false;
-    _acceptor.close();
-    std::cout << "DONE" << std::endl;
+      std::cout << "Stopping TCP Server..\n";
+      _is_running = false;
+
+      _acceptor.cancel();
+      _acceptor.close();
+      _acceptor_thread.join();
+
+      {
+        std::unique_lock<std::mutex> lock(_m);
+        for (auto &client : _clients) {
+          client->~Connection();
+        }
+        _clients.clear();
+      }
+
+      _io_context.stop();
+
+      std::cout << "DONE" << std::endl;
   }
 }
 
-bool TCPServer_::is_running() const {
-  return _is_running;
-}
-
-void TCPServer_::writeToClient(size_t client_index, const std::string &msg) {
+void TCPServer::writeToClient(size_t client_index, const std::string &msg) {
   if (_clients.size() >= client_index + 1) {
     std::cout << "Writing to client " << client_index << ": " << msg << std::endl;
     _clients[client_index]->writeMsg(msg);
@@ -131,9 +144,14 @@ void TCPServer_::writeToClient(size_t client_index, const std::string &msg) {
   }
 }
 
-void TCPServer_::writeToAllClients(const std::string &msg) {
-  for (size_t i = 0; i < _clients.size(); i++) {
-    std::cout << "Writing to client " << i << ": " << msg << std::endl;
-    _clients[i]->writeMsg(msg);
+void TCPServer::writeToAllClients(const std::string &msg) {
+  try {
+    for (size_t i = 0; i < _clients.size(); i++) {
+      std::cout << "Writing to client " << i << ": " << msg << std::endl;
+      _clients[i]->writeMsg(msg);
+    }
   }
+    catch (const std::exception &e) {
+        std::cerr << "Exception while writing to all clients: " << e.what() << std::endl;
+    }
 }

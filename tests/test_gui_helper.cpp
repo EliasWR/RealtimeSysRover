@@ -13,13 +13,13 @@ TEST_CASE("Test SplitString") {
 
 TEST_CASE("Test Direction") {
   int test_value = 0;
-  REQUIRE(get_direction(test_value) == 0);
+  REQUIRE(direction_from_velocity(test_value) == 0);
 
   test_value = 136;
-  REQUIRE(get_direction(test_value) == 1);
+  REQUIRE(direction_from_velocity(test_value) == 1);
 
   test_value = -56;
-  REQUIRE(get_direction(test_value) == 2);
+  REQUIRE(direction_from_velocity(test_value) == 2);
 }
 
 /*
@@ -61,7 +61,7 @@ TEST_CASE("Test Joystick to raw motors") {
 }
  */
 
-/*
+
 TEST_CASE("Test Joystick to Heading and Speed") {
   int joy_x = 0;
   int joy_y = 0;
@@ -75,25 +75,25 @@ TEST_CASE("Test Joystick to Heading and Speed") {
 
   joy_x = 0;
   joy_y = -100;
-  test_string = "-180_255";
+  test_string = "180_255";
   REQUIRE(joystick_to_heading_and_speed(joy_x, joy_y) == test_string);
 
   joy_x = 100;
   joy_y = 0;
-  test_string = "-90_255";
+  test_string = "90_255";
   REQUIRE(joystick_to_heading_and_speed(joy_x, joy_y) == test_string);
 
   joy_x = -100;
   joy_y = 0;
-  test_string = "90_255";
+  test_string = "270_255";
   REQUIRE(joystick_to_heading_and_speed(joy_x, joy_y) == test_string);
 
   joy_x = 50;
   joy_y = 50;
-  test_string = "-45_180";
+  test_string = "45_180";
   REQUIRE(joystick_to_heading_and_speed(joy_x, joy_y) == test_string);
 }
-*/
+
 
 TEST_CASE("Test Message handler") {
   std::string test_command = "move_forward";

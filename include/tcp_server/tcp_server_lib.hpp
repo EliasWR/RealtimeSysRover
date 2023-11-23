@@ -17,8 +17,9 @@ using tcp = boost::asio::ip::tcp;
 
 class Connection {
 public:
-  explicit Connection(std::unique_ptr<tcp::socket> socket);
-  virtual void run();
+  explicit Connection(tcp::socket socket);
+    ~Connection();
+  void run();
   std::string getIPv4();
   //using Callback = std::function<void(Connection& conn, const std::string& request, std::string& response)>;
   using Callback = std::function<void(const std::string &request, std::string &response)>;
@@ -28,39 +29,32 @@ public:
   std::string receiveMessage();
   void writeMsg(const std::string &msg);
 
-  std::unique_ptr<tcp::socket> &getSocket() {
-    return _socket;
-  }
-
-protected:
-  std::unique_ptr<tcp::socket> _socket;
+private:
+  tcp::socket _socket;
   Callback _callback;
-  std::jthread _thread;
+  std::thread _thread;
 };
 
-class TCPServer_ {
+class TCPServer {
 public:
-  explicit TCPServer_(unsigned short port);
+  explicit TCPServer(unsigned short port);
   void start();
   void stop();
-  bool is_running() const;
 
   virtual void set_callback(Connection::Callback callback);
   void writeToClient(size_t client_index, const std::string &msg);
   void writeToAllClients(const std::string &msg);
 
-protected:
-
+private:
   std::vector<std::unique_ptr<Connection>> _clients;
 
-  std::jthread _ioc_thread;
   asio::io_context _io_context;
   tcp::acceptor _acceptor;
-  std::jthread _acceptor_thread;
-  std::unique_ptr<boost::asio::thread_pool> _thread_pool;
+  std::thread _acceptor_thread;
   Connection::Callback _callback;
 
   unsigned short _port;
+  std::mutex _m;
   std::atomic<bool> _is_running{false};
 };
 
