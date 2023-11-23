@@ -1,6 +1,5 @@
 #include "object_detection/object_detection.hpp"
 
-
 ObjectDetection::ObjectDetection(const std::string& model, const std::string& config) :
         _net(cv::dnn::readNet(model, config)) {
     std::vector<std::string> classNames = loadFileToVector(_categoryPath);

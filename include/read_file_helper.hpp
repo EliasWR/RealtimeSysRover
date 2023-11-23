@@ -10,13 +10,13 @@ inline std::vector<std::string> loadFileToVector(const std::string& filename) {
     std::vector<std::string> lines;
     std::ifstream file;
     file.open(filename);
-
     if (!file.is_open()) {
         std::cerr << "Failed to open " << filename << std::endl;
         return lines;
     }
     std::string line;
     while (std::getline(file, line)) {
+        std::cout << line << std::endl;
         lines.push_back(line);
     }
     file.close();
