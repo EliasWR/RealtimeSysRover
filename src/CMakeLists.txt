@@ -25,6 +25,7 @@ target_link_libraries(tcp_server_lib PUBLIC
         Boost::system)
 
 # WebSockets server
+add_library(ws_server_lib ws_server_lib.cpp)
 target_include_directories(ws_server_lib PUBLIC
         "${BOOST_INCLUDE_DIRS}"
         "${CMAKE_SOURCE_DIR}/include")
