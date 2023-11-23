@@ -1,11 +1,11 @@
 #include "object_detection/object_detection.hpp"
-/*
-ObjectDetection::ObjectDetection(const std::string& model, const std::string& config, const std::string categoryPath) :
-        _net(cv::dnn::readNet(model, config)), _categoryPath(categoryPath) {}
-*/
+
 
 ObjectDetection::ObjectDetection(const std::string& model, const std::string& config) :
-        _net(cv::dnn::readNet(model, config)) {}
+        _net(cv::dnn::readNet(model, config)) {
+    std::vector<std::string> classNames = loadFileToVector(_categoryPath);
+    std::cout << "Loaded " << classNames.size() << " classes." << std::endl;
+}
 
 void ObjectDetection::preprocess(const cv::Mat &frame, cv::Mat &blob) {
     double scalefactor = 1/255.0;
@@ -46,11 +46,40 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
         }
     }
 }
+/*
+void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &classIds,
+                                     const std::vector<float> &confidences, const std::vector<cv::Rect> &boxes) {
+    std::vector<std::string> classNames = loadFileToVector(_categoryPath);
+    std::vector<int> indices;
+    cv::dnn::NMSBoxes(boxes, confidences, 0.5, 0.4, indices);
+
+    for (int idx : indices) {
+        cv::Rect box = boxes[idx];
+        cv::rectangle(frame, box, cv::Scalar(0, 255, 0), 3);
+        std::string label = "";
+        if (classIds[idx] < classNames.size()) {
+            label = classNames[classIds[idx]]; // Get the name of the label
+        } else {
+            std::cerr << "Class ID " << classIds[idx] << " is out of range." << std::endl;
+        }
+        label += ": " + cv::format("%.2f", confidences[idx]);
+
+        int baseLine;
+        cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+        int top = std::max(box.y, labelSize.height);
+        cv::rectangle(frame, cv::Point(box.x, top - labelSize.height),
+                      cv::Point(box.x + labelSize.width, top + baseLine),
+                      cv::Scalar(255, 255, 255), cv::FILLED);
+        cv::putText(frame, label, cv::Point(box.x, box.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
+    }
+}
+*/
 
 void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &classIds,
                                      const std::vector<float> &confidences, const std::vector<cv::Rect> &boxes) {
     std::vector<int> indices;
     cv::dnn::NMSBoxes(boxes, confidences, 0.5, 0.4, indices);
+
     for (int idx : indices) {
         cv::Rect box = boxes[idx];
         cv::rectangle(frame, box, cv::Scalar(0, 255, 0), 3);

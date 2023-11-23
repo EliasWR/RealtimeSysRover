@@ -12,7 +12,7 @@ target_link_libraries(video_feed_handler PUBLIC
 add_library(object_detection object_detection.cpp)
 target_include_directories(object_detection PUBLIC
         "${CMAKE_SOURCE_DIR}/include"
-        "${CMAKE_BINARY_DIR}/yolo")
+        "${CMAKE_SOURCE_DIR}/yolo")
 target_link_libraries(object_detection PUBLIC
         ${OpenCV_LIBS})
 
