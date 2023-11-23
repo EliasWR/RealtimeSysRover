@@ -31,6 +31,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // -- Switch between manual and autonomous mode --
+    const checkbox = document.querySelector('.switch input[type="checkbox"]');
+    const switchTitle = document.querySelector('.switch-container .switch-title');
+
+    checkbox.addEventListener('change', function() {
+    if (this.checked) {
+      switchTitle.textContent = 'Autonomous';
+      sendCommand('mode_autonomous')
+    } else {
+      switchTitle.textContent = 'Manual'; 
+      sendCommand('mode_manual')
+    }
+  });
+
+
+
     let pressed = ("ontouchstart" in document.documentElement) ? 'touchstart' : 'mousedown';
     let released = ("ontouchstart" in document.documentElement) ? 'touchend' : 'mouseup';
 
