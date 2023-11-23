@@ -24,6 +24,12 @@ target_include_directories(tcp_server_lib PUBLIC
 target_link_libraries(tcp_server_lib PUBLIC
         Boost::system)
 
+# WebSockets server
+target_include_directories(ws_server_lib PUBLIC
+        "${BOOST_INCLUDE_DIRS}"
+        "${CMAKE_SOURCE_DIR}/include")
+target_link_libraries(ws_server_lib PUBLIC Boost::system)
+
 # UDP server
 add_library(udp_server_lib udp_server_lib.cpp)
 target_include_directories(udp_server_lib PUBLIC
@@ -39,5 +45,6 @@ target_link_libraries(udp_server_lib PUBLIC
 
 if (UNIX)
     target_link_libraries(tcp_server_lib PUBLIC pthread)
+    target_link_libraries(ws_server_lib PUBLIC pthread)
     target_link_libraries(udp_server_lib PUBLIC pthread)
 endif ()

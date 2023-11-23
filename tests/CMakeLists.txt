@@ -18,6 +18,9 @@ target_link_libraries(test_serialization PRIVATE
         nlohmann_json::nlohmann_json
 )
 
+add_executable(test_TCP_no_catch2 test_TCP_no_catch2.cpp)
+target_link_libraries(test_TCP_no_catch2 PUBLIC tcp_server_lib)
+
 
 
 target_include_directories(test_gui_helper PRIVATE "${CMAKE_SOURCE_DIR}/GUI")

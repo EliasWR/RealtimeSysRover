@@ -9,6 +9,8 @@ add_executable(picamera_server_udp picamera_server_udp.cpp)
 target_link_libraries(picamera_server_udp PUBLIC udp_server_lib video_feed_handler object_detection)
 
 add_executable(manual_control manual_control.cpp)
-target_link_libraries(manual_control PUBLIC tcp_server_lib udp_server_lib)
+target_link_libraries(manual_control PUBLIC
+        tcp_server_lib
+        ws_server_lib)
 target_include_directories(manual_control PUBLIC
         ${CMAKE_SOURCE_DIR}/include)
