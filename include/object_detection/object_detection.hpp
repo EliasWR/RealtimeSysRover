@@ -19,7 +19,7 @@ public:
     cv::Mat detectObjects(cv::Mat& frame);
 private:
     cv::dnn::Net _net;
-    const std::string _categoryPath = "coco.names";
+    const std::string _categoryPath = "../../yolo/coco.names";
 };
 
 #endif //REALTIMESYSROVER_OBJECT_DETECTION_HPP
