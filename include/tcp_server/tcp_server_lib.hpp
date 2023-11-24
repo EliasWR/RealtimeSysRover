@@ -1,7 +1,7 @@
 #ifndef REALTIMESYSROVER_TCP_SERVER2_HPP
 #define REALTIMESYSROVER_TCP_SERVER2_HPP
 
-#include "network_helper.hpp"
+#include "helpers/network_helper.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
