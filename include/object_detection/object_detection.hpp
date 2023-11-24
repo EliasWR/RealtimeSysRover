@@ -6,7 +6,7 @@
 #include <opencv2/dnn.hpp>
 #include <string>
 #include <vector>
-#include "read_file_helper.hpp"
+#include "helpers/read_file_helper.hpp"
 
 class ObjectDetection {
 public:
@@ -20,6 +20,7 @@ public:
 private:
     cv::dnn::Net _net;
     const std::string _categoryPath = "../../yolo/coco.names";
+    std::vector<std::string> _classNames = loadFileToVector(_categoryPath);
 };
 
 #endif //REALTIMESYSROVER_OBJECT_DETECTION_HPP

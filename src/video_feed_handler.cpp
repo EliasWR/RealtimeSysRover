@@ -36,7 +36,6 @@ void VideoFeedHandler::displayFrameDetections (const std::vector<char>& frame, s
 
     if (!decoded_frame.empty()) {
         cv::Mat detections = _object_detector.detectObjects(decoded_frame);
-
         cv::imshow("VideoFeed", detections);
         cv::waitKey(1);
     } else {
