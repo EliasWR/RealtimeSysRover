@@ -3,21 +3,21 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
-#include "message_handling/message_handler.hpp"
-#include "message_handling/video_feed_handler.hpp"
+#include <functional>
 
 using udp = boost::asio::ip::udp;
 namespace asio = boost::asio;
 
 class UDPServer {
 public:
-    UDPServer(int port, std::unique_ptr<MessageHandler> handler);
+    UDPServer(int port, std::function<void(const std::string&)> handler);
     void start();
     ~UDPServer();
 
 private:
-    std::unique_ptr<MessageHandler> _messageHandler;
-    std::tuple<std::vector<char>, size_t, udp::endpoint> receiveMessage();
+    std::function<void(const std::string&)> _messageHandler;
+    std::tuple<std::string, size_t, udp::endpoint> receiveMessage();
+    int receiveMessageSize();
     void sendMessage(const std::string& message, const boost::asio::ip::udp::endpoint& remote_endpoint);
     void standardResponse(const udp::endpoint& remote_endpoint);
 
