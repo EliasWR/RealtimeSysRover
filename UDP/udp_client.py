@@ -1,26 +1,37 @@
 import socket
+#from protobuf.my_messages_pb2 import VideoFeed, Instruction
+import base64
+import json
+import numpy as np
 import cv2
-from protobuf.my_messages_pb2 import VideoFeed, Instruction
+import datetime
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # server_address = ('10.22.192.34', 8080)
 server_address = ('127.0.0.1', 8080)
 MAX_UDP_PACKET_SIZE = 65507
 
-cap = cv2.VideoCapture(0)
+'''cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
     print("Could not open camera!")
-    exit()
+    exit()'''
 
 while True:
-    ret, frame = cap.read()
+    #ret, frame = cap.read()
+    frame = np.zeros((480, 640, 3), np.uint8)
+    cv2.putText(frame, "Hello From UDP!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+    # Add timestamp of HH:MM:SS:MS
+    timestamp = datetime.datetime.now().strftime("%H:%M:%S:%f")[:-3]
+    cv2.putText(frame, timestamp, (100, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
+    '''
     if not ret:
         print("Failed to grab frame!")
         break
+'''
+    cv2.imshow("Webcam", frame)
 
-    # cv2.imshow("Webcam", frame)
 
     scale_factor = 1.0
     while True:
@@ -32,11 +43,14 @@ while True:
         if not is_success:
             print("Failed to encode image!")
             break
+        
+        encoded_image = base64.b64encode(buffer).decode('utf-8')
+  
+        video_feed = {"image": encoded_image}
 
-        video_feed = VideoFeed()
-        video_feed.messageFeed = buffer.tobytes()
-        serialized_video_feed = video_feed.SerializeToString()
-
+        
+        serialized_video_feed = json.dumps(video_feed).encode("utf-8")
+     
         if len(serialized_video_feed) <= MAX_UDP_PACKET_SIZE:
             break
         scale_factor -= 0.1
@@ -46,20 +60,23 @@ while True:
             break
 
     sock.sendto(serialized_video_feed, server_address)
-    # print("Sent frame to server on ", server_address)
+    print("Sent frame to server on ", server_address)
+    '''
+    # 
     try:
         serialized_instruction, _ = sock.recvfrom(MAX_UDP_PACKET_SIZE)
+        #instruction = Instruction()
+        #instruction.ParseFromString(serialized_instruction)
     except Exception as e:
         print(f"An error occurred: {e}")
         break
-    instruction = Instruction()
-    instruction.ParseFromString(serialized_instruction)
+    '''
 
     # print("Received instruction:", instruction.messageInstruction)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(100) & 0xFF == ord('q'):
         break
 
-cap.release()
+#cap.release()
 cv2.destroyAllWindows()
 sock.close()

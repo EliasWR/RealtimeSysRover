@@ -1,33 +1,66 @@
 #include <iostream>
 
 #include "udp_server/udp_server.hpp"
+#include "video_viewer/video_viewer.hpp"
 #include "message_handling/video_feed_handler.hpp"
+#include "nlohmann/json.hpp"
+#include <string>
+#include <vector>
 
-std::unique_ptr<UDPServer> start_udp_server () {
-    const int port = 8080;
-    auto handler = std::make_unique<VideoFeedHandler>();
-    auto server = std::make_unique<UDPServer>(port, std::move(handler));
-    server->start();
-    return server;
+std::string base64_decode(const std::string &in) {
+  std::string out;
+  std::vector<int> T(256, -1);
+  for (int i = 0; i < 64; i++) T["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i]] = i;
+
+  int val = 0, valb = -8;
+  for (uchar c : in) {
+    if (T[c] == -1) break;
+    val = (val << 6) + T[c];
+    valb += 6;
+    if (valb >= 0) {
+      out.push_back(char((val >> valb) & 0xFF));
+      valb -= 8;
+    }
+  }
+  return out;
 }
 
-std::unique_ptr<UDPServer> start_udp_server_with_detection () {
-    const int port = 8080;
+cv::Mat decodeImageFromJson(const std::string &jsonString) {
+  // Parse the JSON
+  auto json = nlohmann::json::parse(jsonString);
+  std::string encodedImage = json["image"];
 
-    std::string model = "../../yolo/yolov3-tiny.weights";
-    std::string config = "../../yolo/yolov3-tiny.cfg";
+  // Base64 Decode
+  std::string decodedImageData = base64_decode(encodedImage);
 
-    auto handler = std::make_unique<VideoFeedHandler>(model, config);
-    auto server = std::make_unique<UDPServer>(port, std::move(handler));
-    server->start();
-    return server;
+  // Convert to vector of bytes
+  std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
+
+  // Decode image
+  cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
+
+  return image;
 }
+
+
 
 int main() {
-    // auto udp_server = start_udp_server();
-    auto udp_server = start_udp_server_with_detection();
+    auto Viewer = std::make_unique<VideoViewer>();
 
-    std::cout << "Press a key + 'enter' to end..." << std::endl;
-    while (std::cin.get() != '\n') {}
+    auto handler = [&] (const std::string& message) {
+        cv::Mat decoded_frame = decodeImageFromJson(message);
+        Viewer->addFrame(decoded_frame);
+    };
+    auto udp_server = std::make_unique<UDPServer>(8080, handler);
+
+    udp_server->start();
+
+
+    auto fps = 30;
+    auto frame_interval = std::chrono::milliseconds(1000 / fps);
+    while (true) {
+        Viewer->display();
+        if(cv::waitKey(frame_interval.count()) >= 0) break;
+    }
     std::cout << "Stopping camera feed" << std::endl;
 }

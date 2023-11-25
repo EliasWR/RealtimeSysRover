@@ -15,13 +15,16 @@ public:
   ~VideoViewer();
   void addFrame(const cv::Mat& frame);
   void display();
+  bool accept_frames{false};
 
 private:
   std::queue<cv::Mat> frame_queue;
   std::mutex queue_mutex;
   cv::Mat dummy_frame;
 
-  cv::Mat getFrameFromQueue();
+  std::chrono::steady_clock::time_point last_frame_time;
+
+  cv::Mat getLatestFrame();
 };
 
 

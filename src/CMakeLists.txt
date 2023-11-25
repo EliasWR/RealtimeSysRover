@@ -8,6 +8,15 @@ target_link_libraries(video_feed_handler PUBLIC
         ${OpenCV_LIBS}
         proto_c)
 
+
+# Video viewer
+add_library(video_viewer_lib video_viewer.cpp)
+target_include_directories(video_viewer_lib PUBLIC
+        "${OpenCV_INCLUDE_DIRS}"
+        "${CMAKE_SOURCE_DIR}/include")
+target_link_libraries(video_viewer_lib PUBLIC
+        ${OpenCV_LIBS})
+
 # Object Detection
 add_library(object_detection object_detection.cpp)
 target_include_directories(object_detection PUBLIC
@@ -25,6 +34,7 @@ target_link_libraries(tcp_server_lib PUBLIC
         Boost::system)
 
 # WebSockets server
+add_library(ws_server_lib ws_server_lib.cpp)
 target_include_directories(ws_server_lib PUBLIC
         "${BOOST_INCLUDE_DIRS}"
         "${CMAKE_SOURCE_DIR}/include")
@@ -40,8 +50,7 @@ target_include_directories(udp_server_lib PUBLIC
 target_link_libraries(udp_server_lib PUBLIC
         Boost::system
         proto_c
-        ${OpenCV_LIBS}
-        video_feed_handler)
+        ${OpenCV_LIBS})
 
 if (UNIX)
     target_link_libraries(tcp_server_lib PUBLIC pthread)
