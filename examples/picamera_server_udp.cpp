@@ -1,4 +1,4 @@
-// This file can be tested together with "RealtimeSystems\RealtimeSysRover\UDP\udp_client.py"
+// This file can be tested together with "RealtimeSystems\RealtimeSysRover\UDP\udp_client_json.py"
 
 #include <iostream>
 
