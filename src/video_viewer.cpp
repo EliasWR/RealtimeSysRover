@@ -27,7 +27,7 @@ void VideoViewer::display() {
   cv::Mat frame{getLatestFrame()};
   cv::imshow("Video Viewer", frame);
 
-  cv::waitKey(1); // Adjust delay as needed
+  cv::waitKey(1);
 }
 
 cv::Mat VideoViewer::getLatestFrame() {

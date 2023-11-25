@@ -1,16 +1,21 @@
 #include "object_detection/object_detection.hpp"
 
 
-ObjectDetection::ObjectDetection(const std::string& model, const std::string& config) :
-        _net(cv::dnn::readNet(model, config)) {}
+ObjectDetection::ObjectDetection() {
+    _categoryPath = "../../yolo/coco.names";
+    _modelPath = "../../yolo/yolov3-tiny.weights";
+    _configPath = "../../yolo/yolov3-tiny.cfg";
+    _classNames = loadFileToVector(_categoryPath);
+    _net = cv::dnn::readNet(_modelPath, _configPath);
+}
 
 void ObjectDetection::preprocess(const cv::Mat &frame, cv::Mat &blob) {
-    double scalefactor = 1/255.0;
+    double scale_factor = 1/255.0;
     cv::Size size = cv::Size(416, 416);
     cv::Scalar mean = cv::Scalar(0, 0, 0);
     bool swapRB = true;
     bool crop = false;
-    cv::dnn::blobFromImage(frame, blob, scalefactor, size, mean, swapRB, crop);
+    cv::dnn::blobFromImage(frame, blob, scale_factor, size, mean, swapRB, crop);
 }
 
 void ObjectDetection::runModel(const cv::Mat &blob, std::vector<cv::Mat> &outputs) {

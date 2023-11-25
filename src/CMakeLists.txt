@@ -1,14 +1,3 @@
-# Video Feed Handler
-add_library(video_feed_handler video_feed_handler.cpp)
-target_include_directories(video_feed_handler PUBLIC
-        "${CMAKE_SOURCE_DIR}/include"
-        "${CMAKE_BINARY_DIR}/generated"
-        proto_c)
-target_link_libraries(video_feed_handler PUBLIC
-        ${OpenCV_LIBS}
-        proto_c)
-
-
 # Video viewer
 add_library(video_viewer_lib video_viewer.cpp)
 target_include_directories(video_viewer_lib PUBLIC
