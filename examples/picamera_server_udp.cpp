@@ -4,6 +4,7 @@
 
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
+#include "message_handling/video_feed_handler.hpp"
 #include "nlohmann/json.hpp"
 #include <string>
 #include <vector>
@@ -44,7 +45,6 @@ cv::Mat decodeImageFromJson(const std::string &jsonString) {
 
   return image;
 }
-
 cv::Mat decodeImageFromProto (const std::string& frame) {
     VideoFeed video_feed;
     video_feed.ParseFromString(frame);
