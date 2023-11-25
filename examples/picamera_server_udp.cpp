@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "my_messages.pb.h"
+
 std::string base64_decode(const std::string &in) {
   std::string out;
   std::vector<int> T(256, -1);
@@ -41,17 +43,30 @@ cv::Mat decodeImageFromJson(const std::string &jsonString) {
 
   return image;
 }
+cv::Mat decodeImageFromProto (const std::string& frame) {
+    VideoFeed video_feed;
+    video_feed.ParseFromString(frame);
 
+    std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
+    cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
+    return decoded_frame;
+}
 
 
 int main() {
     auto Viewer = std::make_unique<VideoViewer>();
 
-    auto handler = [&] (const std::string& message) {
+    auto handler_json = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromJson(message);
         Viewer->addFrame(decoded_frame);
     };
-    auto udp_server = std::make_unique<UDPServer>(8080, handler);
+
+    auto handler_proto = [&] (const std::string& message) {
+        cv::Mat decoded_frame = decodeImageFromProto(message);
+        Viewer->addFrame(decoded_frame);
+    };
+
+    auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
 
     udp_server->start();
 

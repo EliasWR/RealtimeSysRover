@@ -47,7 +47,7 @@ int UDPServer::receiveMessageSize() {
     }
 }
 
-
+/*
 void UDPServer::standardResponse(const udp::endpoint& remote_endpoint) {
     Instruction instruction;
     instruction.set_messageinstruction("Message received.");
@@ -56,6 +56,7 @@ void UDPServer::standardResponse(const udp::endpoint& remote_endpoint) {
     sendMessage(serialized_instruction, remote_endpoint);
     // std::cout << "Response sent." << std::endl;
 }
+*/
 
 void UDPServer::sendMessage(const std::string& message, const udp::endpoint& remote_endpoint) {
     _socket.send_to(asio::buffer(message), remote_endpoint);

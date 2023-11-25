@@ -9,6 +9,8 @@ add_executable(picamera_server_udp picamera_server_udp.cpp)
 target_link_libraries(picamera_server_udp PUBLIC
         udp_server_lib
         video_viewer_lib
+        proto_c
+        "${CMAKE_BINARY_DIR}/generated"
         object_detection )
 
 add_executable(manual_control manual_control.cpp)

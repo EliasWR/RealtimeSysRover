@@ -5,9 +5,6 @@
 #include <boost/asio.hpp>
 #include <functional>
 
-#include "message_handling/message_handler.hpp"
-#include "message_handling/video_feed_handler.hpp"
-
 using udp = boost::asio::ip::udp;
 namespace asio = boost::asio;
 
