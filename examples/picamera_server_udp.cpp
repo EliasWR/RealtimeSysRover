@@ -5,6 +5,7 @@
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
 #include "nlohmann/json.hpp"
+#include "object_detection/object_detection.hpp"
 #include <string>
 #include <vector>
 
@@ -56,6 +57,7 @@ cv::Mat decodeImageFromProto (const std::string& frame) {
 
 int main() {
     auto Viewer = std::make_unique<VideoViewer>();
+    auto ObjectDetector = std::make_unique<ObjectDetection>();
 
     auto handler_json = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromJson(message);
@@ -64,6 +66,8 @@ int main() {
 
     auto handler_proto = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromProto(message);
+        // ObjectDetector->detectObjects(decoded_frame);
+
         Viewer->addFrame(decoded_frame);
     };
 
