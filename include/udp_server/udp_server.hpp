@@ -25,6 +25,7 @@ private:
     asio::io_context _io_context;
     udp::socket _socket;
     std::thread _thread;
+    std::mutex _m;
 };
 
 #endif //REALTIMESYSROVER_UDP_SERVER2_HPP

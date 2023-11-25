@@ -1,3 +1,5 @@
+// This file can be tested together with "RealtimeSystems\RealtimeSysRover\UDP\udp_client.py"
+
 #include <iostream>
 
 #include "udp_server/udp_server.hpp"

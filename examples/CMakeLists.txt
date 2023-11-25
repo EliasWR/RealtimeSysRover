@@ -27,3 +27,5 @@ target_link_libraries(video_view PUBLIC
         video_viewer_lib)
 target_include_directories(video_view PUBLIC
         ${CMAKE_SOURCE_DIR}/include)
+
+add_executable(automated_control automated_control.cpp)
