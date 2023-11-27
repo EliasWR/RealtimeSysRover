@@ -3,7 +3,7 @@
 // Connection Implementation
 Connection::Connection(tcp::socket socket) :
     _socket(std::move(socket)) {
-  _callback = [](const std::string &request, std::string &response) {
+    _callback = [](const std::string &request, std::string &response) {
     std::cout << "Received request: " << request << std::endl;
     response = "Hello from server!";
   };
@@ -13,21 +13,22 @@ void Connection::setCallback(Callback &callback) {
   _callback = callback;
 }
 
-void Connection::run() {
+void Connection::start() {
+  _is_running = true;
   _thread = std::thread([&] {
     try {
-      while (true) {
+      while (_is_running) {
+
         auto msg = receiveMessage();
         std::string response{};
-        _callback(msg, response);
-        writeMsg(response);
+          _callback(msg, response);
+          writeMessage(response);
       }
     } catch (const std::exception &ex) {
       std::cerr << "[socket_handler] " << ex.what() << std::endl;
     }
   });
 
-  auto _ = _thread.get_id(); // Make thread not appear unused
 }
 
 std::string Connection::getIPv4() {
@@ -41,8 +42,6 @@ int Connection::receiveMessageSize() {
 }
 
 std::string Connection::receiveMessage() {
-
-
   int len = receiveMessageSize();
   boost::asio::streambuf buf;
   boost::system::error_code err;
@@ -60,15 +59,18 @@ std::string Connection::receiveMessage() {
   return data;
 }
 
-void Connection::writeMsg(const std::string &msg) {
+void Connection::writeMessage(const std::string &msg) {
   int msgSize = static_cast<int>(msg.size());
 
   _socket.send(boost::asio::buffer(int_to_bytes(msgSize), 4));
   _socket.send(boost::asio::buffer(msg));
-
 }
 
-Connection::~Connection() {
+void Connection::stop() {
+  {
+    std::unique_lock<std::mutex> lock(_m);
+    _is_running = false;
+  }
   _socket.close();
   _thread.join();
 }
@@ -100,7 +102,7 @@ void TCPServer::start() {
         auto connection = std::make_unique<Connection>(std::move(socket));
         _clients.push_back(std::move(connection));
         _clients.back()->setCallback(_callback);
-        _clients.back()->run();
+        _clients.back()->start();
 
       }
     } catch (const boost::system::system_error &e) {
@@ -121,13 +123,17 @@ void TCPServer::stop() {
       _acceptor.close();
       _acceptor_thread.join();
 
+      std::cout << "Acceptor closed.\n";
+
       {
         std::unique_lock<std::mutex> lock(_m);
         for (auto &client : _clients) {
-          client->~Connection();
+          client->stop();
         }
         _clients.clear();
       }
+
+      std::cout << "Clients disconnected.\n";
 
       _io_context.stop();
 
@@ -138,7 +144,7 @@ void TCPServer::stop() {
 void TCPServer::writeToClient(size_t client_index, const std::string &msg) {
   if (_clients.size() >= client_index + 1) {
     std::cout << "Writing to client " << client_index << ": " << msg << std::endl;
-    _clients[client_index]->writeMsg(msg);
+    _clients[client_index]->writeMessage(msg);
   } else {
     throw std::out_of_range("Client index out of range");
   }
@@ -148,7 +154,7 @@ void TCPServer::writeToAllClients(const std::string &msg) {
   try {
     for (size_t i = 0; i < _clients.size(); i++) {
       std::cout << "Writing to client " << i << ": " << msg << std::endl;
-      _clients[i]->writeMsg(msg);
+      _clients[i]->writeMessage(msg);
     }
   }
     catch (const std::exception &e) {

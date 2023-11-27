@@ -13,9 +13,9 @@ void WSConnection::start() {
     }
   } catch (const beast::system_error &se) {
     if (se.code() != websocket::error::closed)
-      std::cerr << "Session Error: " << se.code().message() << std::endl;
+      std::cerr << "[WSConnection Error]: " << se.code().message() << std::endl;
   } catch (const std::exception &e) {
-    std::cerr << "Session Error: " << e.what() << std::endl;
+    std::cerr << "[General WSConnection Error]: " << e.what() << std::endl;
   }
 }
 

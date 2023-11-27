@@ -75,6 +75,9 @@ int direction_from_velocity(int value) {
 }
 
 sRawMotors joystick_to_raw_motors(int joy_x, int joy_y) {
+  if (joy_y < 0) {
+    joy_x = -joy_x;
+  }
 
   int left_raw_velocity = joy_y + joy_x;
   int right_raw_velocity = joy_y - joy_x;
