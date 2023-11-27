@@ -3,7 +3,7 @@
 // Connection Implementation
 Connection::Connection(tcp::socket socket) :
     _socket(std::move(socket)) {
-  _callback = [](const std::string &request, std::string &response) {
+    _callback = [](const std::string &request, std::string &response) {
     std::cout << "Received request: " << request << std::endl;
     response = "Hello from server!";
   };
@@ -13,13 +13,15 @@ void Connection::setCallback(Callback &callback) {
   _callback = callback;
 }
 
-void Connection::run() {
+void Connection::start() {
+  _is_running = true;
   _thread = std::thread([&] {
     try {
-      while (true) {
-        auto msg = receiveMessage();
+      while (_is_running) {
+
+        auto msg = recvMsg();
         std::string response{};
-        _callback(msg, response);
+          _callback(msg, response);
         writeMsg(response);
       }
     } catch (const std::exception &ex) {
@@ -27,23 +29,20 @@ void Connection::run() {
     }
   });
 
-  auto _ = _thread.get_id(); // Make thread not appear unused
 }
 
 std::string Connection::getIPv4() {
   return _socket.remote_endpoint().address().to_string();
 }
 
-int Connection::receiveMessageSize() {
+int Connection::recvMsgSize() {
   std::array<unsigned char, 4> buf{};
   boost::asio::read(_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
   return bytes_to_int(buf);
 }
 
-std::string Connection::receiveMessage() {
-
-
-  int len = receiveMessageSize();
+std::string Connection::recvMsg() {
+  int len = recvMsgSize();
   boost::asio::streambuf buf;
   boost::system::error_code err;
   //asio::read(*_socket, buf, err);
@@ -65,10 +64,13 @@ void Connection::writeMsg(const std::string &msg) {
 
   _socket.send(boost::asio::buffer(int_to_bytes(msgSize), 4));
   _socket.send(boost::asio::buffer(msg));
-
 }
 
-Connection::~Connection() {
+void Connection::stop() {
+  {
+    std::unique_lock<std::mutex> lock(_m);
+    _is_running = false;
+  }
   _socket.close();
   _thread.join();
 }
@@ -100,7 +102,7 @@ void TCPServer::start() {
         auto connection = std::make_unique<Connection>(std::move(socket));
         _clients.push_back(std::move(connection));
         _clients.back()->setCallback(_callback);
-        _clients.back()->run();
+        _clients.back()->start();
 
       }
     } catch (const boost::system::system_error &e) {
@@ -121,13 +123,17 @@ void TCPServer::stop() {
       _acceptor.close();
       _acceptor_thread.join();
 
+      std::cout << "Acceptor closed.\n";
+
       {
         std::unique_lock<std::mutex> lock(_m);
         for (auto &client : _clients) {
-          client->~Connection();
+          client->stop();
         }
         _clients.clear();
       }
+
+      std::cout << "Clients disconnected.\n";
 
       _io_context.stop();
 
