@@ -25,12 +25,7 @@ while True:
     timestamp = datetime.datetime.now().strftime("%H:%M:%S:%f")[:-3]
     cv2.putText(frame, timestamp, (100, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
-    '''
-    if not ret:
-        print("Failed to grab frame!")
-        break
-'''
-    cv2.imshow("Webcam", frame)
+    cv2.imshow("Python", frame)
 
 
     scale_factor = 1.0
@@ -60,23 +55,9 @@ while True:
             break
 
     sock.sendto(serialized_video_feed, server_address)
-    print("Sent frame to server on ", server_address)
-    '''
-    # 
-    try:
-        serialized_instruction, _ = sock.recvfrom(MAX_UDP_PACKET_SIZE)
-        #instruction = Instruction()
-        #instruction.ParseFromString(serialized_instruction)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        break
-    '''
-
-    # print("Received instruction:", instruction.messageInstruction)
 
     if cv2.waitKey(100) & 0xFF == ord('q'):
         break
 
-#cap.release()
 cv2.destroyAllWindows()
 sock.close()

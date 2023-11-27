@@ -11,39 +11,40 @@
 #include "my_messages.pb.h"
 
 std::string base64_decode(const std::string &in) {
-  std::string out;
-  std::vector<int> T(256, -1);
-  for (int i = 0; i < 64; i++) T["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i]] = i;
+    std::string out;
+    std::vector<int> T(256, -1);
+    for (int i = 0; i < 64; i++) T["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i]] = i;
 
-  int val = 0, valb = -8;
-  for (uchar c : in) {
-    if (T[c] == -1) break;
-    val = (val << 6) + T[c];
-    valb += 6;
-    if (valb >= 0) {
-      out.push_back(char((val >> valb) & 0xFF));
-      valb -= 8;
+    int val = 0, valb = -8;
+    for (uchar c : in) {
+        if (T[c] == -1) break;
+        val = (val << 6) + T[c];
+        valb += 6;
+        if (valb >= 0) {
+            out.push_back(char((val >> valb) & 0xFF));
+            valb -= 8;
+        }
     }
-  }
-  return out;
+    return out;
 }
 
 cv::Mat decodeImageFromJson(const std::string &jsonString) {
-  // Parse the JSON
-  auto json = nlohmann::json::parse(jsonString);
-  std::string encodedImage = json["image"];
+    // Parse the JSON
+    auto json = nlohmann::json::parse(jsonString);
+    std::string encodedImage = json["image"];
 
-  // Base64 Decode
-  std::string decodedImageData = base64_decode(encodedImage);
+    // Base64 Decode
+    std::string decodedImageData = base64_decode(encodedImage);
 
-  // Convert to vector of bytes
-  std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
+    // Convert to vector of bytes
+    std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
 
-  // Decode image
-  cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
+    // Decode image
+    cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
 
-  return image;
+    return image;
 }
+
 cv::Mat decodeImageFromProto (const std::string& frame) {
     VideoFeed video_feed;
     video_feed.ParseFromString(frame);
@@ -53,10 +54,10 @@ cv::Mat decodeImageFromProto (const std::string& frame) {
     return decoded_frame;
 }
 
-
 int main() {
     auto Viewer = std::make_unique<VideoViewer>();
     auto ObjectDetector = std::make_unique<ObjectDetection>();
+    ObjectDetector->run();
 
     auto handler_json = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromJson(message);
@@ -66,7 +67,17 @@ int main() {
     auto handler_proto = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromProto(message);
         // ObjectDetector->detectObjects(decoded_frame);
+        if(ObjectDetector->_running)
+            ObjectDetector->addLatestFrame (decoded_frame);
 
+        auto detection = ObjectDetector->getLatestDetection();
+
+        if (detection.has_value()) {
+            auto& boxes = detection.value().boxes;
+            auto& confidences = detection.value().confidences;
+            auto& classIds = detection.value().classIds;
+            decoded_frame = ObjectDetector->drawDetections(decoded_frame, classIds, confidences, boxes);
+        }
         Viewer->addFrame(decoded_frame);
     };
 

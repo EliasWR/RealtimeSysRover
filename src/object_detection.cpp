@@ -49,7 +49,7 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
     }
 }
 
-void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &classIds,
+cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, const std::vector<int> &classIds,
                                      const std::vector<float> &confidences, const std::vector<cv::Rect> &boxes) {
     std::vector<int> indices;
     cv::dnn::NMSBoxes(boxes, confidences, 0.5, 0.4, indices);
@@ -59,7 +59,7 @@ void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &cla
         cv::rectangle(frame, box, cv::Scalar(0, 255, 0), 3);
         std::string label = "";
         if (classIds[idx] < _classNames.size()) {
-            label = _classNames[classIds[idx]]; // Get the name of the label
+            label = _classNames[classIds[idx]];
         } else {
             std::cerr << "Class ID " << classIds[idx] << " is out of range." << std::endl;
         }
@@ -73,9 +73,10 @@ void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &cla
                       cv::Scalar(255, 255, 255), cv::FILLED);
         cv::putText(frame, label, cv::Point(box.x, box.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
     }
+    return frame;
 }
 
-cv::Mat ObjectDetection::detectObjects(cv::Mat& frame) {
+std::tuple<std::vector<cv::Rect>, std::vector<float>, std::vector<int>> ObjectDetection::detectObjects(const cv::Mat frame) {
     cv::Mat blob;
     std::vector<cv::Mat> outputs;
     std::vector<int> classIds;
@@ -85,7 +86,40 @@ cv::Mat ObjectDetection::detectObjects(cv::Mat& frame) {
     preprocess(frame, blob);
     runModel(blob, outputs);
     postprocess(outputs, frame, classIds, confidences, boxes);
-    drawDetections(frame, classIds, confidences, boxes);
 
-    return frame;
+    return std::make_tuple(boxes, confidences, classIds);
+}
+
+void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
+    std::unique_lock<std::mutex> guard(mutex);
+    _latest_frame = frame;
+}
+
+std::optional<Detection> ObjectDetection::getLatestDetection (){
+    return _latest_detection;
+}
+
+void ObjectDetection::run(){
+    _running = true;
+    _t = std::thread([&](){
+        while (_running){
+            if (_latest_frame.empty()){
+                continue;
+            }
+            auto [boxes, confidences, classIds] = detectObjects(_latest_frame);
+            if (boxes.empty()){
+                continue;
+            }
+            Detection d;
+            d.boxes = boxes;
+            d.confidences = confidences;
+            d.classIds = classIds;
+            _latest_detection = d;
+        }
+    });
+}
+
+void ObjectDetection::stop(){
+    _running = false;
+    _t.join();
 }
