@@ -19,10 +19,10 @@ void Connection::start() {
     try {
       while (_is_running) {
 
-        auto msg = recvMsg();
+        auto msg = receiveMessage();
         std::string response{};
           _callback(msg, response);
-        writeMsg(response);
+          writeMessage(response);
       }
     } catch (const std::exception &ex) {
       std::cerr << "[socket_handler] " << ex.what() << std::endl;
@@ -35,14 +35,14 @@ std::string Connection::getIPv4() {
   return _socket.remote_endpoint().address().to_string();
 }
 
-int Connection::recvMsgSize() {
+int Connection::receiveMessageSize() {
   std::array<unsigned char, 4> buf{};
   boost::asio::read(_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
   return bytes_to_int(buf);
 }
 
-std::string Connection::recvMsg() {
-  int len = recvMsgSize();
+std::string Connection::receiveMessage() {
+  int len = receiveMessageSize();
   boost::asio::streambuf buf;
   boost::system::error_code err;
   //asio::read(*_socket, buf, err);
@@ -59,7 +59,7 @@ std::string Connection::recvMsg() {
   return data;
 }
 
-void Connection::writeMsg(const std::string &msg) {
+void Connection::writeMessage(const std::string &msg) {
   int msgSize = static_cast<int>(msg.size());
 
   _socket.send(boost::asio::buffer(int_to_bytes(msgSize), 4));
@@ -144,7 +144,7 @@ void TCPServer::stop() {
 void TCPServer::writeToClient(size_t client_index, const std::string &msg) {
   if (_clients.size() >= client_index + 1) {
     std::cout << "Writing to client " << client_index << ": " << msg << std::endl;
-    _clients[client_index]->writeMsg(msg);
+    _clients[client_index]->writeMessage(msg);
   } else {
     throw std::out_of_range("Client index out of range");
   }
@@ -154,7 +154,7 @@ void TCPServer::writeToAllClients(const std::string &msg) {
   try {
     for (size_t i = 0; i < _clients.size(); i++) {
       std::cout << "Writing to client " << i << ": " << msg << std::endl;
-      _clients[i]->writeMsg(msg);
+      _clients[i]->writeMessage(msg);
     }
   }
     catch (const std::exception &e) {

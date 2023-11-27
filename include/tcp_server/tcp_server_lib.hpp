@@ -25,9 +25,9 @@ public:
   using Callback = std::function<void(const std::string &request, std::string &response)>;
 
   void setCallback(Callback &callback);
-  int recvMsgSize();
-  std::string recvMsg();
-  void writeMsg(const std::string &msg);
+  int receiveMessageSize();
+  std::string receiveMessage();
+  void writeMessage(const std::string &msg);
 
 private:
   tcp::socket _socket;
