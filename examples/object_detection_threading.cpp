@@ -73,10 +73,7 @@ int main() {
         auto detection = ObjectDetector->getLatestDetection();
 
         if (detection.has_value()) {
-            auto& boxes = detection.value().boxes;
-            auto& confidences = detection.value().confidences;
-            auto& classIds = detection.value().classIds;
-            decoded_frame = ObjectDetector->drawDetections(decoded_frame, classIds, confidences, boxes);
+            decoded_frame = ObjectDetector->drawDetections(decoded_frame, detection);
         }
         Viewer->addFrame(decoded_frame);
     };

@@ -49,8 +49,11 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
     }
 }
 
-cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, const std::vector<int> &classIds,
-                                     const std::vector<float> &confidences, const std::vector<cv::Rect> &boxes) {
+cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, std::optional<Detection>& detection) {
+    auto& boxes = detection.value().boxes;
+    auto& confidences = detection.value().confidences;
+    auto& classIds = detection.value().classIds;
+
     std::vector<int> indices;
     cv::dnn::NMSBoxes(boxes, confidences, 0.5, 0.4, indices);
 

@@ -37,7 +37,6 @@ target_link_libraries(object_detection_threading PUBLIC
         udp_server_lib
         video_viewer_lib
         proto_c
-        object_detection
-        detector )
+        object_detection )
 target_include_directories(object_detection_threading PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
