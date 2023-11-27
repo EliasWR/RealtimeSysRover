@@ -23,8 +23,11 @@ void ObjectDetection::runModel(const cv::Mat &blob, std::vector<cv::Mat> &output
     _net.forward(outputs, _net.getUnconnectedOutLayersNames());
 }
 
-void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv::Mat &frame, std::vector<int> &classIds,
-                                  std::vector<float> &confidences, std::vector<cv::Rect> &boxes) {
+void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv::Mat &frame, Detection& detection) {
+    auto& boxes = detection.boxes;
+    auto& confidences = detection.confidences;
+    auto& classIds = detection.classIds;
+
     double detection_threshold = 0.3;
     for (auto& output : outputs) {
         auto* data = reinterpret_cast<float*>(output.data);
@@ -79,18 +82,16 @@ cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, std::optional<Detection
     return frame;
 }
 
-std::tuple<std::vector<cv::Rect>, std::vector<float>, std::vector<int>> ObjectDetection::detectObjects(const cv::Mat frame) {
+Detection ObjectDetection::detectObjects(const cv::Mat frame) {
     cv::Mat blob;
     std::vector<cv::Mat> outputs;
-    std::vector<int> classIds;
-    std::vector<float> confidences;
-    std::vector<cv::Rect> boxes;
+    Detection detection;
 
     preprocess(frame, blob);
     runModel(blob, outputs);
-    postprocess(outputs, frame, classIds, confidences, boxes);
+    postprocess(outputs, frame, detection);
 
-    return std::make_tuple(boxes, confidences, classIds);
+    return detection;
 }
 
 void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
@@ -109,15 +110,12 @@ void ObjectDetection::run(){
             if (_latest_frame.empty()){
                 continue;
             }
-            auto [boxes, confidences, classIds] = detectObjects(_latest_frame);
-            if (boxes.empty()){
+            auto detection = detectObjects(_latest_frame);
+
+            if (detection.boxes.empty()){
                 continue;
             }
-            Detection d;
-            d.boxes = boxes;
-            d.confidences = confidences;
-            d.classIds = classIds;
-            _latest_detection = d;
+            _latest_detection = detection;
         }
     });
 }

@@ -19,9 +19,9 @@ public:
     ObjectDetection();
     static void preprocess(const cv::Mat& frame, cv::Mat& blob);
     void runModel(const cv::Mat& blob, std::vector<cv::Mat>& outputs);
-    void postprocess(const std::vector<cv::Mat>& outputs, const cv::Mat& frame, std::vector<int>& classIds, std::vector<float>& confidences, std::vector<cv::Rect>& boxes);
+    void postprocess(const std::vector<cv::Mat>& outputs, const cv::Mat& frame, Detection& detection);
     cv::Mat drawDetections (cv::Mat& frame, std::optional<Detection>& detection);
-    std::tuple<std::vector<cv::Rect>, std::vector<float>, std::vector<int>> detectObjects(const cv::Mat frame);
+    Detection detectObjects(const cv::Mat frame);
     std::optional<Detection> getLatestDetection ();
     void run ();
     void stop ();
