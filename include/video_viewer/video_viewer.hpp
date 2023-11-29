@@ -21,9 +21,7 @@ private:
   std::queue<cv::Mat> frame_queue;
   std::mutex queue_mutex;
   cv::Mat dummy_frame;
-
   std::chrono::steady_clock::time_point last_frame_time;
-
   cv::Mat getLatestFrame();
 };
 

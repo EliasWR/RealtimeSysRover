@@ -35,7 +35,7 @@ std::tuple<std::string, size_t, udp::endpoint> UDPServer::receiveMessage() {
     // std::vector<char> message(recv_buffer.begin(), recv_buffer.begin() + len);
     return std::make_tuple(recv_message, len, remote_endpoint);
 }
-
+/*
 int UDPServer::receiveMessageSize() {
     std::vector<char> recv_buffer(4);
     size_t len = _socket.receive(asio::buffer(recv_buffer));
@@ -47,7 +47,7 @@ int UDPServer::receiveMessageSize() {
     }
 }
 
-/*
+
 void UDPServer::standardResponse(const udp::endpoint& remote_endpoint) {
     Instruction instruction;
     instruction.set_messageinstruction("Message received.");
@@ -56,12 +56,12 @@ void UDPServer::standardResponse(const udp::endpoint& remote_endpoint) {
     sendMessage(serialized_instruction, remote_endpoint);
     // std::cout << "Response sent." << std::endl;
 }
-*/
+
 
 void UDPServer::sendMessage(const std::string& message, const udp::endpoint& remote_endpoint) {
     _socket.send_to(asio::buffer(message), remote_endpoint);
 }
-
+*/
 UDPServer::~UDPServer() {
     _socket.close();
     _io_context.stop();

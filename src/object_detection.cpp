@@ -23,8 +23,11 @@ void ObjectDetection::runModel(const cv::Mat &blob, std::vector<cv::Mat> &output
     _net.forward(outputs, _net.getUnconnectedOutLayersNames());
 }
 
-void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv::Mat &frame, std::vector<int> &classIds,
-                                  std::vector<float> &confidences, std::vector<cv::Rect> &boxes) {
+void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv::Mat &frame, Detection& detection) {
+    auto& boxes = detection.boxes;
+    auto& confidences = detection.confidences;
+    auto& classIds = detection.classIds;
+
     double detection_threshold = 0.3;
     for (auto& output : outputs) {
         auto* data = reinterpret_cast<float*>(output.data);
@@ -49,8 +52,11 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
     }
 }
 
-void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &classIds,
-                                     const std::vector<float> &confidences, const std::vector<cv::Rect> &boxes) {
+cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, std::optional<Detection>& detection) {
+    auto& boxes = detection.value().boxes;
+    auto& confidences = detection.value().confidences;
+    auto& classIds = detection.value().classIds;
+
     std::vector<int> indices;
     cv::dnn::NMSBoxes(boxes, confidences, 0.5, 0.4, indices);
 
@@ -59,7 +65,7 @@ void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &cla
         cv::rectangle(frame, box, cv::Scalar(0, 255, 0), 3);
         std::string label = "";
         if (classIds[idx] < _classNames.size()) {
-            label = _classNames[classIds[idx]]; // Get the name of the label
+            label = _classNames[classIds[idx]];
         } else {
             std::cerr << "Class ID " << classIds[idx] << " is out of range." << std::endl;
         }
@@ -73,19 +79,48 @@ void ObjectDetection::drawDetections(cv::Mat &frame, const std::vector<int> &cla
                       cv::Scalar(255, 255, 255), cv::FILLED);
         cv::putText(frame, label, cv::Point(box.x, box.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
     }
+    return frame;
 }
 
-cv::Mat ObjectDetection::detectObjects(cv::Mat& frame) {
+Detection ObjectDetection::detectObjects(const cv::Mat frame) {
     cv::Mat blob;
     std::vector<cv::Mat> outputs;
-    std::vector<int> classIds;
-    std::vector<float> confidences;
-    std::vector<cv::Rect> boxes;
+    Detection detection;
 
     preprocess(frame, blob);
     runModel(blob, outputs);
-    postprocess(outputs, frame, classIds, confidences, boxes);
-    drawDetections(frame, classIds, confidences, boxes);
+    postprocess(outputs, frame, detection);
 
-    return frame;
+    return detection;
+}
+
+void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
+    std::unique_lock<std::mutex> guard(mutex);
+    _latest_frame = frame;
+}
+
+std::optional<Detection> ObjectDetection::getLatestDetection (){
+    return _latest_detection;
+}
+
+void ObjectDetection::run(){
+    _running = true;
+    _t = std::thread([&](){
+        while (_running){
+            if (_latest_frame.empty()){
+                continue;
+            }
+            auto detection = detectObjects(_latest_frame);
+
+            if (detection.boxes.empty()){
+                continue;
+            }
+            _latest_detection = detection;
+        }
+    });
+}
+
+void ObjectDetection::stop(){
+    _running = false;
+    _t.join();
 }

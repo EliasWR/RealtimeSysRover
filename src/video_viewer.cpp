@@ -31,7 +31,6 @@ void VideoViewer::display() {
 }
 
 cv::Mat VideoViewer::getLatestFrame() {
-
   std::unique_lock<std::mutex> guard(queue_mutex);
   auto now = std::chrono::steady_clock::now();
   cv::Mat frame;
@@ -45,4 +44,3 @@ cv::Mat VideoViewer::getLatestFrame() {
   }
   return frame;
 }
-

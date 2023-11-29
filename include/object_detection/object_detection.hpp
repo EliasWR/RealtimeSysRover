@@ -8,20 +8,39 @@
 #include <vector>
 #include "helpers/read_file_helper.hpp"
 
+struct Detection {
+    std::vector<cv::Rect> boxes;
+    std::vector<float> confidences;
+    std::vector<int> classIds;
+};
+
 class ObjectDetection {
 public:
     ObjectDetection();
     static void preprocess(const cv::Mat& frame, cv::Mat& blob);
     void runModel(const cv::Mat& blob, std::vector<cv::Mat>& outputs);
-    static void postprocess(const std::vector<cv::Mat>& outputs, const cv::Mat& frame, std::vector<int>& classIds, std::vector<float>& confidences, std::vector<cv::Rect>& boxes);
-    void drawDetections(cv::Mat& frame, const std::vector<int>& classIds, const std::vector<float>& confidences, const std::vector<cv::Rect>& boxes);
-    cv::Mat detectObjects(cv::Mat& frame);
+    void postprocess(const std::vector<cv::Mat>& outputs, const cv::Mat& frame, Detection& detection);
+    cv::Mat drawDetections (cv::Mat& frame, std::optional<Detection>& detection);
+    Detection detectObjects(const cv::Mat frame);
+    std::optional<Detection> getLatestDetection ();
+    void run ();
+    void stop ();
+    void addLatestFrame(const cv::Mat& frame);
+
+    bool _running{false};
+
 private:
     cv::dnn::Net _net;
     std::string _categoryPath;
     std::string _modelPath;
     std::string _configPath;
     std::vector<std::string> _classNames;
+
+    std::thread _t;
+    cv::Mat _latest_frame;
+    std::mutex mutex;
+    Detection _latest_detection;
+
 };
 
 #endif //REALTIMESYSROVER_OBJECT_DETECTION_HPP

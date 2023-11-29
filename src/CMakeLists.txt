@@ -9,10 +9,9 @@ target_link_libraries(video_viewer_lib PUBLIC
 # Object Detection
 add_library(object_detection object_detection.cpp)
 target_include_directories(object_detection PUBLIC
+        "${OpenCV_INCLUDE_DIRS}"
         "${CMAKE_SOURCE_DIR}/include"
         "${CMAKE_SOURCE_DIR}/yolo")
-target_link_libraries(object_detection PUBLIC
-        ${OpenCV_LIBS})
 
 # TCP Server
 add_library(tcp_server_lib tcp_server_lib.cpp)
@@ -34,12 +33,10 @@ add_library(udp_server_lib udp_server_lib.cpp)
 target_include_directories(udp_server_lib PUBLIC
         "${BOOST_INCLUDE_DIRS}"
         "${CMAKE_SOURCE_DIR}/include"
-        "${CMAKE_BINARY_DIR}/generated"
-        proto_c)
+        "${CMAKE_BINARY_DIR}/generated")
 target_link_libraries(udp_server_lib PUBLIC
         Boost::system
-        proto_c
-        ${OpenCV_LIBS})
+        proto_c)
 
 if (UNIX)
     target_link_libraries(tcp_server_lib PUBLIC pthread)
