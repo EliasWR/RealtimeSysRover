@@ -66,9 +66,9 @@ int main() {
 
     auto handler_proto = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromProto(message);
-        // ObjectDetector->detectObjects(decoded_frame);
-        if(ObjectDetector->_running)
+        if(ObjectDetector->_running) {
             ObjectDetector->addLatestFrame (decoded_frame);
+        }
 
         auto detection = ObjectDetector->getLatestDetection();
 
@@ -89,4 +89,5 @@ int main() {
         if(cv::waitKey(frame_interval.count()) >= 0) break;
     }
     std::cout << "Stopping camera feed" << std::endl;
+    ObjectDetector->stop();
 }
