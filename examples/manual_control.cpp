@@ -10,7 +10,7 @@
 
 void websocket_server() {
   WSServer server(12345);
-  server.set_callback([](const std::string &msg, std::string &response) {
+  server.setMessageHandler([](const std::string &msg) {
     message_handler(msg);
   });
   server.start();
@@ -39,7 +39,7 @@ int main() {
   std::atomic<bool> stop{false};
 
   auto WebsocketServer = WSServer(12345);
-  WebsocketServer.set_callback([&](const std::string &msg, std::string &response) {
+  WebsocketServer.setMessageHandler([&](const std::string &msg) {
     auto command = message_handler(msg);
     command_queue.enqueue(command);
   });
