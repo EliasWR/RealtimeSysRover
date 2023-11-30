@@ -18,11 +18,10 @@ void Connection::start() {
   _thread = std::thread([&] {
     try {
       while (_is_running) {
-
         auto msg = receiveMessage();
-        std::string response{};
-          _callback(msg, response);
-          writeMessage(response);
+        if (_message_handler) {
+            _message_handler(msg);
+        }
       }
     } catch (const std::exception &ex) {
       std::cerr << "[TCPConnection Error]: " << ex.what() << std::endl;
@@ -82,6 +81,10 @@ void Connection::setDisconnectionHandler(const std::function<void(Connection *)>
     _disconnection_handler = handler;
 }
 
+void Connection::setMessageHandler(std::function<void(const std::string &)> handler) {
+    _message_handler = std::move(handler);
+}
+
 // TCPServer Implementation
 TCPServer::TCPServer(unsigned short port) :
     _port(port),
@@ -114,7 +117,7 @@ void TCPServer::start() {
         _clients.back()->setDisconnectionHandler([&](Connection* conn) {
             handleDisconnection(conn);
         });
-        _clients.back()->setCallback(_callback);
+        _clients.back()->setMessageHandler(_message_handler);
         _clients.back()->start();
 
       }
@@ -193,7 +196,7 @@ void TCPServer::handleDisconnection(Connection* conn) {
                                    return client.get() == conn;
                                  });
           if (connection_itr != _clients.end()) {
-            std::cout << "Removing client: " << (*connection_itr)->getIPv4() << std::endl;
+            std::cout << "Client disconnected: " << (*connection_itr)->getIPv4() << std::endl;
             (*connection_itr)->stop(); // Now safe to call stop()
             _clients.erase(connection_itr);
           }
@@ -218,4 +221,8 @@ void TCPServer::processTasks() {
       task();
         }
     }
+}
+
+void TCPServer::setMessageHandler(std::function<void(const std::string &)> handler) {
+    _message_handler = std::move(handler);
 }

@@ -29,6 +29,7 @@ public:
   using Callback = std::function<void(const std::string &request, std::string &response)>;
 
   void setCallback(Callback &callback);
+  void setMessageHandler(std::function<void(const std::string&)> handler);
   int receiveMessageSize();
   std::string receiveMessage();
   void writeMessage(const std::string &msg);
@@ -36,6 +37,7 @@ public:
 
 private:
   std::function<void(Connection*)> _disconnection_handler;
+  std::function<void(const std::string&)> _message_handler;
 
   tcp::socket _socket;
   std::mutex _m;
@@ -51,6 +53,7 @@ public:
   void stop();
 
   virtual void set_callback(Connection::Callback callback);
+  void setMessageHandler(std::function<void(const std::string&)> handler);
   void writeToClient(size_t client_index, const std::string &msg);
   void writeToAllClients(const std::string &msg);
   void processTasks();
@@ -68,6 +71,7 @@ private:
   tcp::acceptor _acceptor;
   std::thread _acceptor_thread;
   Connection::Callback _callback;
+  std::function<void(const std::string&)> _message_handler;
   void handleDisconnection(Connection* conn);
 
   unsigned short _port;
