@@ -38,6 +38,12 @@ target_link_libraries(udp_server_lib PUBLIC
         Boost::system
         proto_c)
 
+# Autonomous driving
+add_executable(autonomous_driving autonomous_driving.cpp)
+target_include_directories(autonomous_driving PUBLIC
+        "${OpenCV_INCLUDE_DIRS}"
+        "${CMAKE_SOURCE_DIR}/include")
+
 if (UNIX)
     target_link_libraries(tcp_server_lib PUBLIC pthread)
     target_link_libraries(ws_server_lib PUBLIC pthread)

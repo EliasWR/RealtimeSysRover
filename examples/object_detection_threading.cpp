@@ -29,17 +29,13 @@ std::string base64_decode(const std::string &in) {
 }
 
 cv::Mat decodeImageFromJson(const std::string &jsonString) {
-    // Parse the JSON
     auto json = nlohmann::json::parse(jsonString);
     std::string encodedImage = json["image"];
 
-    // Base64 Decode
     std::string decodedImageData = base64_decode(encodedImage);
 
-    // Convert to vector of bytes
     std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
 
-    // Decode image
     cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
 
     return image;
@@ -66,7 +62,6 @@ int main() {
 
     auto handler_proto = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromProto(message);
-        // ObjectDetector->detectObjects(decoded_frame);
         if(ObjectDetector->_running)
             ObjectDetector->addLatestFrame (decoded_frame);
 
