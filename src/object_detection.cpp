@@ -99,6 +99,8 @@ Detection ObjectDetection::detectObjects(const cv::Mat& frame) {
 void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
     std::unique_lock<std::mutex> guard(mutex);
     _latest_frame = frame;
+    new_frame_available = true;
+    cv.notify_one();
 }
 
 std::optional<Detection> ObjectDetection::getLatestDetection (){
@@ -109,15 +111,23 @@ void ObjectDetection::run(){
     _running = true;
     _t = std::thread([&](){
         while (_running){
-            if (_latest_frame.empty()){
-                continue;
-            }
-            auto detection = detectObjects(_latest_frame);
+          std::unique_lock<std::mutex> guard(mutex);
+          cv.wait(guard, [this] { return new_frame_available || !_running; });
 
-            if (detection.boxes.empty()){
-                continue;
-            }
+          if (!_running) break;
+
+          if (_latest_frame.empty()) {
+            new_frame_available = false;
+            continue;
+          }
+
+          auto detection = detectObjects(_latest_frame);
+          new_frame_available = false;
+
+          if (!detection.boxes.empty()){
             _latest_detection = detection;
+          }
+
         }
     });
 }

@@ -33,6 +33,8 @@ private:
     std::thread _t;
     cv::Mat _latest_frame;
     std::mutex mutex;
+    std::condition_variable cv;
+    bool new_frame_available = false;
     Detection _latest_detection;
 
 };
