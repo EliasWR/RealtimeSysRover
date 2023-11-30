@@ -22,6 +22,12 @@ cv::Mat decodeImageFromProto (const std::string& frame) {
 }
 
 int main() {
+    AutonomousDriving autonomousDriving;
+    int x = 100;
+    int y = 100;
+    auto coordinates = autonomousDriving.formatCommand(x, y);
+    std::cout << coordinates << std::endl;
+    /*
     auto Viewer = std::make_unique<VideoViewer>();
     auto ObjectDetector = std::make_unique<ObjectDetection>();
     ObjectDetector->run();
@@ -53,4 +59,5 @@ int main() {
     }
     std::cout << "Stopping camera feed" << std::endl;
     ObjectDetector->stop();
+     */
 }

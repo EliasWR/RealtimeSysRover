@@ -47,6 +47,7 @@ target_link_libraries(automated_driving PUBLIC
         udp_server_lib
         video_viewer_lib
         proto_c
-        object_detection )
+        object_detection
+        autonomous_driving )
 target_include_directories(automated_driving PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
