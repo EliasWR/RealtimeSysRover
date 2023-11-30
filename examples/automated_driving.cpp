@@ -10,36 +10,6 @@
 #include "object_detection/object_detection.hpp"
 #include "my_messages.pb.h"
 
-std::string base64_decode(const std::string &in) {
-    std::string out;
-    std::vector<int> T(256, -1);
-    for (int i = 0; i < 64; i++) T["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i]] = i;
-
-    int val = 0, valb = -8;
-    for (uchar c : in) {
-        if (T[c] == -1) break;
-        val = (val << 6) + T[c];
-        valb += 6;
-        if (valb >= 0) {
-            out.push_back(char((val >> valb) & 0xFF));
-            valb -= 8;
-        }
-    }
-    return out;
-}
-
-cv::Mat decodeImageFromJson(const std::string &jsonString) {
-    auto json = nlohmann::json::parse(jsonString);
-    std::string encodedImage = json["image"];
-
-    std::string decodedImageData = base64_decode(encodedImage);
-
-    std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
-
-    cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
-
-    return image;
-}
 
 cv::Mat decodeImageFromProto (const std::string& frame) {
     VideoFeed video_feed;
@@ -55,11 +25,6 @@ int main() {
     auto ObjectDetector = std::make_unique<ObjectDetection>();
     ObjectDetector->run();
 
-    auto handler_json = [&] (const std::string& message) {
-        cv::Mat decoded_frame = decodeImageFromJson(message);
-        Viewer->addFrame(decoded_frame);
-    };
-
     auto handler_proto = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromProto(message);
         if(ObjectDetector->_running)
@@ -71,6 +36,8 @@ int main() {
             decoded_frame = ObjectDetector->drawDetections(decoded_frame, detection);
         }
         Viewer->addFrame(decoded_frame);
+
+
     };
 
     auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);

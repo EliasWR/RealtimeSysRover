@@ -82,7 +82,7 @@ cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, std::optional<Detection
     return frame;
 }
 
-Detection ObjectDetection::detectObjects(const cv::Mat frame) {
+Detection ObjectDetection::detectObjects(const cv::Mat& frame) {
     cv::Mat blob;
     std::vector<cv::Mat> outputs;
     Detection detection;
