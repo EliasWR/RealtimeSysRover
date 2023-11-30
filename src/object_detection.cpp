@@ -27,6 +27,7 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
     auto& boxes = detection.boxes;
     auto& confidences = detection.confidences;
     auto& classIds = detection.classIds;
+    auto& frameSize = detection.frameSize;
 
     double detection_threshold = 0.3;
     for (auto& output : outputs) {
@@ -47,6 +48,7 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
                 classIds.push_back(classIdPoint.x);
                 confidences.push_back(static_cast<float>(confidence));
                 boxes.push_back(cv::Rect(left, top, width, height));
+                frameSize = std::make_pair(frame.cols, frame.rows);
             }
         }
     }

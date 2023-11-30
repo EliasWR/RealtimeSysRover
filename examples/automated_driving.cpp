@@ -22,15 +22,19 @@ cv::Mat decodeImageFromProto (const std::string& frame) {
 }
 
 int main() {
+    /*
     AutonomousDriving autonomousDriving;
-    int x = 100;
-    int y = 100;
+    int x = 0;
+    int y = -60;
     auto coordinates = autonomousDriving.formatCommand(x, y);
     std::cout << coordinates << std::endl;
-    /*
+    */
+    auto AutonomousDriver = std::make_unique<AutonomousDriving>();
     auto Viewer = std::make_unique<VideoViewer>();
     auto ObjectDetector = std::make_unique<ObjectDetection>();
+
     ObjectDetector->run();
+    AutonomousDriver->run();
 
     auto handler_proto = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromProto(message);
@@ -39,12 +43,16 @@ int main() {
 
         auto detection = ObjectDetector->getLatestDetection();
 
+        AutonomousDriver->addLatestDetection(detection);
+        auto command = AutonomousDriver->getLatestCommand();
+        if (command.has_value()) {
+            std::cout << command.value() << std::endl;
+        }
+
         if (detection.has_value()) {
             decoded_frame = ObjectDetector->drawDetections(decoded_frame, detection);
         }
         Viewer->addFrame(decoded_frame);
-
-
     };
 
     auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
@@ -59,5 +67,4 @@ int main() {
     }
     std::cout << "Stopping camera feed" << std::endl;
     ObjectDetector->stop();
-     */
 }
