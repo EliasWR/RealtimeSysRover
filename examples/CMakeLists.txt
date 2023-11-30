@@ -41,13 +41,25 @@ target_link_libraries(object_detection_threading PUBLIC
 target_include_directories(object_detection_threading PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
 
+# Autonomous driving commands
+add_executable(automated_driving_command automated_driving_command.cpp)
+target_link_libraries(automated_driving_command PUBLIC
+        udp_server_lib
+        video_viewer_lib
+        proto_c
+        object_detection
+        autonomous_driving)
+target_include_directories(automated_driving_command PUBLIC
+        "${CMAKE_BINARY_DIR}/generated")
+
 # Autonomous driving example
-add_executable(automated_driving automated_driving.cpp)
+add_executable(automated_driving automated_driving_command.cpp)
 target_link_libraries(automated_driving PUBLIC
         udp_server_lib
         video_viewer_lib
         proto_c
         object_detection
-        autonomous_driving )
+        autonomous_driving
+        tcp_server_lib )
 target_include_directories(automated_driving PUBLIC
         "${CMAKE_BINARY_DIR}/generated")

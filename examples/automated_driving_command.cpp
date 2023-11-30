@@ -10,9 +10,7 @@
 #include "nlohmann/json.hpp"
 #include "object_detection/object_detection.hpp"
 #include "my_messages.pb.h"
-#include "safe_queue/safe_queue.hpp"
-#include "tcp_server/tcp_server_lib.hpp"
-#include "helpers/gui_helper.hpp"
+
 
 cv::Mat decodeImageFromProto (const std::string& frame) {
     VideoFeed video_feed;
@@ -31,31 +29,6 @@ int main() {
     auto coordinates = autonomousDriving.formatCommand(x, y);
     std::cout << coordinates << std::endl;
     */
-    SafeQueue<std::string> command_queue;
-    std::atomic<bool> stop{false};
-
-    auto TCP = TCPServer(9091);
-    TCP.start();
-
-    auto internal_comm_thread = std::thread([&] {
-        auto last_msg_time = std::chrono::steady_clock::now();
-        while (!stop){
-            auto now = std::chrono::steady_clock::now();
-            auto cmd = command_queue.dequeue();
-            if (cmd.has_value()) {
-                json j = json::parse(cmd.value());
-
-                if (j["command"] == "stop") {
-                    last_msg_time = now;
-                    TCP.writeToAllClients(cmd.value());
-                } else if (now - last_msg_time > std::chrono::milliseconds(100)) {
-                    last_msg_time = now;
-                    TCP.writeToAllClients(cmd.value());
-                }
-            }
-        }
-    });
-
     auto AutonomousDriver = std::make_unique<AutonomousDriving>();
     auto Viewer = std::make_unique<VideoViewer>();
     auto ObjectDetector = std::make_unique<ObjectDetection>();
@@ -73,9 +46,7 @@ int main() {
         AutonomousDriver->addLatestDetection(detection);
         auto command = AutonomousDriver->getLatestCommand();
         if (command.has_value()) {
-            // std::cout << command.value() << std::endl;
-            auto json_command = message_handler(command.value());
-            command_queue.enqueue(json_command);
+            std::cout << command.value() << std::endl;
         }
 
         if (detection.has_value()) {
@@ -96,6 +67,4 @@ int main() {
     }
     std::cout << "Stopping camera feed" << std::endl;
     ObjectDetector->stop();
-    stop = true;
-    TCP.stop();
 }
