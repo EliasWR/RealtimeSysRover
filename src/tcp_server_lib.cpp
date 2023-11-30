@@ -25,7 +25,10 @@ void Connection::start() {
           writeMessage(response);
       }
     } catch (const std::exception &ex) {
-      std::cerr << "[socket_handler] " << ex.what() << std::endl;
+      std::cerr << "[TCPConnection Error]: " << ex.what() << std::endl;
+      if (_disconnection_handler) {
+          _disconnection_handler(this);
+      }
     }
   });
 
@@ -75,6 +78,10 @@ void Connection::stop() {
   _thread.join();
 }
 
+void Connection::setDisconnectionHandler(const std::function<void(Connection *)> &handler) {
+    _disconnection_handler = handler;
+}
+
 // TCPServer Implementation
 TCPServer::TCPServer(unsigned short port) :
     _port(port),
@@ -90,6 +97,9 @@ void TCPServer::start() {
   _is_running = true;
   std::cout << "TCP Server running on port: " << _port << std::endl;
 
+  stop_task_thread = false;
+  tasks_thread = std::thread(&TCPServer::processTasks, this);
+
   _acceptor_thread = std::thread([&] {
     try {
       while (_is_running) {
@@ -101,6 +111,9 @@ void TCPServer::start() {
 
         auto connection = std::make_unique<Connection>(std::move(socket));
         _clients.push_back(std::move(connection));
+        _clients.back()->setDisconnectionHandler([&](Connection* conn) {
+            handleDisconnection(conn);
+        });
         _clients.back()->setCallback(_callback);
         _clients.back()->start();
 
@@ -124,6 +137,15 @@ void TCPServer::stop() {
       _acceptor_thread.join();
 
       std::cout << "Acceptor closed.\n";
+
+      {
+        std::lock_guard<std::mutex> lock(_task_m);
+        stop_task_thread = true;
+      }
+      tasks_cond.notify_one();
+      if (tasks_thread.joinable()) {
+        tasks_thread.join();
+      }
 
       {
         std::unique_lock<std::mutex> lock(_m);
@@ -159,5 +181,41 @@ void TCPServer::writeToAllClients(const std::string &msg) {
   }
     catch (const std::exception &e) {
         std::cerr << "Exception while writing to all clients: " << e.what() << std::endl;
+    }
+}
+
+void TCPServer::handleDisconnection(Connection* conn) {
+    {
+        std::lock_guard<std::mutex> lock(_task_m);
+        tasks.push([this, conn]() {
+          auto connection_itr = std::find_if(_clients.begin(), _clients.end(),
+                                 [conn](const std::unique_ptr<Connection>& client) {
+                                   return client.get() == conn;
+                                 });
+          if (connection_itr != _clients.end()) {
+            std::cout << "Removing client: " << (*connection_itr)->getIPv4() << std::endl;
+            (*connection_itr)->stop(); // Now safe to call stop()
+            _clients.erase(connection_itr);
+          }
+        });
+    }
+    tasks_cond.notify_one();
+}
+
+void TCPServer::processTasks() {
+    while (true) {
+        std::function<void()> task;
+        {
+      std::unique_lock<std::mutex> lock(_task_m);
+      tasks_cond.wait(lock, [this] { return stop_task_thread || !tasks.empty(); });
+      if (stop_task_thread && tasks.empty()) {
+          break;
+      }
+      task = std::move(tasks.front());
+      tasks.pop();
+        }
+        if (task) {
+      task();
+        }
     }
 }
