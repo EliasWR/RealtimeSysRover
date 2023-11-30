@@ -53,7 +53,7 @@ target_include_directories(automated_driving_command PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
 
 # Autonomous driving example
-add_executable(automated_driving automated_driving_command.cpp)
+add_executable(automated_driving automated_driving.cpp)
 target_link_libraries(automated_driving PUBLIC
         udp_server_lib
         video_viewer_lib
