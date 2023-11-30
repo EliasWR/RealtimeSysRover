@@ -11,7 +11,7 @@ public:
     AutonomousDriving();
     void run ();
     void stop ();
-    void addLatestDetection (const cv::Mat& frame);
+    void addLatestDetection (Detection& detection);
     void getLatestCommand (std::string& command);
     bool _running{false};
 private:

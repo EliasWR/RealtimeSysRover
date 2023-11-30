@@ -6,6 +6,7 @@
 
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
+#include "autonomous_driving/autonomous_driving.hpp"
 #include "nlohmann/json.hpp"
 #include "object_detection/object_detection.hpp"
 #include "my_messages.pb.h"
