@@ -58,10 +58,10 @@ int main() {
       if (cmd.has_value()) {
         json j = json::parse(cmd.value());
 
-        if (j["command"] == "stop") {
+        if (j["command"] == "stop" or j["command"] == "reset_camera") {
           last_msg_time = now;
           TCP.writeToAllClients(cmd.value());
-        } else if (now - last_msg_time > std::chrono::milliseconds(10)) {
+        } else if (now - last_msg_time > std::chrono::milliseconds(100)) {
           last_msg_time = now;
           TCP.writeToAllClients(cmd.value());
         }

@@ -27,6 +27,11 @@ struct sMotors {
   int speed;
 };
 
+struct sCamera {
+  int tilt;
+  int pan;
+};
+
 
 
 std::vector<std::string> splitString(const std::string &str, char delimiter) {
@@ -92,20 +97,36 @@ sRawMotors joystick_to_raw_motors(int joy_x, int joy_y) {
 
 }
 
+sCamera joystick_to_camera(int joy_x, int joy_y) {
+  std::cout << "joy_x: " << joy_x << std::endl;
+  std::cout << "joy_y: " << joy_y << std::endl;
+
+  int tilt = 35;
+  int tilt_swing = 35;
+  if (joy_x != 0) {
+    tilt = map(joy_y, -100, 100, tilt - tilt_swing, tilt + tilt_swing);
+  }
+  int pan = 45;
+  int pan_swing = 45;
+  if (joy_y != 0) {
+      pan = map(joy_x, -100, 100, pan + pan_swing, pan - pan_swing); // Pan is inverted
+  }
+
+  std::cout << "tilt: " << tilt << std::endl;
+    std::cout << "pan: " << pan << std::endl;
+
+  return {tilt, pan};
+}
+
+
 std::string message_handler(const std::string &message) {
   std::vector<std::string> tokens = splitString(message, '_');
 
   auto command = tokens[0];
 
   json rover_message = {
-    {"command", ""},
-    {"drive_mode", ""},
-    {"left_direction", ""},
-    {"left_velocity", ""},
-    {"right_direction", ""},
-    {"right_velocity", ""},
-    {"heading", ""},
-    {"speed", ""}};
+    {"command", ""}
+  };
 
   if (command == "stop") {
     rover_message["command"] = "stop";
@@ -211,9 +232,13 @@ std::string message_handler(const std::string &message) {
       } else if (tokens[1] == "camera") {
         int joy_x = std::stoi(tokens[2]);
         int joy_y = std::stoi(tokens[3]);
-        auto h_and_s = joystick_to_heading_and_speed(joy_x, joy_y);
-        std::cout << "Joystick: " << joy_x << ", " << joy_y << std::endl;
-        std::cout << "Camera: " << h_and_s.heading << ", " << h_and_s.speed << std::endl;
+        auto p_and_t = joystick_to_camera(joy_x, joy_y);
+
+        if(joy_x == 0 and joy_y == 0){
+          rover_message["command"] = "reset_camera";
+        }
+        rover_message["servo_tilt"] = p_and_t.tilt;
+        rover_message["servo_pan"] = p_and_t.pan;
       } else {
         std::cout << "Invalid joystick command" << std::endl;
       }
