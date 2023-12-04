@@ -10,7 +10,7 @@
 
 void websocket_server() {
   WSServer server(12345);
-  server.set_callback([](const std::string &msg, std::string &response) {
+  server.setMessageHandler([](const std::string &msg) {
     message_handler(msg);
   });
   server.start();
@@ -39,7 +39,7 @@ int main() {
   std::atomic<bool> stop{false};
 
   auto WebsocketServer = WSServer(12345);
-  WebsocketServer.set_callback([&](const std::string &msg, std::string &response) {
+  WebsocketServer.setMessageHandler([&](const std::string &msg) {
     auto command = message_handler(msg);
     command_queue.enqueue(command);
   });
@@ -58,10 +58,10 @@ int main() {
       if (cmd.has_value()) {
         json j = json::parse(cmd.value());
 
-        if (j["command"] == "stop") {
+        if (j["command"] == "stop" or j["command"] == "reset_camera") {
           last_msg_time = now;
           TCP.writeToAllClients(cmd.value());
-        } else if (now - last_msg_time > std::chrono::milliseconds(10)) {
+        } else if (now - last_msg_time > std::chrono::milliseconds(100)) {
           last_msg_time = now;
           TCP.writeToAllClients(cmd.value());
         }

@@ -7,9 +7,10 @@ void WSConnection::start() {
   try {
     _socket.accept();
     while (true) {
-      beast::flat_buffer buffer;
-      _socket.read(buffer);
-      on_message(buffer);
+      auto msg = receiveMessage();
+      if (_message_handler) {
+        _message_handler(msg);
+      }
     }
   } catch (const beast::system_error &se) {
     if (se.code() != websocket::error::closed)
@@ -19,43 +20,22 @@ void WSConnection::start() {
   }
 }
 
-void WSConnection::set_callback(Callback callback) {
-  _callback = std::move(callback);
-}
-
-int WSConnection::receiveMessageSize() {
+std::string WSConnection::receiveMessage() {
   beast::flat_buffer buffer;
-  _socket.read_some(buffer, 4);
+  _socket.read(buffer);
   std::stringstream ss;
   ss << beast::make_printable(buffer.data());
   std::string data = ss.str();
-  try {
-    return std::stoi(data);
-  } catch (const std::exception &e) {
-    std::cerr << "Error: " << e.what() << std::endl;
-  }
+  return data;
 }
 
-void WSConnection::on_message(beast::flat_buffer &buffer) {
-  if (_callback) {
-    std::stringstream ss;
-    ss << beast::make_printable(buffer.data());
-    std::string request = ss.str();
-    std::string response;
-    _callback(request, response);
-    _socket.write(asio::buffer(response));
-    //std::cout << "Callback, received message: " << beast::make_printable(buffer.data()) << std::endl;
-  } else {
-    std::cout << "No callback, received message: " << beast::make_printable(buffer.data()) << std::endl;
-  }
+
+void WSConnection::setMessageHandler(std::function<void(const std::string &)> handler) {
+    _message_handler = std::move(handler);
 }
 
 WSServer::WSServer(unsigned short port)
     : _ioc(1), _acceptor(_ioc, {asio::ip::make_address("0.0.0.0"), port}) {
-}
-
-void WSServer::set_callback(WSConnection::Callback callback) {
-  _callback = std::move(callback);
 }
 
 void WSServer::start() {
@@ -72,11 +52,11 @@ void WSServer::start() {
         std::cout << "Websocket connected to client at " << socket.remote_endpoint().address().to_string() << std::endl;
 
         std::thread([&, sock = std::move(socket)]() mutable {
-          WSConnection session(std::move(sock));
-          if (_callback) {
-            session.set_callback(_callback);
+          WSConnection connection(std::move(sock));
+          if (_message_handler) {
+            connection.setMessageHandler(_message_handler);
           }
-          session.start();
+          connection.start();
         }).detach();
       }
     } catch (const beast::system_error &e) {
@@ -98,4 +78,8 @@ void WSServer::stop() {
     _ioc.stop();
     std::cout << "DONE" << std::endl;
   }
+}
+
+void WSServer::setMessageHandler(std::function<void(const std::string &)> handler) {
+    _message_handler = std::move(handler);
 }

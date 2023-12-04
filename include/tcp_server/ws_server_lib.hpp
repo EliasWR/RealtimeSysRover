@@ -19,31 +19,28 @@ using tcp = boost::asio::ip::tcp;
 
 class WSConnection {
 public:
-  using Callback = std::function<void(const std::string &request, std::string &response)>;
-
   explicit WSConnection(tcp::socket socket);
   void start();
-  void set_callback(Callback callback);
-  int receiveMessageSize();
-  virtual void on_message(beast::flat_buffer &buffer);
+  std::string receiveMessage();
+  void setMessageHandler(std::function<void(const std::string&)> handler);
 
 private:
   websocket::stream<tcp::socket> _socket;
-  Callback _callback;
+  std::function<void(const std::string&)> _message_handler;
 };
 
 class WSServer {
 public:
   explicit WSServer(unsigned short port);
-  void set_callback(WSConnection::Callback callback);
   void start();
   void stop();
+  void setMessageHandler(std::function<void(const std::string&)> handler);
 
 private:
   asio::io_context _ioc;
   tcp::acceptor _acceptor;
   std::thread _acceptor_thread;
-  WSConnection::Callback _callback;
+  std::function<void(const std::string&)> _message_handler;
   std::mutex _m;
   std::atomic<bool> _is_running{false};
 };
