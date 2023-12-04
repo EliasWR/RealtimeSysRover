@@ -108,7 +108,7 @@ std::pair<int, int> AutonomousDriving::interpretLatestDetection (Detection& dete
     // Define thresholds for centering and size
     const double centerThreshold = 0.1; // 0.1
     const double sizeMinThreshold = 0.1; // 0.1
-    const double sizeMaxThreshold = 0.3; // 0.3
+    const double sizeMaxThreshold = 0.4; // 0.3
 
     for (int idx = 0; idx < detection.classIds.size(); idx++) {
         auto label = detection.classIds[idx];
