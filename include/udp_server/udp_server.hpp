@@ -17,10 +17,11 @@ public:
 private:
     std::function<void(const std::string&)> _messageHandler;
     std::tuple<std::string, size_t, udp::endpoint> receiveMessage();
+    /*
     int receiveMessageSize();
     void sendMessage(const std::string& message, const boost::asio::ip::udp::endpoint& remote_endpoint);
     void standardResponse(const udp::endpoint& remote_endpoint);
-
+    */
     int _port;
     asio::io_context _io_context;
     udp::socket _socket;

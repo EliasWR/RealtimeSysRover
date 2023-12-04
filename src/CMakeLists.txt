@@ -26,7 +26,8 @@ add_library(ws_server_lib ws_server_lib.cpp)
 target_include_directories(ws_server_lib PUBLIC
         "${BOOST_INCLUDE_DIRS}"
         "${CMAKE_SOURCE_DIR}/include")
-target_link_libraries(ws_server_lib PUBLIC Boost::system)
+target_link_libraries(ws_server_lib PUBLIC
+        Boost::system)
 
 # UDP server
 add_library(udp_server_lib udp_server_lib.cpp)
@@ -38,8 +39,16 @@ target_link_libraries(udp_server_lib PUBLIC
         Boost::system
         proto_c)
 
+# Autonomous driving
+add_library(autonomous_driving autonomous_driving.cpp)
+target_include_directories(autonomous_driving PUBLIC
+        "${OpenCV_INCLUDE_DIRS}"
+        "${CMAKE_SOURCE_DIR}/include" )
+
 if (UNIX)
     target_link_libraries(tcp_server_lib PUBLIC pthread)
     target_link_libraries(ws_server_lib PUBLIC pthread)
     target_link_libraries(udp_server_lib PUBLIC pthread)
+    target_link_libraries(object_detection PUBLIC pthread)
+    target_link_libraries(autonomous_driving PUBLIC pthread)
 endif ()

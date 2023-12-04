@@ -6,40 +6,11 @@
 
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
+#include "autonomous_driving/autonomous_driving.hpp"
 #include "nlohmann/json.hpp"
 #include "object_detection/object_detection.hpp"
 #include "my_messages.pb.h"
 
-std::string base64_decode(const std::string &in) {
-    std::string out;
-    std::vector<int> T(256, -1);
-    for (int i = 0; i < 64; i++) T["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i]] = i;
-
-    int val = 0, valb = -8;
-    for (uchar c : in) {
-        if (T[c] == -1) break;
-        val = (val << 6) + T[c];
-        valb += 6;
-        if (valb >= 0) {
-            out.push_back(char((val >> valb) & 0xFF));
-            valb -= 8;
-        }
-    }
-    return out;
-}
-
-cv::Mat decodeImageFromJson(const std::string &jsonString) {
-    auto json = nlohmann::json::parse(jsonString);
-    std::string encodedImage = json["image"];
-
-    std::string decodedImageData = base64_decode(encodedImage);
-
-    std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
-
-    cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
-
-    return image;
-}
 
 cv::Mat decodeImageFromProto (const std::string& frame) {
     VideoFeed video_feed;
@@ -51,14 +22,19 @@ cv::Mat decodeImageFromProto (const std::string& frame) {
 }
 
 int main() {
+    /*
+    AutonomousDriving autonomousDriving;
+    int x = 0;
+    int y = -60;
+    auto coordinates = autonomousDriving.formatCommand(x, y);
+    std::cout << coordinates << std::endl;
+    */
+    auto AutonomousDriver = std::make_unique<AutonomousDriving>();
     auto Viewer = std::make_unique<VideoViewer>();
     auto ObjectDetector = std::make_unique<ObjectDetection>();
-    ObjectDetector->run();
 
-    auto handler_json = [&] (const std::string& message) {
-        cv::Mat decoded_frame = decodeImageFromJson(message);
-        Viewer->addFrame(decoded_frame);
-    };
+    ObjectDetector->run();
+    AutonomousDriver->run();
 
     auto handler_proto = [&] (const std::string& message) {
         cv::Mat decoded_frame = decodeImageFromProto(message);
@@ -66,6 +42,12 @@ int main() {
             ObjectDetector->addLatestFrame (decoded_frame);
 
         auto detection = ObjectDetector->getLatestDetection();
+
+        AutonomousDriver->addLatestDetection(detection);
+        auto command = AutonomousDriver->getLatestCommand();
+        if (command.has_value()) {
+            // std::cout << command.value() << std::endl;
+        }
 
         if (detection.has_value()) {
             decoded_frame = ObjectDetector->drawDetections(decoded_frame, detection);

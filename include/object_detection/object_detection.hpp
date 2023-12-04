@@ -1,18 +1,12 @@
 #ifndef REALTIMESYSROVER_OBJECT_DETECTION_HPP
 #define REALTIMESYSROVER_OBJECT_DETECTION_HPP
 
-
 #include <opencv2/opencv.hpp>
 #include <opencv2/dnn.hpp>
 #include <string>
 #include <vector>
 #include "helpers/read_file_helper.hpp"
-
-struct Detection {
-    std::vector<cv::Rect> boxes;
-    std::vector<float> confidences;
-    std::vector<int> classIds;
-};
+#include "helpers/detection_helper.hpp"
 
 class ObjectDetection {
 public:
@@ -21,7 +15,7 @@ public:
     void runModel(const cv::Mat& blob, std::vector<cv::Mat>& outputs);
     void postprocess(const std::vector<cv::Mat>& outputs, const cv::Mat& frame, Detection& detection);
     cv::Mat drawDetections (cv::Mat& frame, std::optional<Detection>& detection);
-    Detection detectObjects(const cv::Mat frame);
+    Detection detectObjects(const cv::Mat& frame);
     std::optional<Detection> getLatestDetection ();
     void run ();
     void stop ();
@@ -39,6 +33,8 @@ private:
     std::thread _t;
     cv::Mat _latest_frame;
     std::mutex mutex;
+    std::condition_variable cv;
+    bool new_frame_available = false;
     Detection _latest_detection;
 
 };

@@ -29,7 +29,7 @@ std::tuple<std::string, size_t, udp::endpoint> UDPServer::receiveMessage() {
 
     std::vector<char> recv_buffer(65507);
     size_t len = _socket.receive_from(asio::buffer(recv_buffer), remote_endpoint);
-    std::cout << "Message length: " << len << std::endl;
+    // std::cout << "Message length: " << len << std::endl;
     std::string recv_message(recv_buffer.begin(), recv_buffer.begin() + len);
     // std::cout << "Message received." << std::endl;
     // std::vector<char> message(recv_buffer.begin(), recv_buffer.begin() + len);

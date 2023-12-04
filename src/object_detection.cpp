@@ -27,6 +27,7 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
     auto& boxes = detection.boxes;
     auto& confidences = detection.confidences;
     auto& classIds = detection.classIds;
+    auto& frameSize = detection.frameSize;
 
     double detection_threshold = 0.3;
     for (auto& output : outputs) {
@@ -47,6 +48,7 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
                 classIds.push_back(classIdPoint.x);
                 confidences.push_back(static_cast<float>(confidence));
                 boxes.push_back(cv::Rect(left, top, width, height));
+                frameSize = std::make_pair(frame.cols, frame.rows);
             }
         }
     }
@@ -82,7 +84,7 @@ cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, std::optional<Detection
     return frame;
 }
 
-Detection ObjectDetection::detectObjects(const cv::Mat frame) {
+Detection ObjectDetection::detectObjects(const cv::Mat& frame) {
     cv::Mat blob;
     std::vector<cv::Mat> outputs;
     Detection detection;
@@ -97,6 +99,8 @@ Detection ObjectDetection::detectObjects(const cv::Mat frame) {
 void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
     std::unique_lock<std::mutex> guard(mutex);
     _latest_frame = frame;
+    new_frame_available = true;
+    cv.notify_one();
 }
 
 std::optional<Detection> ObjectDetection::getLatestDetection (){
@@ -107,15 +111,23 @@ void ObjectDetection::run(){
     _running = true;
     _t = std::thread([&](){
         while (_running){
-            if (_latest_frame.empty()){
-                continue;
-            }
-            auto detection = detectObjects(_latest_frame);
+          std::unique_lock<std::mutex> guard(mutex);
+          cv.wait(guard, [this] { return new_frame_available || !_running; });
 
-            if (detection.boxes.empty()){
-                continue;
-            }
+          if (!_running) break;
+
+          if (_latest_frame.empty()) {
+            new_frame_available = false;
+            continue;
+          }
+
+          auto detection = detectObjects(_latest_frame);
+          new_frame_available = false;
+
+          if (!detection.boxes.empty()){
             _latest_detection = detection;
+          }
+
         }
     });
 }
