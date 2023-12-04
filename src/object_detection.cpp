@@ -55,6 +55,10 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
 }
 
 cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, std::optional<Detection>& detection) {
+    if (detection == std::nullopt) {
+        return frame;
+    }
+
     auto& boxes = detection.value().boxes;
     auto& confidences = detection.value().confidences;
     auto& classIds = detection.value().classIds;
@@ -104,6 +108,9 @@ void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
 }
 
 std::optional<Detection> ObjectDetection::getLatestDetection (){
+    if (std::chrono::steady_clock::now() - _last_detection_time >=  std::chrono::milliseconds(MAX_DETECTION_AGE) ){
+        return std::nullopt;
+    }
     return _latest_detection;
 }
 
@@ -125,6 +132,7 @@ void ObjectDetection::run(){
           new_frame_available = false;
 
           if (!detection.boxes.empty()){
+            _last_detection_time = std::chrono::steady_clock::now();
             _latest_detection = detection;
           }
 

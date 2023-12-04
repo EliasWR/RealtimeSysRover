@@ -29,8 +29,8 @@ int main() {
     std::chrono::steady_clock::time_point last_detection_time;
     std::optional<std::string> last_command;
     std::optional<Detection> last_detection;
-    const std::chrono::seconds command_duration{1};
-    const std::chrono::seconds detection_duration{1};
+    const std::chrono::milliseconds command_duration{50};
+    const std::chrono::milliseconds detection_duration{50};
     /*
     AutonomousDriving autonomousDriving;
     int x = 0;
@@ -85,14 +85,12 @@ int main() {
         } else if (last_detection.has_value() && now - last_detection_time < detection_duration) {
             detection = last_detection;
         } else {
-            std::cout << "No detection" << std::endl;
+            std::cout << "No available detection" << std::endl;
             last_detection.reset();
         }
 
-
         AutonomousDriver->addLatestDetection(detection);
         auto command = AutonomousDriver->getLatestCommand();
-
 
         // Only use last command if it is not too old
         if (command.has_value()) {
@@ -106,12 +104,12 @@ int main() {
         }
 
         if (command.has_value()) {
-            last_command_time = now;
-
             // std::cout << command.value() << std::endl;
             auto json_command = message_handler(command.value());
             command_queue.enqueue(json_command);
-            json json_command_json = json::parse(json_command);
+
+
+            /*json json_command_json = json::parse(json_command);
             std::string overlay_text = "No detection";
             try{
                 int left_velocity = json_command_json["left_velocity"];
@@ -120,11 +118,12 @@ int main() {
             } catch (std::exception& e) {
                 std::cout << "Could not make overlay" << std::endl;
             }
-            cv::putText(decoded_frame, overlay_text, cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
+            cv::putText(decoded_frame, overlay_text, cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);*/
         }
 
-        if (detection.has_value()) {
-            decoded_frame = ObjectDetector->drawDetections(decoded_frame, detection);
+        if (detection != std::nullopt) {
+            ObjectDetector->drawDetections(decoded_frame, detection);
+            std::cout << "Added detection to frame" << std::endl;
         }
         Viewer->addFrame(decoded_frame);
     };

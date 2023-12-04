@@ -112,8 +112,8 @@ std::pair<int, int> AutonomousDriving::interpretLatestDetection (Detection& dete
 
     for (int idx = 0; idx < detection.classIds.size(); idx++) {
         auto label = detection.classIds[idx];
-        //if (label == 0) { // person
-        if (label == 39) {  // bottle
+        if (label == 0) { // person
+        //if (label == 39) {  // bottle
             auto box = detection.boxes[idx];
 
             // Calculating center of object
@@ -162,6 +162,9 @@ void AutonomousDriving::run() {
         if (_latest_detection.has_value()) {
             std::pair<int, int> joystick = interpretLatestDetection(_latest_detection.value());
             std::string command = formatCommand(joystick.first, joystick.second);
+            setLatestCommand(command);
+        } else {
+            std::string command = "joystick_rover_0_0";
             setLatestCommand(command);
         }
     }

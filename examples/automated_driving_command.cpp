@@ -49,8 +49,9 @@ int main() {
             // std::cout << command.value() << std::endl;
         }
 
-        if (detection.has_value()) {
+        if (detection != std::nullopt) {
             decoded_frame = ObjectDetector->drawDetections(decoded_frame, detection);
+            std::cout << "Added detection to frame" << std::endl;
         }
         Viewer->addFrame(decoded_frame);
     };
@@ -59,11 +60,11 @@ int main() {
 
     udp_server->start();
 
-    auto fps = 30;
+    int fps = 30;
     auto frame_interval = std::chrono::milliseconds(1000 / fps);
     while (true) {
         Viewer->display();
-        if(cv::waitKey(frame_interval.count()) >= 0) break;
+        if(cv::waitKey(static_cast<int>(frame_interval.count())) >= 0) break;
     }
     std::cout << "Stopping camera feed" << std::endl;
     ObjectDetector->stop();
