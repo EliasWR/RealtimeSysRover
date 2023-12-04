@@ -112,8 +112,8 @@ std::pair<int, int> AutonomousDriving::interpretLatestDetection (Detection& dete
 
     for (int idx = 0; idx < detection.classIds.size(); idx++) {
         auto label = detection.classIds[idx];
-        if (label == 0) { // person
-        //if (label == 39) {  // bottle
+        //if (label == 0) { // person
+        if (label == 39) {  // bottle
             auto box = detection.boxes[idx];
 
             // Calculating center of object

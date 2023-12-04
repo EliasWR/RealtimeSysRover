@@ -30,7 +30,7 @@ int main() {
     std::optional<std::string> last_command;
     std::optional<Detection> last_detection;
     const std::chrono::milliseconds command_duration{50};
-    const std::chrono::milliseconds detection_duration{50};
+    const std::chrono::milliseconds detection_duration{0};
     /*
     AutonomousDriving autonomousDriving;
     int x = 0;
