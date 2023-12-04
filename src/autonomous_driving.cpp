@@ -124,13 +124,15 @@ std::pair<int, int> AutonomousDriving::interpretLatestDetection (Detection& dete
             bool isCentered =   std::abs(boxCenterX) < detection.frameSize.first/2 + centerThreshold * detection.frameSize.first &&
                                 std::abs(boxCenterX) > detection.frameSize.first/2 - centerThreshold * detection.frameSize.first;
 
+            bool isSizeInRange = box.width >= detection.frameSize.first * sizeMinThreshold &&
+                                 box.width <= detection.frameSize.first * sizeMaxThreshold;
 
             // std::cout << "boxCenterX: " << boxCenterX << "Threshold: " << detection.frameSize.first/2 - centerThreshold << " , " << detection.frameSize.first/2 + centerThreshold << std::endl;
             // std::cout << "Is centered: " << isCentered << std::endl;
-            bool isSizeInRange = box.width >= detection.frameSize.first * sizeMinThreshold &&
-                                 box.width <= detection.frameSize.first * sizeMaxThreshold;//  &&
-                                 // box.height >= detection.frameSize.second * sizeMinThreshold &&
-                                 // box.height <= detection.frameSize.second * sizeMaxThreshold;
+            // std::cout << "Is size in range: " << isSizeInRange << std::endl;
+            // std::cout << "box.width: " << box.width << "Threshold: " << detection.frameSize.first * sizeMinThreshold << " , " << detection.frameSize.first * sizeMaxThreshold << std::endl;
+            // box.height >= detection.frameSize.second * sizeMinThreshold &&
+            // box.height <= detection.frameSize.second * sizeMaxThreshold;
 
             // Controlling joystick
             int displacementX = detection.frameSize.first/2 - boxCenterX;
