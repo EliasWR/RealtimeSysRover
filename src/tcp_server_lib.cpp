@@ -2,16 +2,8 @@
 
 // Connection Implementation
 Connection::Connection(tcp::socket socket) :
-    _socket(std::move(socket)) {
-    _callback = [](const std::string &request, std::string &response) {
-    std::cout << "Received request: " << request << std::endl;
-    response = "Hello from server!";
-  };
-}
+    _socket(std::move(socket)) {}
 
-void Connection::setCallback(Callback &callback) {
-  _callback = callback;
-}
 
 void Connection::start() {
   _is_running = true;
@@ -90,10 +82,6 @@ TCPServer::TCPServer(unsigned short port) :
     _port(port),
     _acceptor(_io_context, tcp::endpoint(tcp::v4(), port)),
     _is_running(false) {
-}
-
-void TCPServer::set_callback(Connection::Callback callback) {
-  _callback = std::move(callback);
 }
 
 void TCPServer::start() {
