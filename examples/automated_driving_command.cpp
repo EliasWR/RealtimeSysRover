@@ -46,7 +46,7 @@ int main() {
         AutonomousDriver->addLatestDetection(detection);
         auto command = AutonomousDriver->getLatestCommand();
         if (command.has_value()) {
-            std::cout << command.value() << std::endl;
+            // std::cout << command.value() << std::endl;
         }
 
         if (detection != std::nullopt) {
