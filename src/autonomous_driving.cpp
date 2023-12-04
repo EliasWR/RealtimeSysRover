@@ -106,13 +106,14 @@ std::pair<int, int> AutonomousDriving::interpretLatestDetection (Detection& dete
     }
 
     // Define thresholds for centering and size
-    const double centerThreshold = 0.1;
-    const double sizeMinThreshold = 0.1;
-    const double sizeMaxThreshold = 0.3;
+    const double centerThreshold = 0.1; // 0.1
+    const double sizeMinThreshold = 0.1; // 0.1
+    const double sizeMaxThreshold = 0.3; // 0.3
 
     for (int idx = 0; idx < detection.classIds.size(); idx++) {
         auto label = detection.classIds[idx];
-        if (label == 0) {
+        //if (label == 0) { // person
+        if (label == 39) {  // bottle
             auto box = detection.boxes[idx];
 
             // Calculating center of object
@@ -136,7 +137,7 @@ std::pair<int, int> AutonomousDriving::interpretLatestDetection (Detection& dete
             int displacementY = detection.frameSize.first/2 - boxCenterY;
 
             // Calculating joystick position
-            joystick.first = static_cast<int>((static_cast<double>(displacementX) / detection.frameSize.first) * 100);
+            joystick.first = -static_cast<int>((static_cast<double>(displacementX) / detection.frameSize.first) * 100);
             joystick.second = static_cast<int>((static_cast<double>(displacementY) / detection.frameSize.second) * 100);
 
             if (isCentered && isSizeInRange) {

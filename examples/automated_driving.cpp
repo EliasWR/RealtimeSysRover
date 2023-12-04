@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
@@ -24,6 +25,12 @@ cv::Mat decodeImageFromProto (const std::string& frame) {
 }
 
 int main() {
+    std::chrono::steady_clock::time_point last_command_time;
+    std::chrono::steady_clock::time_point last_detection_time;
+    std::optional<std::string> last_command;
+    std::optional<Detection> last_detection;
+    const std::chrono::seconds command_duration{1};
+    const std::chrono::seconds detection_duration{1};
     /*
     AutonomousDriving autonomousDriving;
     int x = 0;
@@ -64,18 +71,56 @@ int main() {
     AutonomousDriver->run();
 
     auto handler_proto = [&] (const std::string& message) {
+        auto now = std::chrono::steady_clock::now();
         cv::Mat decoded_frame = decodeImageFromProto(message);
         if(ObjectDetector->_running)
             ObjectDetector->addLatestFrame (decoded_frame);
 
         auto detection = ObjectDetector->getLatestDetection();
 
+        // Only use last detection if it is not too old
+        if (detection.has_value()) {
+            last_detection_time = now;
+            last_detection = detection;
+        } else if (last_detection.has_value() && now - last_detection_time < detection_duration) {
+            detection = last_detection;
+        } else {
+            std::cout << "No detection" << std::endl;
+            last_detection.reset();
+        }
+
+
         AutonomousDriver->addLatestDetection(detection);
         auto command = AutonomousDriver->getLatestCommand();
+
+
+        // Only use last command if it is not too old
         if (command.has_value()) {
+            last_command_time = now;
+            last_command = command;
+        } else if (last_command.has_value() && now - last_command_time < command_duration) {
+            command = last_command;
+        } else {
+            std::cout << "No auto command" << std::endl;
+            last_command.reset();
+        }
+
+        if (command.has_value()) {
+            last_command_time = now;
+
             // std::cout << command.value() << std::endl;
             auto json_command = message_handler(command.value());
             command_queue.enqueue(json_command);
+            json json_command_json = json::parse(json_command);
+            std::string overlay_text = "No detection";
+            try{
+                int left_velocity = json_command_json["left_velocity"];
+                int right_velocity = json_command_json["right_velocity"];
+                overlay_text = "Left: " + std::to_string(left_velocity) + " Right: " + std::to_string(right_velocity);
+            } catch (std::exception& e) {
+                std::cout << "Could not make overlay" << std::endl;
+            }
+            cv::putText(decoded_frame, overlay_text, cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
         }
 
         if (detection.has_value()) {
