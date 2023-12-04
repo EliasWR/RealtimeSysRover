@@ -152,9 +152,14 @@ void TCPServer::writeToClient(size_t client_index, const std::string &msg) {
 
 void TCPServer::writeToAllClients(const std::string &msg) {
   try {
-    for (size_t i = 0; i < _clients.size(); i++) {
-      std::cout << "Writing to client " << i << ": " << msg << std::endl;
-      _clients[i]->writeMessage(msg);
+    if (_clients.empty()) {
+      std::cout << "No clients connected." << std::endl;
+      return;
+    } else {
+      for (size_t i = 0; i < _clients.size(); i++) {
+          std::cout << "Writing to client " << i << ": " << msg << std::endl;
+          _clients[i]->writeMessage(msg);
+      }
     }
   }
     catch (const std::exception &e) {

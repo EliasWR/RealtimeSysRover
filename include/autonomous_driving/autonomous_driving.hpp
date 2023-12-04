@@ -28,7 +28,7 @@ private:
     std::optional <std::string> _latest_command;
     std::mutex _mutex;
     std::optional <Detection> _latest_detection;
-    int _speedLim {50}; // -100 < x < 100, -100 < y < 100
+    int _speedLim {40}; // -100 < x < 100, -100 < y < 100
     int _angleLim {30}; // 30 deg to either side of reference angle
 };
 

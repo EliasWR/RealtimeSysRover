@@ -82,13 +82,13 @@ sRawMotors joystick_to_raw_motors(int joy_x, int joy_y) {
   int left_raw_velocity = joy_y + joy_x;
   int right_raw_velocity = joy_y - joy_x;
 
-  int left_velocity = left_raw_velocity * 255 / 200;
-  int right_velocity = right_raw_velocity * 255 / 200;
+  int left_velocity = std::clamp((left_raw_velocity * 255) / 100, -255, 255);
+  int right_velocity = std::clamp((right_raw_velocity * 255) / 100, -255, 255);
 
   int left_direction = direction_from_velocity(left_velocity);
   int right_direction = direction_from_velocity(right_velocity);
 
-  return {left_direction, abs(left_velocity), right_direction, abs(right_velocity)};
+  return {left_direction, std::abs(left_velocity), right_direction, std::abs(right_velocity)};
 
 }
 
@@ -98,14 +98,8 @@ std::string message_handler(const std::string &message) {
   auto command = tokens[0];
 
   json rover_message = {
-    {"command", ""},
-    {"drive_mode", ""},
-    {"left_direction", ""},
-    {"left_velocity", ""},
-    {"right_direction", ""},
-    {"right_velocity", ""},
-    {"heading", ""},
-    {"speed", ""}};
+    {"command", ""}
+  };
 
   if (command == "stop") {
     rover_message["command"] = "stop";
