@@ -8,30 +8,6 @@
 
 #include <iostream>
 
-void websocket_server() {
-  WSServer server(12345);
-  server.setMessageHandler([](const std::string &msg) {
-    message_handler(msg);
-  });
-  server.start();
-  std::cout << "Press a key + 'enter' to end..." << std::endl;
-}
-
-void tcp_server() {
-  TCPServer server(12345);
-  server.set_callback([](const std::string &msg, std::string &response) {
-    std::cout << "Message received: " << msg << std::endl;
-    response = "I got , " + msg + "!\n";
-  });
-
-  server.start();
-
-  std::cout << "Press a key + 'enter' to continue..." << std::endl;
-  while (std::cin.get() != '\n') {}
-
-  server.stop();
-}
-
 
 
 int main() {
