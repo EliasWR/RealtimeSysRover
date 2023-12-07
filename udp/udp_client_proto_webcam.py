@@ -1,7 +1,5 @@
 import socket
 import cv2
-import numpy as np
-import datetime
 from protobuf.my_messages_pb2 import VideoFeed, Instruction
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -9,16 +7,20 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('127.0.0.1', 8080)
 MAX_UDP_PACKET_SIZE = 65507
 
+cap = cv2.VideoCapture(0)
 
+if not cap.isOpened():
+    print("Could not open camera!")
+    exit()
 
 while True:
-    frame = np.zeros((480, 640, 3), np.uint8)
-    cv2.putText(frame, "Hello From UDP!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-    # Add timestamp of HH:MM:SS:MS
-    timestamp = datetime.datetime.now().strftime("%H:%M:%S:%f")[:-3]
-    cv2.putText(frame, timestamp, (100, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+    ret, frame = cap.read()
 
-    cv2.imshow("Python", frame)
+    if not ret:
+        print("Failed to grab frame!")
+        break
+
+    # cv2.imshow("Webcam", frame)
 
     scale_factor = 1.0
     while True:
@@ -40,13 +42,15 @@ while True:
         scale_factor -= 0.1
 
         if scale_factor <= 0.1:
-            print("Frame too large to fit into UDP packet even after reducing resolution.")
+            print("Frame too large to fit into udp packet even after reducing resolution.")
             break
 
     sock.sendto(serialized_video_feed, server_address)
+    # print("Sent frame to server on ", server_address)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+cap.release()
 cv2.destroyAllWindows()
 sock.close()

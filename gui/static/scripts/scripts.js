@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // GUI is a client in terms of communicating with the c++ server
+    // gui is a client in terms of communicating with the c++ server
     // let server_ip = '192.168.0.100';
     let server_port = '12345';
     console.log('Connecting to the server at ' + server_ip + ':' + server_port + '...');
