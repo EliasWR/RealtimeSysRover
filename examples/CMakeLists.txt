@@ -69,6 +69,9 @@ add_executable(manual_control_with_camera executables/manual_control_with_camera
 target_link_libraries(manual_control_with_camera PUBLIC
         tcp_server_lib
         ws_server_lib
-        video_viewer_lib)
+        video_viewer_lib
+        proto_c
+        udp_server_lib)
 target_include_directories(manual_control_with_camera PUBLIC
-        ${CMAKE_SOURCE_DIR}/include)
+        ${CMAKE_SOURCE_DIR}/include
+        "${CMAKE_BINARY_DIR}/generated")
