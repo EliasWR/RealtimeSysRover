@@ -3,7 +3,7 @@
 
 int main(){
   auto server = ¨TCP::TCPServer(9095);
-  server.set_handler([](const std::string &msg, std::string &response) {
+  server.set_callback([](const std::string &msg, std::string &response) {
     std::cout << "Message received: " << msg << std::endl;
     response = "I got , " + msg + "!\n";
   });
