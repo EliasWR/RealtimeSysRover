@@ -1,12 +1,15 @@
 #ifndef REALTIMESYSROVER_OBJECT_DETECTION_HPP
 #define REALTIMESYSROVER_OBJECT_DETECTION_HPP
 
-#include "helpers/detection_helper.hpp"
-#include "helpers/read_file_helper.hpp"
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
+#include <thread>
+#include <condition_variable>
+#include <optional>
+#include "helpers/read_file_helper.hpp"
+#include "helpers/detection_helper.hpp"
 
 class ObjectDetection {
 public:

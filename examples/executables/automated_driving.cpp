@@ -1,5 +1,3 @@
-// This file can be tested together with "RealtimeSystems\RealtimeSysRover\udp\udp_client_json_dummy.py"
-
 #include <chrono>
 #include <iostream>
 #include <string>

@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <thread>
 
 struct Detection {
   std::vector<cv::Rect> boxes;
