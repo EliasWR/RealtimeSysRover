@@ -3,3 +3,4 @@ cmake-build*
 .vscode
 sphero*
 **/__pycache__
+**/.venv

@@ -34,7 +34,6 @@ public:
     _queue.pop();
     return val;
   }
-
 };
 
 
