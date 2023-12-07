@@ -1,6 +1,5 @@
 #include "object_detection/object_detection.hpp"
 
-
 ObjectDetection::ObjectDetection() {
     _categoryPath = "../../yolo/coco.names";
     _modelPath = "../../yolo/yolov3-tiny.weights";

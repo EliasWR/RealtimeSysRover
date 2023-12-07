@@ -5,6 +5,9 @@
 #include <opencv2/dnn.hpp>
 #include <string>
 #include <vector>
+#include <thread>
+#include <condition_variable>
+#include <optional>
 #include "helpers/read_file_helper.hpp"
 #include "helpers/detection_helper.hpp"
 

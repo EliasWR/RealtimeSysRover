@@ -1,10 +1,6 @@
 add_executable(main main.cpp)
 
-target_include_directories(main PRIVATE
-        "${CMAKE_SOURCE_DIR}/protobuf"
+target_include_directories(main PUBLIC
         "${CMAKE_SOURCE_DIR}/include")
 
-target_link_libraries(main PRIVATE
-        Boost::system
-        protobuf::libprotobuf
-        nlohmann_json::nlohmann_json)
+target_link_libraries(main PUBLIC )
