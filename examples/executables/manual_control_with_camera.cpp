@@ -5,7 +5,6 @@
 #include "tcp_server/tcp_server_lib.hpp"
 #include "tcp_server/ws_server_lib.hpp"
 #include "video_viewer/video_viewer.hpp"
-#include "safe_queue/safe_queue.hpp"
 #include "udp_server/udp_server.hpp"
 #include "my_messages.pb.h"
 
@@ -46,7 +45,6 @@ int main() {
                 json j = json::parse(cmd.value());
 
                 if (j["command"] == "stop" or j["command"] == "reset_camera") {
-                    //last_msg_time = now;
                     TCP.writeToAllClients(cmd.value());
                 } else if (now - last_msg_time > std::chrono::milliseconds(200)) {
                     last_msg_time = now;
