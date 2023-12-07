@@ -4,16 +4,16 @@
 #include "opencv2/opencv.hpp"
 
 
-#include <thread>
-#include <mutex>
 #include <atomic>
+#include <mutex>
 #include <queue>
+#include <thread>
 
-class VideoViewer{
+class VideoViewer {
 public:
   VideoViewer(std::string screen_name = "Video Viewer");
   ~VideoViewer();
-  void addFrame(const cv::Mat& frame);
+  void addFrame(const cv::Mat &frame);
   void display();
   bool accept_frames{false};
 

@@ -16,7 +16,8 @@ inline std::array<unsigned char, 4> int_to_bytes(int n, byte_order order = byte_
     bytes[1] = (n >> 8) & 0xFF;
     bytes[2] = (n >> 16) & 0xFF;
     bytes[3] = (n >> 24) & 0xFF;
-  } else {
+  }
+  else {
     bytes[0] = (n >> 24) & 0xFF;
     bytes[1] = (n >> 16) & 0xFF;
     bytes[2] = (n >> 8) & 0xFF;
@@ -32,7 +33,8 @@ inline int bytes_to_int(std::array<unsigned char, 4> buffer, byte_order order = 
                buffer[1] << 8 |
                buffer[2] << 16 |
                buffer[3] << 24);
-  } else {
+  }
+  else {
     return int(buffer[0] << 24 |
                buffer[1] << 16 |
                buffer[2] << 8 |
