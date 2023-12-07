@@ -9,11 +9,41 @@
 
 #include <iostream>
 
+/*
+
+    auto ObjectDetector = std::make_unique<ObjectDetection>();
+
+    auto handler_json = [&] (const std::string& message) {
+        cv::Mat decoded_frame = decodeImageFromJson(message);
+        Viewer->addFrame(decoded_frame);
+    };
+
+    auto handler_proto = [&] (const std::string& message) {
+        cv::Mat decoded_frame = decodeImageFromProto(message);
+        // ObjectDetector->detectObjects(decoded_frame);
+
+        Viewer->addFrame(decoded_frame);
+    };
+
+    auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
+
+    udp_server->start();
+
+    auto fps = 30;
+    auto frame_interval = std::chrono::milliseconds(1000 / fps);
+    while (true) {
+        Viewer->display();
+        if(cv::waitKey(frame_interval.count()) >= 0) break;
+    }
+    std::cout << "Stopping camera feed" << std::endl;
+
+ */
+
 int main() {
     SafeQueue<std::string> command_queue;
     std::atomic<bool> stop{false};
 
-    VideoViewer viewer;
+    auto Viewer = std::make_unique<VideoViewer>();
 
 
     auto WebsocketServer = WSServer(12345);
@@ -25,8 +55,6 @@ int main() {
 
     auto TCP = TCPServer(9091);
     TCP.start();
-
-
 
     auto internal_comm_thread = std::thread([&] {
         auto last_msg_time = std::chrono::steady_clock::now();
@@ -47,17 +75,21 @@ int main() {
         }
     });
 
-    std::thread frame_grabber([&](){
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        while (!stop) {
-            cv::Mat frame = cv::Mat(480, 640, CV_8UC3, cv::Scalar(100, 100, 255));
-            viewer.addFrame(frame);
-        }
-    });
+    auto handler_proto = [&] (const std::string& message) {
+        cv::Mat decoded_frame = decodeImageFromProto(message);
+        Viewer->addFrame(decoded_frame);
+    };
+
+    auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
+
+    udp_server->start();
+
+    auto fps = 30;
+    auto frame_interval = std::chrono::milliseconds(1000 / fps);
 
     while (true) {
-        viewer.display();
-        if (cv::waitKey(10) >= 0) break;
+        Viewer->display();
+        if(cv::waitKey(frame_interval.count()) >= 0) break;
     }
 
     std::cout << "Press a key + 'enter' to end..." << std::endl;
@@ -71,10 +103,8 @@ int main() {
 
     std::cout << "Joining..." << std::endl;
     internal_comm_thread.join();
-    frame_grabber.join();
 
     std::cout << "Joined" << std::endl;
-
 
     return 0;
 }
