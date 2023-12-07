@@ -12,7 +12,7 @@ class UDPServer {
 public:
     UDPServer(int port, std::function<void(const std::string&)> handler);
     void start();
-    ~UDPServer();
+    void stop();
 
 private:
     std::function<void(const std::string&)> _messageHandler;

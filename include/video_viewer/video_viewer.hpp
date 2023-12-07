@@ -11,7 +11,7 @@
 
 class VideoViewer{
 public:
-  VideoViewer();
+  VideoViewer(std::string screen_name = "Video Viewer");
   ~VideoViewer();
   void addFrame(const cv::Mat& frame);
   void display();
@@ -23,6 +23,7 @@ private:
   cv::Mat dummy_frame;
   std::chrono::steady_clock::time_point last_frame_time;
   cv::Mat getLatestFrame();
+  std::string _screen_name;
 };
 
 

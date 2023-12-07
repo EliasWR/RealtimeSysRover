@@ -62,7 +62,7 @@ void UDPServer::sendMessage(const std::string& message, const udp::endpoint& rem
     _socket.send_to(asio::buffer(message), remote_endpoint);
 }
 */
-UDPServer::~UDPServer() {
+void UDPServer::stop() {
     _socket.close();
     _io_context.stop();
     _thread.join();

@@ -24,7 +24,7 @@ int main() {
     SafeQueue<std::string> command_queue;
     std::atomic<bool> stop{false};
 
-    auto Viewer = std::make_unique<VideoViewer>();
+    auto Viewer = std::make_unique<VideoViewer>("Camera View");
 
 
     auto WebsocketServer = WSServer(12345);
@@ -46,9 +46,9 @@ int main() {
                 json j = json::parse(cmd.value());
 
                 if (j["command"] == "stop" or j["command"] == "reset_camera") {
-                    last_msg_time = now;
+                    //last_msg_time = now;
                     TCP.writeToAllClients(cmd.value());
-                } else if (now - last_msg_time > std::chrono::milliseconds(100)) {
+                } else if (now - last_msg_time > std::chrono::milliseconds(200)) {
                     last_msg_time = now;
                     TCP.writeToAllClients(cmd.value());
                 }
@@ -68,23 +68,21 @@ int main() {
     auto fps = 30;
     auto frame_interval = std::chrono::milliseconds(1000 / fps);
 
+    std::cout << "Press a key in Video View to end..." << std::endl;
     while (true) {
         Viewer->display();
         if(cv::waitKey(frame_interval.count()) >= 0) break;
     }
 
-    std::cout << "Press a key + 'enter' to end..." << std::endl;
-    while (std::cin.get() != '\n') {
-    }
     std::cout << "Stopping..." << std::endl;
     stop = true;
 
     WebsocketServer.stop();
     TCP.stop();
+    udp_server->stop();
 
     std::cout << "Joining..." << std::endl;
     internal_comm_thread.join();
-
     std::cout << "Joined" << std::endl;
 
     return 0;

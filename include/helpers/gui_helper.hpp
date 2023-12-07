@@ -93,8 +93,8 @@ sRawMotors joystick_to_raw_motors(int joy_x, int joy_y) {
   int left_direction = direction_from_velocity(left_velocity);
   int right_direction = direction_from_velocity(right_velocity);
 
-  left_velocity =   std::abs(left_velocity) == 0 ? 0 : (std::abs(left_velocity) < 70 ?  70 : std::abs(left_velocity));
-  right_velocity =   std::abs(right_velocity) == 0 ?  0 : (std::abs(right_velocity) < 70 ?  70 : std::abs(right_velocity));
+  //left_velocity =   std::abs(left_velocity) == 0 ? 0 : (std::abs(left_velocity) < 70 ?  70 : std::abs(left_velocity));
+  //right_velocity =   std::abs(right_velocity) == 0 ?  0 : (std::abs(right_velocity) < 70 ?  70 : std::abs(right_velocity));
 
   return {left_direction, std::abs(left_velocity), right_direction, std::abs(right_velocity)};
 
