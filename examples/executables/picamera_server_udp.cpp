@@ -44,6 +44,7 @@ cv::Mat decodeImageFromJson(const std::string &jsonString) {
 
   return image;
 }
+
 cv::Mat decodeImageFromProto (const std::string& frame) {
     VideoFeed video_feed;
     video_feed.ParseFromString(frame);

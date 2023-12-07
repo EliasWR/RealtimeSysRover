@@ -6,38 +6,19 @@
 #include "tcp_server/ws_server_lib.hpp"
 #include "video_viewer/video_viewer.hpp"
 #include "safe_queue/safe_queue.hpp"
+#include "udp_server/udp_server.hpp"
+#include "my_messages.pb.h"
 
 #include <iostream>
 
-/*
+cv::Mat decodeImageFromProto (const std::string& frame) {
+    VideoFeed video_feed;
+    video_feed.ParseFromString(frame);
 
-    auto ObjectDetector = std::make_unique<ObjectDetection>();
-
-    auto handler_json = [&] (const std::string& message) {
-        cv::Mat decoded_frame = decodeImageFromJson(message);
-        Viewer->addFrame(decoded_frame);
-    };
-
-    auto handler_proto = [&] (const std::string& message) {
-        cv::Mat decoded_frame = decodeImageFromProto(message);
-        // ObjectDetector->detectObjects(decoded_frame);
-
-        Viewer->addFrame(decoded_frame);
-    };
-
-    auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
-
-    udp_server->start();
-
-    auto fps = 30;
-    auto frame_interval = std::chrono::milliseconds(1000 / fps);
-    while (true) {
-        Viewer->display();
-        if(cv::waitKey(frame_interval.count()) >= 0) break;
-    }
-    std::cout << "Stopping camera feed" << std::endl;
-
- */
+    std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
+    cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
+    return decoded_frame;
+}
 
 int main() {
     SafeQueue<std::string> command_queue;
