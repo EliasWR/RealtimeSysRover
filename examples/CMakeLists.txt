@@ -12,7 +12,7 @@ target_link_libraries(picamera_server_udp PUBLIC
         udp_server_lib
         video_viewer_lib
         proto_c
-        object_detection )
+        object_detection)
 target_include_directories(picamera_server_udp PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
 
@@ -37,7 +37,7 @@ target_link_libraries(object_detection_threading PUBLIC
         udp_server_lib
         video_viewer_lib
         proto_c
-        object_detection )
+        object_detection)
 target_include_directories(object_detection_threading PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
 
@@ -60,7 +60,7 @@ target_link_libraries(automated_driving PUBLIC
         proto_c
         object_detection
         autonomous_driving
-        tcp_server_lib )
+        tcp_server_lib)
 target_include_directories(automated_driving PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
 
