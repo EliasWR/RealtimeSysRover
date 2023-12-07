@@ -5,6 +5,7 @@
 #include <mutex>
 #include <numbers>
 #include <thread>
+#include <optional>
 
 class AutonomousDriving {
 public:
