@@ -64,7 +64,7 @@ cv::Mat ObjectDetection::drawDetections (cv::Mat &frame, std::optional<Detection
     auto& classIds = detection.value().classIds;
 
     std::vector<int> indices;
-    cv::dnn::NMSBoxes(boxes, confidences, 0.5, 0.4, indices);
+    cv::dnn::NMSBoxes(boxes, confidences, 0.3, 0.4, indices);
 
     for (int idx : indices) {
         cv::Rect box = boxes[idx];
