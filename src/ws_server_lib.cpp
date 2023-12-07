@@ -1,6 +1,7 @@
 #include "tcp_server/ws_server_lib.hpp"
 
-WSConnection::WSConnection(tcp::socket socket) : _socket(std::move(socket)) {
+WSConnection::WSConnection(tcp::socket socket) :
+    _socket(std::move(socket)) {
 }
 
 void WSConnection::start() {
@@ -29,13 +30,12 @@ std::string WSConnection::receiveMessage() {
   return data;
 }
 
-
 void WSConnection::setMessageHandler(std::function<void(const std::string &)> handler) {
-    _message_handler = std::move(handler);
+  _message_handler = std::move(handler);
 }
 
-WSServer::WSServer(unsigned short port)
-    : _ioc(1), _acceptor(_ioc, {asio::ip::make_address("0.0.0.0"), port}) {
+WSServer::WSServer(unsigned short port) :
+    _ioc(1), _acceptor(_ioc, {asio::ip::make_address("0.0.0.0"), port}) {
 }
 
 void WSServer::start() {
@@ -81,5 +81,5 @@ void WSServer::stop() {
 }
 
 void WSServer::setMessageHandler(std::function<void(const std::string &)> handler) {
-    _message_handler = std::move(handler);
+  _message_handler = std::move(handler);
 }

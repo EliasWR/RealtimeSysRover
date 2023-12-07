@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     socket.onmessage = function (e) {
         console.log('Recieved: ' + e.data);
-    };  
+    };
 
     function sendCommand(command) {
         if (socket.readyState === WebSocket.OPEN) {
@@ -35,16 +35,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const checkbox = document.querySelector('.switch input[type="checkbox"]');
     const switchTitle = document.querySelector('.switch-container .switch-title');
 
-    checkbox.addEventListener('change', function() {
-    if (this.checked) {
-      switchTitle.textContent = 'Autonomous';
-      sendCommand('mode_autonomous')
-    } else {
-      switchTitle.textContent = 'Manual'; 
-      sendCommand('mode_manual')
-    }
-  });
-
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            switchTitle.textContent = 'Autonomous';
+            sendCommand('mode_autonomous')
+        } else {
+            switchTitle.textContent = 'Manual';
+            sendCommand('mode_manual')
+        }
+    });
 
 
     let pressed = ("ontouchstart" in document.documentElement) ? 'touchstart' : 'mousedown';

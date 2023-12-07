@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "udp_server/udp_server.hpp"
-#include "video_viewer/video_viewer.hpp"
+#include "my_messages.pb.h"
 #include "nlohmann/json.hpp"
 #include "object_detection/object_detection.hpp"
-#include "my_messages.pb.h"
+#include "udp_server/udp_server.hpp"
+#include "video_viewer/video_viewer.hpp"
 
 std::string base64_decode(const std::string &in) {
   std::string out;
@@ -45,41 +45,40 @@ cv::Mat decodeImageFromJson(const std::string &jsonString) {
   return image;
 }
 
-cv::Mat decodeImageFromProto (const std::string& frame) {
-    VideoFeed video_feed;
-    video_feed.ParseFromString(frame);
+cv::Mat decodeImageFromProto(const std::string &frame) {
+  VideoFeed video_feed;
+  video_feed.ParseFromString(frame);
 
-    std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
-    cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
-    return decoded_frame;
+  std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
+  cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
+  return decoded_frame;
 }
 
-
 int main() {
-    auto Viewer = std::make_unique<VideoViewer>();
-    auto ObjectDetector = std::make_unique<ObjectDetection>();
+  auto Viewer = std::make_unique<VideoViewer>();
+  auto ObjectDetector = std::make_unique<ObjectDetection>();
 
-    auto handler_json = [&] (const std::string& message) {
-        cv::Mat decoded_frame = decodeImageFromJson(message);
-        Viewer->addFrame(decoded_frame);
-    };
+  auto handler_json = [&](const std::string &message) {
+    cv::Mat decoded_frame = decodeImageFromJson(message);
+    Viewer->addFrame(decoded_frame);
+  };
 
-    auto handler_proto = [&] (const std::string& message) {
-        cv::Mat decoded_frame = decodeImageFromProto(message);
-        // ObjectDetector->detectObjects(decoded_frame);
+  auto handler_proto = [&](const std::string &message) {
+    cv::Mat decoded_frame = decodeImageFromProto(message);
+    // ObjectDetector->detectObjects(decoded_frame);
 
-        Viewer->addFrame(decoded_frame);
-    };
+    Viewer->addFrame(decoded_frame);
+  };
 
-    auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
+  auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
 
-    udp_server->start();
+  udp_server->start();
 
-    auto fps = 30;
-    auto frame_interval = std::chrono::milliseconds(1000 / fps);
-    while (true) {
-        Viewer->display();
-        if(cv::waitKey(frame_interval.count()) >= 0) break;
-    }
-    std::cout << "Stopping camera feed" << std::endl;
+  auto fps = 30;
+  auto frame_interval = std::chrono::milliseconds(1000 / fps);
+  while (true) {
+    Viewer->display();
+    if (cv::waitKey(frame_interval.count()) >= 0) break;
+  }
+  std::cout << "Stopping camera feed" << std::endl;
 }

@@ -5,73 +5,75 @@
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
-#include <functional>
-#include <string>
-#include <iostream>
-#include <utility>
-#include <queue>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
+#include <functional>
+#include <iostream>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <thread>
+#include <utility>
 
-namespace beast = boost::beast;
-namespace asio = boost::asio;
+namespace TCP {
 
-using tcp = boost::asio::ip::tcp;
+  namespace beast = boost::beast;
+  namespace asio = boost::asio;
 
-class Connection {
-public:
-  explicit Connection(tcp::socket socket);
-  void stop();
-  void start();
-  std::string getIPv4();
+  using tcp = boost::asio::ip::tcp;
 
-  void setMessageHandler(std::function<void(const std::string&)> handler);
-  int receiveMessageSize();
-  std::string receiveMessage();
-  void writeMessage(const std::string &msg);
-  void setDisconnectionHandler(const std::function<void(Connection*)>& handler);
+  class Connection {
+  public:
+    explicit Connection(tcp::socket socket);
+    void stop();
+    void start();
+    std::string getIPv4();
 
-private:
-  std::function<void(Connection*)> _disconnection_handler;
-  std::function<void(const std::string&)> _message_handler;
+    void setMessageHandler(std::function<void(const std::string &)> handler);
+    int receiveMessageSize();
+    std::string receiveMessage();
+    void writeMessage(const std::string &msg);
+    void setDisconnectionHandler(const std::function<void(Connection *)> &handler);
 
-  tcp::socket _socket;
-  std::mutex _m;
-  std::thread _thread;
-  std::atomic<bool> _is_running{false};
-};
+  private:
+    std::function<void(Connection *)> _disconnection_handler;
+    std::function<void(const std::string &)> _message_handler;
 
-class TCPServer {
-public:
-  explicit TCPServer(unsigned short port);
-  void start();
-  void stop();
+    tcp::socket _socket;
+    std::mutex _m;
+    std::thread _thread;
+    std::atomic<bool> _is_running{false};
+  };
 
-  void setMessageHandler(std::function<void(const std::string&)> handler);
-  void writeToClient(size_t client_index, const std::string &msg);
-  void writeToAllClients(const std::string &msg);
-  void processTasks();
+  class TCPServer {
+  public:
+    explicit TCPServer(unsigned short port);
+    void start();
+    void stop();
 
-private:
-  std::queue<std::function<void()>> tasks;
-  std::mutex _task_m;
-  std::condition_variable tasks_cond;
-  std::thread tasks_thread;
-  bool stop_task_thread{false};
+    void setMessageHandler(std::function<void(const std::string &)> handler);
+    void writeToClient(size_t client_index, const std::string &msg);
+    void writeToAllClients(const std::string &msg);
+    void processTasks();
 
-  std::vector<std::unique_ptr<Connection>> _clients;
+  private:
+    std::queue<std::function<void()>> tasks;
+    std::mutex _task_m;
+    std::condition_variable tasks_cond;
+    std::thread tasks_thread;
+    bool stop_task_thread{false};
 
-  asio::io_context _io_context;
-  tcp::acceptor _acceptor;
-  std::thread _acceptor_thread;
-  std::function<void(const std::string&)> _message_handler;
-  void handleDisconnection(Connection* conn);
+    std::vector<std::unique_ptr<Connection>> _clients;
 
-  unsigned short _port;
-  std::mutex _m;
-  std::atomic<bool> _is_running{false};
-};
+    asio::io_context _io_context;
+    tcp::acceptor _acceptor;
+    std::thread _acceptor_thread;
+    std::function<void(const std::string &)> _message_handler;
+    void handleDisconnection(Connection *conn);
 
+    unsigned short _port;
+    std::mutex _m;
+    std::atomic<bool> _is_running{false};
+  };
+}// namespace TCP
 
 #endif//REALTIMESYSROVER__TCP_SERVER2_HPP
