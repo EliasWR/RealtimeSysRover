@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "autonomous_driving/autonomous_driving.hpp"
-#include "helpers/gui_helper.hpp"
+#include "helpers/gui_helper_V2.hpp"
 #include "my_messages.pb.h"
 #include "nlohmann/json.hpp"
 #include "object_detection/object_detection.hpp"
@@ -12,6 +12,8 @@
 #include "tcp_server/tcp_server_lib.hpp"
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
+
+using json = nlohmann::json;
 
 cv::Mat decodeImageFromProto(const std::string &frame) {
   VideoFeed video_feed;
@@ -39,7 +41,7 @@ int main() {
   SafeQueue<std::string> command_queue;
   std::atomic<bool> stop{false};
 
-  auto TCP = TCPServer(9091);
+  auto TCP = TCP::TCPServer(9091);
   TCP.start();
 
   auto internal_comm_thread = std::thread([&] {
@@ -108,7 +110,7 @@ int main() {
 
     if (command.has_value()) {
       // std::cout << command.value() << std::endl;
-      auto json_command = message_handler(command.value());
+      auto json_command = GUI::message_handler(command.value());
       command_queue.enqueue(json_command);
 
 
