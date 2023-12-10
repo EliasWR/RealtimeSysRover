@@ -1,6 +1,21 @@
 # RealtimeSysRover
 
 NTNU project in the subject of "Real-Time Data Engineering for Cyber-Physical Systems".
+Subject code: AIS2203 \
+Subject title: Real-Time Data Engineering for Cyber-Physical Systems \
+Type of grading: Folder delivery \
+Group number: 11 \
+
+## Table of contents
+
+- [Project description](#project-description)
+- [Project structure](#project-structure)
+  - [Conventions](#conventions)
+  - [Code conventions](#code-conventions)
+  - [Code comments](#code-comments)
+  - [Git conventions](#git-conventions)
+- [Useful scripts](#useful-scripts)
+  - [SSH to the Raspberry Pi](#ssh-to-the-raspberry-pi)
 
 ## Project description
 
@@ -17,6 +32,8 @@ NTNU project in the subject of "Real-Time Data Engineering for Cyber-Physical Sy
 * **/protobuf** - Protobuf files
 * **/resources** - Resources such yolo-data
 
+### Class structure
+![img.svg](resources/images/uml_class_diagram.png)
 
 ### Conventions
 
