@@ -1,6 +1,6 @@
 import socket
 import cv2
-from protobuf.my_messages_pb2 import VideoFeed, Instruction
+from resources.protobuf.my_messages_pb2 import VideoFeed
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # server_address = ('10.22.192.34', 8080)

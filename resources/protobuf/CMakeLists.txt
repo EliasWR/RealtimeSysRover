@@ -8,7 +8,7 @@ execute_process(
         "-I=${CMAKE_CURRENT_SOURCE_DIR}"
         "--cpp_out=${generatedDir}"
         "--python_out=${CMAKE_SOURCE_DIR}/protobuf"
-        "${CMAKE_CURRENT_SOURCE_DIR}/my_messages.proto"
+        "my_messages.proto"
 )
 
 add_library(proto_c "${generatedDir}/my_messages.pb.cc")
