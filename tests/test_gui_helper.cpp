@@ -1,4 +1,4 @@
-#include "helpers/gui_helper_V2.hpp"
+#include "helpers/gui_helper.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Test SplitString") {

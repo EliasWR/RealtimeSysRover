@@ -1,14 +1,26 @@
-
 #ifndef REALTIMESYSROVER_GUI_HELPER_HPP
 #define REALTIMESYSROVER_GUI_HELPER_HPP
 
-
+#include "nlohmann/json.hpp"
+#include <cmath>
 #include <iostream>
 #include <numbers>
+#include <sstream>
 
-#include "nlohmann/json.hpp"
+namespace GUI {
 
-namespace gui {
+  constexpr int MAX_SPEED = 255;
+  constexpr int MAX_HEADING = 360;
+  constexpr int MIN_HEADING = 0;
+  constexpr int MAX_TILT = 70;
+  constexpr int MIN_TILT = 0;
+  constexpr int MAX_PAN = 90;
+  constexpr int MIN_PAN = 0;
+  constexpr int TILT_ZERO = 35;
+  constexpr int PAN_ZERO = 45;
+
+  constexpr double PI = std::numbers::pi;
+  constexpr int MAX_JOY_VAL = 100;
 
   using json = nlohmann::json;
 
@@ -38,97 +50,47 @@ namespace gui {
     std::vector<std::string> tokens;
     std::stringstream ss(str);
     std::string token;
-
     while (std::getline(ss, token, delimiter)) {
       tokens.push_back(token);
     }
-
     return tokens;
   }
 
+  int direction_from_velocity(int value) {
+    return (value > 0) ? 1 : (value < 0) ? 2 :
+                                           0;
+  }
+
   sMotors joystick_to_heading_and_speed(int joy_x, int joy_y) {
-    double magnitude = sqrt(pow(joy_x, 2) + pow(joy_y, 2));
-    double angle = atan2(joy_y, joy_x);
+    double magnitude = std::hypot(joy_x, joy_y);
 
-    int heading = int(angle * 180 / std::numbers::pi) - 90;
+    int heading = static_cast<int>(std::atan2(joy_y, joy_x) * 180 / std::numbers::pi) - 90;
+    heading = heading < 0 ? heading + MAX_HEADING : heading;
+    heading = map(heading, MIN_HEADING, MAX_HEADING, MAX_HEADING, MIN_HEADING) % MAX_HEADING;// Flip the heading
 
-    if (heading < 0) {
-      heading += 360;
-    }
-
-    heading = map(heading, 0, 360, 360, 0);// Flip the heading
-
-    if (heading > 359) {
-      heading -= 360;
-    }
-
-    int speed = magnitude * 255 / 100;
-
+    int speed = static_cast<int>(magnitude * MAX_SPEED / 100);
 
     return {heading, speed};
   }
 
-  int direction_from_velocity(int value) {
-    if (value > 0) {
-      return 1;
-    }
-    else if (value < 0) {
-      return 2;
-    }
-    else {
-      return 0;
-    }
-  }
-
   sRawMotors joystick_to_raw_motors(int joy_x, int joy_y) {
-    if (joy_y < 0) {
-      joy_x = -joy_x;
-    }
-
-    int left_raw_velocity = joy_y + joy_x;
-    int right_raw_velocity = joy_y - joy_x;
-
-    int left_velocity = std::clamp((left_raw_velocity * 255) / 200, -255, 255);
-    int right_velocity = std::clamp((right_raw_velocity * 255) / 200, -255, 255);
-
-    int left_direction = direction_from_velocity(left_velocity);
-    int right_direction = direction_from_velocity(right_velocity);
-
-    //left_velocity =   std::abs(left_velocity) == 0 ? 0 : (std::abs(left_velocity) < 70 ?  70 : std::abs(left_velocity));
-    //right_velocity =   std::abs(right_velocity) == 0 ?  0 : (std::abs(right_velocity) < 70 ?  70 : std::abs(right_velocity));
-
-    return {left_direction, std::abs(left_velocity), right_direction, std::abs(right_velocity)};
+    joy_x = joy_y < 0 ? -joy_x : joy_x;// Flip the x axis if the y axis is negative
+    int left_velocity = (joy_y + joy_x) * MAX_SPEED / (MAX_JOY_VAL * 2);
+    int right_velocity = (joy_y - joy_x) * MAX_SPEED / (MAX_JOY_VAL * 2);
+    return {direction_from_velocity(left_velocity), std::abs(left_velocity),
+            direction_from_velocity(right_velocity), std::abs(right_velocity)};
   }
 
   sCamera joystick_to_camera(int joy_x, int joy_y) {
-    std::cout << "joy_x: " << joy_x << std::endl;
-    std::cout << "joy_y: " << joy_y << std::endl;
-
-    int tilt = 35;
-    int tilt_swing = 35;
-    if (joy_x != 0) {
-      tilt = map(joy_y, -100, 100, tilt - tilt_swing, tilt + tilt_swing);
-    }
-    int pan = 45;
-    int pan_swing = 45;
-    if (joy_y != 0) {
-      pan = map(joy_x, -100, 100, pan + pan_swing, pan - pan_swing);// Pan is inverted
-    }
-
-    std::cout << "tilt: " << tilt << std::endl;
-    std::cout << "pan: " << pan << std::endl;
+    int tilt = joy_x == 0 ? TILT_ZERO : map(joy_x, -MAX_JOY_VAL, MAX_JOY_VAL, MIN_TILT, MAX_TILT);
+    int pan = joy_y == 0 ? PAN_ZERO : map(joy_y, -MAX_JOY_VAL, MAX_JOY_VAL, MIN_PAN, MAX_PAN);
 
     return {tilt, pan};
   }
 
-  std::string message_handler(const std::string &message) {
-    std::vector<std::string> tokens = splitString(message, '_');
-
-    auto command = tokens[0];
-
-    json rover_message = {
-      {"command", ""}};
-
+  json createRoverMessage(const std::vector<std::string> &tokens) {
+    const auto &command = tokens[0];
+    json rover_message = {{"command", ""}};
     if (command == "stop") {
       rover_message["command"] = "stop";
       rover_message["drive_mode"] = "tank";
@@ -213,6 +175,7 @@ namespace gui {
           rover_message["speed"] = "0";
         }
         else {
+
           auto h_and_s = joystick_to_heading_and_speed(joy_x, joy_y);
           rover_message["drive_mode"] = "heading";
           rover_message["heading"] = h_and_s.heading;
@@ -243,12 +206,23 @@ namespace gui {
     }
     else {
       std::cout << "Invalid command" << std::endl;
-      std::cout << "Message: " << message << std::endl;
+      for (auto &token : tokens) {
+        std::cout << token << " ";
+      }
+      std::cout << std::endl;
     }
 
+    /* Only tank-drive mode are used at the moment */
     rover_message["drive_mode"] = "tank";
-    return rover_message.dump();
-    std::cout << "Message: " << rover_message.dump(2) << std::endl;
+
+    return rover_message;
   }
-}// namespace gui
-#endif//REALTIMESYSROVER_GUI_HELPER_HPP
+
+  std::string message_handler(const std::string &message) {
+    std::vector<std::string> tokens = splitString(message, '_');
+    json rover_message = createRoverMessage(tokens);
+    return rover_message.dump();
+  }
+}// namespace GUI
+
+#endif// REALTIMESYSROVER_GUI_HELPER_HPP

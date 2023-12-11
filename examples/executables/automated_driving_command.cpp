@@ -1,4 +1,4 @@
-// This file can be tested together with "RealtimeSystems\RealtimeSysRover\udp\""
+// This file can be tested together with "RealtimeSystems\realtime_sys_rover\udp\""
 
 #include <iostream>
 #include <string>
