@@ -74,7 +74,7 @@ namespace GUI {
   }
 
   sRawMotors joystick_to_raw_motors(int joy_x, int joy_y) {
-    joy_x = joy_y < 0 ? -joy_x : joy_x;// Flip the x axis if the y axis is negative
+    joy_x = joy_y < 0 ? -joy_x : joy_x; // Flip the x axis if the y axis is negative
     int left_velocity = (joy_y + joy_x) * MAX_SPEED / (MAX_JOY_VAL * 2);
     int right_velocity = (joy_y - joy_x) * MAX_SPEED / (MAX_JOY_VAL * 2);
     return {direction_from_velocity(left_velocity), std::abs(left_velocity),

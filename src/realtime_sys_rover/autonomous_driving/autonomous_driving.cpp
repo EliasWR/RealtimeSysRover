@@ -46,28 +46,39 @@ bool AutonomousDriving::isAngleWithinLimits(double angle, int angleLimitDeg) {
 }
 
 double AutonomousDriving::adjustAngleToBoundary(double angle, int angleLimitDeg) {
-    const int referenceAngles[] = {90, 270};
-    double closestDifference = std::numeric_limits<double>::max();
-    double adjustedAngle = 0;
+    std::pair<int, int> reference_angles = {90, 270};
+    double new_angle = angle;
 
-    for (int referenceAngle : referenceAngles) {
-        double lowerBoundDeg = referenceAngle - angleLimitDeg;
-        double upperBoundDeg = referenceAngle + angleLimitDeg;
-
-        double lowerDiff = std::abs(angle - lowerBoundDeg);
-        double upperDiff = std::abs(angle - upperBoundDeg);
-
-        if (lowerDiff < closestDifference) {
-            closestDifference = lowerDiff;
-            adjustedAngle = lowerBoundDeg;
-        }
-        if (upperDiff < closestDifference) {
-            closestDifference = upperDiff;
-            adjustedAngle = upperBoundDeg;
-        }
+    if (angle < 0) {
+        angle += 360;
     }
 
-    return adjustedAngle;
+    double closest_difference = 1000.0;
+
+    for (int reference_angle : {reference_angles.first, reference_angles.second}) {
+        double lower_boundary = reference_angle - angleLimitDeg;
+        double upper_boundary = reference_angle + angleLimitDeg;
+
+        if (angle >= lower_boundary && angle <= upper_boundary) {
+            std::cout << lower_boundary << upper_boundary << angle << std::endl;
+            return angle;
+        }
+
+        double lower_difference = std::abs(angle - lower_boundary);
+        double upper_difference = std::abs(angle - upper_boundary);
+
+        std::cout << lower_difference << upper_difference << angle << std::endl;
+
+        if (lower_difference < closest_difference) {
+            closest_difference = lower_difference;
+            new_angle = lower_boundary;
+        }
+        if (upper_difference < closest_difference) {
+            closest_difference = upper_difference;
+            new_angle = upper_boundary;
+        }
+    }
+    return new_angle;
 }
 
 std::pair<int, int> AutonomousDriving::convertToCartesian(int radius, double angle) {

@@ -1,5 +1,4 @@
 import socket
-#from protobuf.my_messages_pb2 import VideoFeed, Instruction
 import base64
 import json
 import numpy as np
@@ -11,17 +10,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('127.0.0.1', 8080)
 MAX_UDP_PACKET_SIZE = 65507
 
-'''cap = cv2.VideoCapture(0)
-
-if not cap.isOpened():
-    print("Could not open camera!")
-    exit()'''
-
 while True:
-    #ret, frame = cap.read()
     frame = np.zeros((480, 640, 3), np.uint8)
     cv2.putText(frame, "Hello From udp!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-    # Add timestamp of HH:MM:SS:MS
     timestamp = datetime.datetime.now().strftime("%H:%M:%S:%f")[:-3]
     cv2.putText(frame, timestamp, (100, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 

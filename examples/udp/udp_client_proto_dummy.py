@@ -14,7 +14,6 @@ MAX_UDP_PACKET_SIZE = 65507
 while True:
     frame = np.zeros((480, 640, 3), np.uint8)
     cv2.putText(frame, "Hello From udp!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-    # Add timestamp of HH:MM:SS:MS
     timestamp = datetime.datetime.now().strftime("%H:%M:%S:%f")[:-3]
     cv2.putText(frame, timestamp, (100, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
