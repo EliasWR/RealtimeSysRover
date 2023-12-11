@@ -56,15 +56,15 @@ Group number: 11 \
 * Variable names should be self-explanatory.
 * Documentation following Doxygen standard:
 ``` c++
-/**
-  * Sum numbers in a vector.
-  *
-  * This sum is the arithmetic sum, not some other kind of sum that only
-  * mathematicians have heard of.
-  *
-  * @param values Container whose values are summed.
-  * @return sum of `values`, or 0.0 if `values` is empty.
-  */
+/*
+Sum numbers in a vector.
+
+This sum is the arithmetic sum, not some other kind of sum that only
+mathematicians have heard of.
+
+@param values Container whose values are summed.
+@return sum of `values`, or 0.0 if `values` is empty.
+*/
 ```
 
 #### Git conventions:
