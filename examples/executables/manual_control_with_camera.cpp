@@ -3,7 +3,7 @@
 #include <iostream>
 #include "nlohmann/json.hpp"
 
-#include "helpers/gui_helper_V2.hpp"
+#include "helpers/gui_helper.hpp"
 #include "my_messages.pb.h"
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server_lib.hpp"

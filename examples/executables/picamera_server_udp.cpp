@@ -1,4 +1,4 @@
-// This file can be tested together with python files in "RealtimeSystems\RealtimeSysRover\udp\"
+// This file can be tested together with python files in "RealtimeSystems\realtime_sys_rover\udp\"
 
 #include <iostream>
 #include <string>

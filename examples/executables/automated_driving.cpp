@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "autonomous_driving/autonomous_driving.hpp"
-#include "helpers/gui_helper_V2.hpp"
+#include "helpers/gui_helper.hpp"
 #include "my_messages.pb.h"
 #include "nlohmann/json.hpp"
 #include "object_detection/object_detection.hpp"
