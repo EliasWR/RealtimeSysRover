@@ -1,0 +1,2 @@
+add_test_executable(test_autonomous_driving)
+target_link_libraries(test_autonomous_driving PUBLIC autonomous_driving)
