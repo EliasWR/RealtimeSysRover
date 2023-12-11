@@ -10,7 +10,7 @@ execute_process(
         "--python_out=${CMAKE_CURRENT_SOURCE_DIR}"
         "my_messages.proto"
 )
-message(${CMAKE_CURRENT_SOURCE_DIR})
+
 add_library(proto_c "${generatedDir}/my_messages.pb.cc")
 target_include_directories(proto_c PUBLIC ${generatedDir})
 target_link_libraries(proto_c PUBLIC protobuf::libprotobuf)
