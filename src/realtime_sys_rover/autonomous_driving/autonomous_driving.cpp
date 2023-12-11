@@ -44,39 +44,7 @@ bool AutonomousDriving::isAngleWithinLimits(double angle, int angleLimitDeg) {
     }
     return false;
 }
-/*
-double AutonomousDriving::adjustAngleToBoundary(double angle, int angleLimitDeg) {
-    const int referenceAngles[] = {90, 270};
-    double closestDifference = std::numeric_limits<double>::max();
-    double adjustedAngle = angle;
 
-    angle = fmod(angle, 360);
-    if (angle < 0) angle += 360;
-
-    for (int referenceAngle : referenceAngles) {
-        double lowerBoundDeg = referenceAngle - angleLimitDeg;
-        double upperBoundDeg = referenceAngle + angleLimitDeg;
-
-        if (angle >= lowerBoundDeg && angle <= upperBoundDeg) {
-            return angle;
-        }
-
-        double lowerDiff = std::abs(angle - lowerBoundDeg);
-        double upperDiff = std::abs(angle - upperBoundDeg);
-
-        if (lowerDiff < closestDifference) {
-            closestDifference = lowerDiff;
-            adjustedAngle = (lowerDiff <= angleLimitDeg) ? angle : lowerBoundDeg;
-        }
-        if (upperDiff < closestDifference) {
-            closestDifference = upperDiff;
-            adjustedAngle = (upperDiff <= angleLimitDeg) ? angle : upperBoundDeg;
-        }
-    }
-
-    return adjustedAngle;
-}
-*/
 double AutonomousDriving::adjustAngleToBoundary(double angle, int angleLimitDeg) {
     std::pair<int, int> reference_angles = {90, 270};
     double new_angle = angle;
