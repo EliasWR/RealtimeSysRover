@@ -1,10 +1,24 @@
 #include "tcp_server/tcp_server_lib.hpp"
 
-// Connection Implementation
+
+/***********************************************************************************************************************
+ *  TCP-Connection
+ */
+
+/*
+   Constructor for establishing a TCP connection.
+
+   @param socket: The TCP socket used for the connection.
+*/
 TCP::Connection::Connection(tcp::socket socket) :
     _socket(std::move(socket)) {
 }
 
+/*
+Starts the connection-loop
+
+Creates a thread that runs a loop that receives messages and calls the message handler.
+*/
 void TCP::Connection::start() {
   _is_running = true;
   _thread = std::thread([&] {
@@ -24,16 +38,34 @@ void TCP::Connection::start() {
   });
 }
 
+/*
+Returns the IPv4 address of the connection.
+
+@return std::string: The IPv4 address of the connection.
+*/
 std::string TCP::Connection::getIPv4() {
   return _socket.remote_endpoint().address().to_string();
 }
 
+/*
+ Receives the size of the incoming message.
+
+ @return int: The size of the incoming message.
+*/
 int TCP::Connection::receiveMessageSize() {
   std::array<unsigned char, 4> buf{};
   boost::asio::read(_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
   return bytes_to_int(buf);
 }
 
+/*
+ Receives a message from the connection.
+
+ First receives the size of the message, then the message itself.
+ Throws a boost::system::system_error if an error occurs.
+
+ @return std::string: The received message.
+*/
 std::string TCP::Connection::receiveMessage() {
   int len = receiveMessageSize();
   boost::asio::streambuf buf;
@@ -47,11 +79,17 @@ std::string TCP::Connection::receiveMessage() {
   }
   //std::string data(boost::asio::buffer_cast<const char *>(buf.data()));
 
-
   std::string data(boost::asio::buffer_cast<const char *>(buf.data()), len);
   return data;
 }
 
+/*
+ Sends a message over the connection.
+
+ First sends the size of the message, then the message itself.
+
+ @param msg: The message to be sent.
+*/
 void TCP::Connection::writeMessage(const std::string &msg) {
   int msgSize = static_cast<int>(msg.size());
 
@@ -59,6 +97,11 @@ void TCP::Connection::writeMessage(const std::string &msg) {
   _socket.send(boost::asio::buffer(msg));
 }
 
+/*
+   Stops the connection.
+
+   Closes the socket and joins the thread.
+*/
 void TCP::Connection::stop() {
   {
     std::unique_lock<std::mutex> lock(_m);
@@ -68,21 +111,47 @@ void TCP::Connection::stop() {
   _thread.join();
 }
 
+/*
+ Sets the disconnection handler.
+
+ @param handler: The disconnection handler.
+*/
 void TCP::Connection::setDisconnectionHandler(const std::function<void(Connection *)> &handler) {
   _disconnection_handler = handler;
 }
 
+/*
+ Sets the message handler.
+
+ @param handler: The message handler.
+*/
 void TCP::Connection::setMessageHandler(std::function<void(const std::string &)> handler) {
   _message_handler = std::move(handler);
 }
 
-// TCPServer Implementation
+
+/***********************************************************************************************************************
+ *  TCP-Server
+ */
+
+/*
+ Constructor for the TCP server.
+
+ Creates the acceptor and binds it to the given port.
+
+ @param port: The port to be used for the server.
+*/
 TCP::TCPServer::TCPServer(unsigned short port) :
     _port(port),
     _acceptor(_io_context, tcp::endpoint(tcp::v4(), port)),
     _is_running(false) {
 }
 
+/*
+ Starts the TCP server.
+
+ Starts the acceptor thread and the task thread.
+*/
 void TCP::TCPServer::start() {
   _is_running = true;
   std::cout << "TCP Server running on port: " << _port << std::endl;
@@ -115,6 +184,11 @@ void TCP::TCPServer::start() {
   });
 }
 
+/*
+ Stops the TCP server.
+
+ Stops the acceptor and the task thread.
+*/
 void TCP::TCPServer::stop() {
   if (_is_running) {
     std::cout << "Stopping TCP Server..\n";
@@ -151,6 +225,14 @@ void TCP::TCPServer::stop() {
   }
 }
 
+/*
+ Writes a message to a client.
+
+ Throws a std::out_of_range exception if the client index is out of range.
+
+ @param client_index: The index of the client to write to.
+ @param msg: The message to be written.
+*/
 void TCP::TCPServer::writeToClient(size_t client_index, const std::string &msg) {
   if (_clients.size() >= client_index + 1) {
     std::cout << "Writing to client " << client_index << ": " << msg << std::endl;
@@ -161,6 +243,11 @@ void TCP::TCPServer::writeToClient(size_t client_index, const std::string &msg) 
   }
 }
 
+/*
+ Writes a message to all clients.
+
+ @param msg: The message to be written.
+*/
 void TCP::TCPServer::writeToAllClients(const std::string &msg) {
   try {
     if (_clients.empty()) {
@@ -178,6 +265,13 @@ void TCP::TCPServer::writeToAllClients(const std::string &msg) {
   }
 }
 
+/*
+ Handles the disconnection of a client.
+
+ Removes the client from the list of clients.
+
+ @param conn: The connection of the client that disconnected.
+*/
 void TCP::TCPServer::handleDisconnection(Connection *conn) {
   {
     std::lock_guard<std::mutex> lock(_task_m);
@@ -196,6 +290,12 @@ void TCP::TCPServer::handleDisconnection(Connection *conn) {
   tasks_cond.notify_one();
 }
 
+/*
+ Processes the tasks.
+
+ Runs a loop that processes the tasks in the task queue.
+ For now, the only task is to remove a client from the list of clients.
+*/
 void TCP::TCPServer::processTasks() {
   while (true) {
     std::function<void()> task;
@@ -216,6 +316,11 @@ void TCP::TCPServer::processTasks() {
   }
 }
 
+/*
+ Sets the message handler.
+
+ @param handler: The message handler.
+*/
 void TCP::TCPServer::setMessageHandler(std::function<void(const std::string &)> handler) {
   _message_handler = std::move(handler);
 }
