@@ -1,5 +1,10 @@
 #include "object_detection/object_detection.hpp"
 
+/*
+ * Constructor for ObjectDetection class.
+ *
+ * Loads the model and the class names.
+ */
 ObjectDetection::ObjectDetection() {
   _categoryPath = "../../resources/yolo/coco.names";
   _modelPath = "../../resources/yolo/yolov3-tiny.weights";
@@ -8,6 +13,12 @@ ObjectDetection::ObjectDetection() {
   _net = cv::dnn::readNet(_modelPath, _configPath);
 }
 
+/*
+ * Preprocesses the frame for the model.
+ *
+ * @param frame The frame to preprocess.
+ * @param blob The blob to store the preprocessed frame in.
+ */
 void ObjectDetection::preprocess(const cv::Mat &frame, cv::Mat &blob) {
   double scale_factor = 1 / 255.0;
   cv::Size size = cv::Size(416, 416);
@@ -17,11 +28,28 @@ void ObjectDetection::preprocess(const cv::Mat &frame, cv::Mat &blob) {
   cv::dnn::blobFromImage(frame, blob, scale_factor, size, mean, swapRB, crop);
 }
 
+/*
+ * Runs the model.
+ *
+ * The model is run on the blob and the outputs are stored in the outputs vector.
+ *
+ * @param blob The blob to run the model on.
+ * @param outputs The outputs of the model.
+ */
 void ObjectDetection::runModel(const cv::Mat &blob, std::vector<cv::Mat> &outputs) {
   _net.setInput(blob);
   _net.forward(outputs, _net.getUnconnectedOutLayersNames());
 }
 
+/*
+ * Postprocesses the outputs of the model.
+ *
+ * The outputs are postprocessed and stored in the detection object.
+ *
+ * @param outputs The outputs of the model.
+ * @param frame The frame to postprocess.
+ * @param detection The detection object to store the postprocessed outputs in.
+ */
 void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv::Mat &frame, Detection &detection) {
   auto &boxes = detection.boxes;
   auto &confidences = detection.confidences;
@@ -53,6 +81,13 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
   }
 }
 
+/*
+ * Draws the detections on the frame.
+ *
+ * @param frame The frame to draw the detections on.
+ * @param detection The detection object containing the detections.
+ * @return The frame with the detections drawn on it.
+ */
 cv::Mat ObjectDetection::drawDetections(cv::Mat &frame, std::optional<Detection> &detection) {
   if (detection == std::nullopt) {
     return frame;
@@ -88,6 +123,12 @@ cv::Mat ObjectDetection::drawDetections(cv::Mat &frame, std::optional<Detection>
   return frame;
 }
 
+/*
+ * Detects objects in the frame.
+ *
+ * @param frame The frame to detect objects in.
+ * @return The detection object containing the detections.
+ */
 Detection ObjectDetection::detectObjects(const cv::Mat &frame) {
   cv::Mat blob;
   std::vector<cv::Mat> outputs;
@@ -100,6 +141,11 @@ Detection ObjectDetection::detectObjects(const cv::Mat &frame) {
   return detection;
 }
 
+/*
+ * Adds the latest frame to the object detection.
+ *
+ * @param frame The latest frame.
+ */
 void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
   std::unique_lock<std::mutex> guard(mutex);
   _latest_frame = frame;
@@ -107,6 +153,11 @@ void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
   cv.notify_one();
 }
 
+/*
+ * Gets the latest detection.
+ *
+ * @return The latest detection.
+ */
 std::optional<Detection> ObjectDetection::getLatestDetection() {
   if (std::chrono::steady_clock::now() - _last_detection_time >= std::chrono::milliseconds(MAX_DETECTION_AGE)) {
     return std::nullopt;
@@ -114,6 +165,12 @@ std::optional<Detection> ObjectDetection::getLatestDetection() {
   return _latest_detection;
 }
 
+/*
+ * Runs the object detection.
+ *
+ * Runs the object detection in a separate thread.
+ * The latest detection is stored in the _latest_detection variable.
+ */
 void ObjectDetection::run() {
   _running = true;
   _t = std::thread([&]() {
@@ -141,6 +198,11 @@ void ObjectDetection::run() {
   });
 }
 
+/*
+ * Stops the object detection.
+ *
+ * Stops the object detection thread.
+ */
 void ObjectDetection::stop() {
   _running = false;
   _t.join();
