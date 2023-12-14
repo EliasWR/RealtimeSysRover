@@ -1,16 +1,13 @@
-set(generatedDir "${CMAKE_BINARY_DIR}/generated")
-file(MAKE_DIRECTORY ${generatedDir})
-
 find_program(protoc NAMES protoc)
 
 execute_process(
-        COMMAND ${protoc}
+        COMMAND $protoc}
         "-I=${CMAKE_CURRENT_SOURCE_DIR}"
-        "--cpp_out=${generatedDir}"
+        "--cpp_out=${proto_dir}"
         "--python_out=${CMAKE_CURRENT_SOURCE_DIR}"
         "my_messages.proto"
 )
 
-add_library(proto_c "${generatedDir}/my_messages.pb.cc")
-target_include_directories(proto_c PUBLIC ${generatedDir})
+add_library(proto_c "${proto_dir}/my_messages.pb.cc")
+target_include_directories(proto_c PUBLIC ${proto_dir})
 target_link_libraries(proto_c PUBLIC protobuf::libprotobuf)

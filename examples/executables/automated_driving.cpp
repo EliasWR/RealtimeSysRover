@@ -3,10 +3,11 @@
 #include <string>
 #include <vector>
 
+#include "nlohmann/json.hpp"
+
 #include "autonomous_driving/autonomous_driving.hpp"
 #include "helpers/gui_helper.hpp"
-#include "my_messages.pb.h"
-#include "nlohmann/json.hpp"
+#include "helpers/network_helper.hpp"
 #include "object_detection/object_detection.hpp"
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server_lib.hpp"
@@ -15,15 +16,6 @@
 
 using json = nlohmann::json;
 
-cv::Mat decodeImageFromProto(const std::string &frame) {
-  VideoFeed video_feed;
-  video_feed.ParseFromString(frame);
-
-  std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
-  cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
-  return decoded_frame;
-}
-
 int main() {
   std::chrono::steady_clock::time_point last_command_time;
   std::chrono::steady_clock::time_point last_detection_time;
@@ -31,13 +23,7 @@ int main() {
   std::optional<Detection> last_detection;
   const std::chrono::milliseconds command_duration{50};
   const std::chrono::milliseconds detection_duration{0};
-  /*
-    AutonomousDriving autonomousDriving;
-    int x = 0;
-    int y = -60;
-    auto coordinates = autonomousDriving.formatCommand(x, y);
-    std::cout << coordinates << std::endl;
-    */
+
   SafeQueue<std::string> command_queue;
   std::atomic<bool> stop{false};
 
@@ -109,21 +95,8 @@ int main() {
     }
 
     if (command.has_value()) {
-      // std::cout << command.value() << std::endl;
       auto json_command = GUI::message_handler(command.value());
       command_queue.enqueue(json_command);
-
-
-      /*json json_command_json = json::parse(json_command);
-            std::string overlay_text = "No detection";
-            try{
-                int left_velocity = json_command_json["left_velocity"];
-                int right_velocity = json_command_json["right_velocity"];
-                overlay_text = "Left: " + std::to_string(left_velocity) + " Right: " + std::to_string(right_velocity);
-            } catch (std::exception& e) {
-                std::cout << "Could not make overlay" << std::endl;
-            }
-            cv::putText(decoded_frame, overlay_text, cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);*/
     }
 
     if (detection != std::nullopt) {

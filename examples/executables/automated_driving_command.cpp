@@ -2,32 +2,16 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
+
+#include "nlohmann/json.hpp"
 
 #include "autonomous_driving/autonomous_driving.hpp"
-#include "my_messages.pb.h"
-#include "nlohmann/json.hpp"
+#include "helpers/network_helper.hpp"
 #include "object_detection/object_detection.hpp"
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
 
-cv::Mat decodeImageFromProto(const std::string &frame) {
-  VideoFeed video_feed;
-  video_feed.ParseFromString(frame);
-
-  std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
-  cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
-  return decoded_frame;
-}
-
 int main() {
-  /*
-    AutonomousDriving autonomousDriving;
-    int x = 0;
-    int y = -60;
-    auto coordinates = autonomousDriving.formatCommand(x, y);
-    std::cout << coordinates << std::endl;
-    */
   auto AutonomousDriver = std::make_unique<AutonomousDriving>();
   auto Viewer = std::make_unique<VideoViewer>();
   auto ObjectDetector = std::make_unique<ObjectDetection>();
