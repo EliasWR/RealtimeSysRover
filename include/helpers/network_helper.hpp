@@ -3,6 +3,8 @@
 
 #include <array>
 
+#include "nlohmann/json.hpp"
+#include "opencv2/opencv.hpp"
 #include "my_messages.pb.h"
 
 enum class byte_order {
@@ -41,7 +43,7 @@ inline std::array<unsigned char, 4> int_to_bytes(int n, byte_order order = byte_
  *
  * @param buffer The byte array to convert
  * @param order The byte order to use
- * @return The integer
+ * @return int The integer
  */
 inline int bytes_to_int(std::array<unsigned char, 4> buffer, byte_order order = byte_order::LITTLE) {
   if (order == byte_order::LITTLE) {
@@ -59,12 +61,36 @@ inline int bytes_to_int(std::array<unsigned char, 4> buffer, byte_order order = 
 }
 
 /**
+ * @brief Decodes a base64 string
+ *
+ * @param in The base64 string to decode
+ * @return std::string The decoded string
+ */
+inline std::string base64_decode(const std::string &in) {
+  std::string out;
+  std::vector<int> T(256, -1);
+  for (int i = 0; i < 64; i++) T["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i]] = i;
+
+  int val = 0, valb = -8;
+  for (uchar c : in) {
+    if (T[c] == -1) break;
+    val = (val << 6) + T[c];
+    valb += 6;
+    if (valb >= 0) {
+      out.push_back(char((val >> valb) & 0xFF));
+      valb -= 8;
+    }
+  }
+  return out;
+}
+
+/**
  * @brief Encodes an image to a protobuf message
  *
  * @param frame The image to encode
- * @return The encoded protobuf message
+ * @return cv::Mat The encoded protobuf message
  */
-cv::Mat decodeImageFromProto(const std::string &frame) {
+inline cv::Mat decodeImageFromProto(const std::string &frame) {
   VideoFeed video_feed;
   video_feed.ParseFromString(frame);
 
@@ -72,4 +98,31 @@ cv::Mat decodeImageFromProto(const std::string &frame) {
   cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
   return decoded_frame;
 }
+
+/**
+ * @brief Encodes an image to a JSON string
+ *
+ * @param jsonString The JSON string to decode
+ * @return cv::Mat The decoded image
+ */
+inline cv::Mat decodeImageFromJson(const std::string &jsonString) {
+  // Parse the JSON
+  auto json = nlohmann::json::parse(jsonString);
+  std::string encodedImage = json["image"];
+
+  // Base64 Decode
+  std::string decodedImageData = base64_decode(encodedImage);
+
+  // Convert to vector of bytes
+  std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
+
+  // Decode image
+  cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
+
+  return image;
+}
+
+
+
+
 #endif//REALTIMESYSROVER_NETWORK_HELPER_HPP

@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "nlohmann/json.hpp"
-#include "my_messages.pb.h"
 
 #include "autonomous_driving/autonomous_driving.hpp"
 #include "helpers/gui_helper.hpp"
+#include "helpers/network_helper.hpp"
 #include "object_detection/object_detection.hpp"
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server_lib.hpp"
@@ -15,15 +15,6 @@
 #include "video_viewer/video_viewer.hpp"
 
 using json = nlohmann::json;
-
-cv::Mat decodeImageFromProto(const std::string &frame) {
-  VideoFeed video_feed;
-  video_feed.ParseFromString(frame);
-
-  std::vector<uchar> encoded_frame(video_feed.messagefeed().begin(), video_feed.messagefeed().end());
-  cv::Mat decoded_frame = cv::imdecode(encoded_frame, cv::IMREAD_COLOR);
-  return decoded_frame;
-}
 
 int main() {
   std::chrono::steady_clock::time_point last_command_time;
