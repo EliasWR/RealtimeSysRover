@@ -1,9 +1,5 @@
 #include "tcp_server/tcp_server_lib.hpp"
 
-/***********************************************************************************************************************
- *  TCP-Connection
- */
-
 /**
  * @brief Constructor for establishing a TCP connection.
  *
@@ -123,11 +119,6 @@ void TCP::Connection::setDisconnectionHandler(const std::function<void(Connectio
 void TCP::Connection::setMessageHandler(std::function<void(const std::string &)> handler) {
   _message_handler = std::move(handler);
 }
-
-
-/***********************************************************************************************************************
- *  TCP-Server
- */
 
 /**
  * @brief Constructor for establishing a TCP server.

@@ -25,14 +25,14 @@ int main() {
   const std::chrono::milliseconds detection_duration{0};
 
   SafeQueue<std::string> command_queue;
-  std::atomic<bool> stop{false};
+  std::atomic<bool> stop_comm_thread{false};
 
   auto TCP = TCP::TCPServer(9091);
   TCP.start();
 
   auto internal_comm_thread = std::thread([&] {
     auto last_msg_time = std::chrono::steady_clock::now();
-    while (!stop) {
+    while (!stop_comm_thread) {
       auto now = std::chrono::steady_clock::now();
       auto cmd = command_queue.dequeue();
       if (cmd.has_value()) {
@@ -117,7 +117,9 @@ int main() {
     if (cv::waitKey(frame_interval.count()) >= 0) break;
   }
   std::cout << "Stopping camera feed" << std::endl;
+  stop_comm_thread = true;
   ObjectDetector->stop();
-  stop = true;
   TCP.stop();
+  udp_server->stop();
+  internal_comm_thread.join();
 }

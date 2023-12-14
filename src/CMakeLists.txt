@@ -11,7 +11,7 @@ add_library(object_detection realtime_sys_rover/object_detection/object_detectio
 target_include_directories(object_detection PUBLIC
         "${OpenCV_INCLUDE_DIRS}"
         "${CMAKE_SOURCE_DIR}/include"
-        "${CMAKE_SOURCE_DIR}/yolo")
+        "${CMAKE_SOURCE_DIR}/resources")
 
 # TCP Server
 add_library(tcp_server_lib realtime_sys_rover/tcp_server/tcp_server_lib.cpp)

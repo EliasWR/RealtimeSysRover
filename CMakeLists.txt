@@ -12,6 +12,10 @@ find_package(Catch2 CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 
+set(RESOURCE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/resources")
+set(RESOURCE_DEST_DIR "${CMAKE_BINARY_DIR}/resources")
+file(COPY ${RESOURCE_SOURCE_DIR}/ DESTINATION ${RESOURCE_DEST_DIR})
+
 set(proto_dir "${CMAKE_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY ${proto_dir})
 include_directories("${proto_dir}") # Not optimal, needed for generated protobuf files

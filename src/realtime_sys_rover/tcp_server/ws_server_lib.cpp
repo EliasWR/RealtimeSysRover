@@ -1,10 +1,5 @@
 #include "tcp_server/ws_server_lib.hpp"
 
-
-/***********************************************************************************************************************
- *  Websocket-Connection
- */
-
 /*
    Constructor for establishing a Websocket connection.
 
@@ -58,11 +53,6 @@ std::string WSConnection::receiveMessage() {
 void WSConnection::setMessageHandler(std::function<void(const std::string &)> handler) {
   _message_handler = std::move(handler);
 }
-
-
-/***********************************************************************************************************************
- *  Websocket-Server
- */
 
 /*
    Constructor for establishing a Websocket server.
