@@ -23,7 +23,6 @@ public:
   void run();
   void stop();
   void addLatestFrame(const cv::Mat &frame);
-
   bool _running{false};
 
 private:

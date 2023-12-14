@@ -1,8 +1,9 @@
 #include "object_detection/object_detection.hpp"
 
-/*
- * Constructor for ObjectDetection class.
+/**
+ * @brief Constructor for ObjectDetection class.
  *
+ * @details
  * Loads the model and the class names.
  */
 ObjectDetection::ObjectDetection() {
@@ -13,8 +14,8 @@ ObjectDetection::ObjectDetection() {
   _net = cv::dnn::readNet(_modelPath, _configPath);
 }
 
-/*
- * Preprocesses the frame for the model.
+/**
+ * @brief Preprocesses the frame for the model.
  *
  * @param frame The frame to preprocess.
  * @param blob The blob to store the preprocessed frame in.
@@ -28,9 +29,10 @@ void ObjectDetection::preprocess(const cv::Mat &frame, cv::Mat &blob) {
   cv::dnn::blobFromImage(frame, blob, scale_factor, size, mean, swapRB, crop);
 }
 
-/*
- * Runs the model.
+/**
+ * @brief Runs the model.
  *
+ * @details
  * The model is run on the blob and the outputs are stored in the outputs vector.
  *
  * @param blob The blob to run the model on.
@@ -41,9 +43,10 @@ void ObjectDetection::runModel(const cv::Mat &blob, std::vector<cv::Mat> &output
   _net.forward(outputs, _net.getUnconnectedOutLayersNames());
 }
 
-/*
- * Postprocesses the outputs of the model.
+/**
+ * @brief Postprocesses the outputs of the model.
  *
+ * @details
  * The outputs are postprocessed and stored in the detection object.
  *
  * @param outputs The outputs of the model.
@@ -81,8 +84,8 @@ void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv:
   }
 }
 
-/*
- * Draws the detections on the frame.
+/**
+ * @brief Draws the detections on the frame.
  *
  * @param frame The frame to draw the detections on.
  * @param detection The detection object containing the detections.
@@ -123,8 +126,8 @@ cv::Mat ObjectDetection::drawDetections(cv::Mat &frame, std::optional<Detection>
   return frame;
 }
 
-/*
- * Detects objects in the frame.
+/**
+ * @brief Detects objects in the frame.
  *
  * @param frame The frame to detect objects in.
  * @return The detection object containing the detections.
@@ -141,8 +144,8 @@ Detection ObjectDetection::detectObjects(const cv::Mat &frame) {
   return detection;
 }
 
-/*
- * Adds the latest frame to the object detection.
+/**
+ * @brief Adds the latest frame to the object detection.
  *
  * @param frame The latest frame.
  */
@@ -153,8 +156,8 @@ void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
   cv.notify_one();
 }
 
-/*
- * Gets the latest detection.
+/**
+ * @brief Get the latest detection.
  *
  * @return The latest detection.
  */
@@ -165,9 +168,10 @@ std::optional<Detection> ObjectDetection::getLatestDetection() {
   return _latest_detection;
 }
 
-/*
- * Runs the object detection.
+/**
+ * @brief Runs the object detection.
  *
+ * @details
  * Runs the object detection in a separate thread.
  * The latest detection is stored in the _latest_detection variable.
  */
@@ -198,9 +202,10 @@ void ObjectDetection::run() {
   });
 }
 
-/*
- * Stops the object detection.
+/**
+ * @brief Stops the object detection.
  *
+ * @details
  * Stops the object detection thread.
  */
 void ObjectDetection::stop() {
