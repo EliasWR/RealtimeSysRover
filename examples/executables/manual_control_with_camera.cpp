@@ -1,10 +1,11 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include <iostream>
+
 #include "nlohmann/json.hpp"
+#include "my_messages.pb.h"
 
 #include "helpers/gui_helper.hpp"
-#include "my_messages.pb.h"
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server_lib.hpp"
 #include "tcp_server/ws_server_lib.hpp"

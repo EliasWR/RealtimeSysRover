@@ -1,6 +1,5 @@
 #include "video_viewer/video_viewer.hpp"
 
-
 /**
  * @brief Construct a new Video Viewer object
  *
