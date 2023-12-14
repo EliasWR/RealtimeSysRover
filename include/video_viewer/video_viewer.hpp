@@ -7,7 +7,6 @@
 #include <atomic>
 #include <mutex>
 #include <queue>
-#include <thread>
 
 class VideoViewer {
 public:
