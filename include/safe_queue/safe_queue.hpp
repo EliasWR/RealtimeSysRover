@@ -26,7 +26,7 @@ public:
   }
 
   std::optional<T> dequeue() {
-    std::unique_lock<std::mutex> lock{_m};
+    std::unique_lock<std::mutex> lock(_m);
     if (_queue.empty()) {
       return std::nullopt;
     }

@@ -42,7 +42,7 @@ private:
   std::thread _acceptor_thread;
   std::function<void(const std::string &)> _message_handler;
   std::mutex _m;
-  std::atomic<bool> _is_running{false};
+  std::atomic<bool> _is_running = false;
 };
 
 

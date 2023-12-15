@@ -28,7 +28,7 @@ void UDPServer::start() {
   _thread = std::thread([&] {
     try {
       while (true) {
-        auto [message, len, endpoint] = receiveMessage();
+        auto [message, endpoint] = receiveMessage();
         _messageHandler(message);
         //standardResponse(endpoint);
       }
@@ -46,13 +46,13 @@ void UDPServer::start() {
  * @return std::tuple<std::string, size_t, udp::endpoint>: The received message, the length of the message and the
  * endpoint of the client.
  */
-std::tuple<std::string, size_t, udp::endpoint> UDPServer::receiveMessage() {
+std::tuple<std::string, udp::endpoint> UDPServer::receiveMessage() {
   udp::endpoint remote_endpoint;
 
   std::vector<char> recv_buffer(65507);
   size_t len = _socket.receive_from(asio::buffer(recv_buffer), remote_endpoint);
   std::string recv_message(recv_buffer.begin(), recv_buffer.begin() + len);
-  return std::make_tuple(recv_message, len, remote_endpoint);
+  return std::make_tuple(recv_message, remote_endpoint);
 }
 
 

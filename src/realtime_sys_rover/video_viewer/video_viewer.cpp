@@ -6,10 +6,10 @@
  * @param screen_name
  */
 VideoViewer::VideoViewer(std::string screen_name) :
-    dummy_frame(cv::Mat::zeros(cv::Size(640, 480), CV_8UC3)),
-    last_frame_time(std::chrono::steady_clock::now()),
+    _dummy_frame(cv::Mat::zeros(cv::Size(640, 480), CV_8UC3)),
+    _last_frame_time(std::chrono::steady_clock::now()),
     _screen_name(screen_name) {
-  cv::putText(dummy_frame, "Waiting for video feed...", cv::Point(50, 240),
+  cv::putText(_dummy_frame, "Waiting for video feed...", cv::Point(50, 240),
               cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(255, 255, 255), 2);
 }
 
@@ -29,13 +29,13 @@ VideoViewer::~VideoViewer() {
  * @param frame The frame to add.
  */
 void VideoViewer::addFrame(const cv::Mat &frame) {
-  std::unique_lock<std::mutex> guard(queue_mutex);
+  std::unique_lock<std::mutex> guard(_queue_mutex);
   if (!frame.empty()) {
-    if (!frame_queue.empty()) {
-      frame_queue.pop();
+    if (!_frame_queue.empty()) {
+      _frame_queue.pop();
     }
-    frame_queue.push(frame);
-    last_frame_time = std::chrono::steady_clock::now();
+    _frame_queue.push(frame);
+    _last_frame_time = std::chrono::steady_clock::now();
   }
 }
 
@@ -44,7 +44,7 @@ void VideoViewer::addFrame(const cv::Mat &frame) {
  *
  */
 void VideoViewer::display() {
-  cv::Mat frame{getLatestFrame()};
+  cv::Mat frame = getLatestFrame();
   cv::imshow(_screen_name, frame);
 
   cv::waitKey(1);
@@ -56,17 +56,17 @@ void VideoViewer::display() {
  * @return cv::Mat The latest frame.
  */
 cv::Mat VideoViewer::getLatestFrame() {
-  std::unique_lock<std::mutex> guard(queue_mutex);
+  std::unique_lock<std::mutex> guard(_queue_mutex);
   auto now = std::chrono::steady_clock::now();
   cv::Mat frame;
-  if (!frame_queue.empty()) {
-    frame = frame_queue.front();
-    if (now - last_frame_time >= std::chrono::seconds(3)) {
-      frame_queue.pop();
+  if (!_frame_queue.empty()) {
+    frame = _frame_queue.front();
+    if (now - _last_frame_time >= std::chrono::seconds(3)) {
+      _frame_queue.pop();
     }
   }
   else {
-    frame = dummy_frame;
+    frame = _dummy_frame;
   }
   return frame;
 }

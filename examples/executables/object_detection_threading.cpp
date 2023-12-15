@@ -18,7 +18,7 @@ int main() {
 
   auto handler_proto = [&](const std::string &message) {
     cv::Mat decoded_frame = decodeImageFromProto(message);
-    if (ObjectDetector->_running)
+    if (ObjectDetector->running)
       ObjectDetector->addLatestFrame(decoded_frame);
 
     auto detection = ObjectDetector->getLatestDetection();

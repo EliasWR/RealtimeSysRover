@@ -16,37 +16,36 @@
 using json = nlohmann::json;
 
 int main() {
-  std::chrono::steady_clock::time_point last_command_time {};
-  std::chrono::steady_clock::time_point last_detection_time {};
-  std::optional<std::string> last_command {};
-  std::optional<Detection> last_detection {};
+  std::chrono::steady_clock::time_point last_command_time;
+  std::chrono::steady_clock::time_point last_detection_time;
+  std::optional<std::string> last_command;
+  std::optional<Detection> last_detection;
   const std::chrono::milliseconds command_duration {50};
   const std::chrono::milliseconds detection_duration {0};
 
-  SafeQueue<std::string> command_queue {};
-  std::atomic<bool> stop_comm_thread {false};
+  SafeQueue<std::string> command_queue;
+  std::atomic<bool> stop_comm_thread = false;
 
-  auto TCP {TCP::TCPServer(9091)};
-  auto AutonomousDriver {AutonomousDriving()};
-  auto Viewer {VideoViewer()};
-  auto ObjectDetector {ObjectDetection()};
+  auto TCP = TCP::TCPServer(9091);
+  auto AutonomousDriver = AutonomousDriving();
+  auto Viewer = VideoViewer();
+  auto ObjectDetector = ObjectDetection();
 
   TCP.start();
   AutonomousDriver.run();
   ObjectDetector.run();
 
-  auto internal_comm_thread {std::thread([&] {
-    auto last_msg_time {std::chrono::steady_clock::now()};
+  auto internal_comm_thread = std::thread([&] {
+    auto last_msg_time = std::chrono::steady_clock::now();
 
     while (!stop_comm_thread) {
-      auto now {std::chrono::steady_clock::now()};
-      auto cmd {command_queue.dequeue()};
+      auto now = std::chrono::steady_clock::now();
+      auto cmd = command_queue.dequeue();
 
       if (cmd.has_value()) {
-        json j {json::parse(cmd.value())};
+        json j = json::parse(cmd.value());
 
         if (j["command"] == "stop") {
-          last_msg_time = now;
           TCP.writeToAllClients(cmd.value());
         }
         else if (now - last_msg_time > std::chrono::milliseconds(100)) {
@@ -55,16 +54,16 @@ int main() {
         }
       }
     }
-  })};
+  });
 
   auto handler_proto {[&](const std::string &message) {
-    auto now {std::chrono::steady_clock::now()};
-    auto decoded_frame {decodeImageFromProto(message)};
-    if (ObjectDetector._running) {
+    auto now = std::chrono::steady_clock::now();
+    auto decoded_frame = decodeImageFromProto(message);
+    if (ObjectDetector.running) {
       ObjectDetector.addLatestFrame(decoded_frame);
     }
 
-    auto detection {ObjectDetector.getLatestDetection()};
+    auto detection = ObjectDetector.getLatestDetection();
 
     // Only use last detection if it is not too old
     if (detection.has_value()) {
@@ -80,7 +79,7 @@ int main() {
     }
 
     AutonomousDriver.addLatestDetection(detection);
-    auto command {AutonomousDriver.getLatestCommand()};
+    auto command = AutonomousDriver.getLatestCommand();
 
     // Only use last command if it is not too old
     if (command.has_value()) {
@@ -106,11 +105,11 @@ int main() {
     Viewer.addFrame(decoded_frame);
   }};
 
-  auto UDP {UDPServer(8080, handler_proto)};
+  auto UDP = UDPServer(8080, handler_proto);
   UDP.start();
 
-  auto fps {30};
-  auto frame_interval {std::chrono::milliseconds(1000 / fps)};
+  auto fps = 30;
+  auto frame_interval = std::chrono::milliseconds(1000 / fps);
   while (true) {
     Viewer.display();
     if (cv::waitKey(frame_interval.count()) >= 0) break;

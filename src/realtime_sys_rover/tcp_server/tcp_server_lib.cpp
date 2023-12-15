@@ -62,9 +62,9 @@ int TCP::Connection::receiveMessageSize() {
  * @return std::string The received message.
  */
 std::string TCP::Connection::receiveMessage() {
-  int len {receiveMessageSize()};
-  boost::asio::streambuf buf {};
-  boost::system::error_code err {};
+  int len = receiveMessageSize();
+  boost::asio::streambuf buf;
+  boost::system::error_code err;
 
   boost::asio::read(_socket, buf, boost::asio::transfer_exactly(len), err);
   if (err) {
@@ -82,7 +82,7 @@ std::string TCP::Connection::receiveMessage() {
  * @param msg The message to be sent.
  */
 void TCP::Connection::writeMessage(const std::string &msg) {
-  int msgSize {static_cast<int>(msg.size())};
+  int msgSize = static_cast<int>(msg.size());
 
   _socket.send(boost::asio::buffer(int_to_bytes(msgSize), 4));
   _socket.send(boost::asio::buffer(msg));
@@ -251,8 +251,8 @@ void TCP::TCPServer::writeToAllClients(const std::string &msg) {
  */
 void TCP::TCPServer::handleDisconnection(Connection *conn) {
   {
-    std::lock_guard<std::mutex> lock {_task_m};
-    tasks.emplace([this, conn]() {
+    std::lock_guard<std::mutex> lock(_task_m);
+    _tasks.emplace([this, conn]() {
       auto connection_itr = std::find_if(_clients.begin(), _clients.end(),
                                          [conn](const std::unique_ptr<Connection> &client) {
                                            return client.get() == conn;
@@ -275,17 +275,17 @@ void TCP::TCPServer::handleDisconnection(Connection *conn) {
  */
 void TCP::TCPServer::processTasks() {
   while (true) {
-    std::function<void()> task {};
+    std::function<void()> task;
     {
-      std::unique_lock<std::mutex> lock {_task_m};
+      std::unique_lock<std::mutex> lock(_task_m);
       _tasks_cond.wait(lock, [this] {
-        return _stop_task_thread || !tasks.empty();
+        return _stop_task_thread || !_tasks.empty();
       });
-      if (_stop_task_thread && tasks.empty()) {
+      if (_stop_task_thread && _tasks.empty()) {
         break;
       }
-      task = std::move(tasks.front());
-      tasks.pop();
+      task = std::move(_tasks.front());
+      _tasks.pop();
     }
     if (task) {
       task();

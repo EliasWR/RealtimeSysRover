@@ -24,7 +24,7 @@ namespace GUI {
 
   using json = nlohmann::json;
 
-    /**
+  /**
      * @brief Maps a value from one range to another.
      *
      * This template function maps a value from its original range (in_min, in_max)
@@ -59,7 +59,7 @@ namespace GUI {
     int pan;
   };
 
-    /**
+  /**
     * @brief Splits a string into tokens based on a delimiter.
     *
     * @param str The string to split.
@@ -75,7 +75,8 @@ namespace GUI {
     }
     return tokens;
   }
-    /**
+
+  /**
     * @brief Determines the direction based on velocity.
     *
     * @param value The velocity value.
@@ -86,7 +87,7 @@ namespace GUI {
                                            0;
   }
 
-    /**
+  /**
      * @brief Converts joystick input to heading and speed for the rover.
      *
      * @param joy_x The x-coordinate of the joystick input.
@@ -105,7 +106,7 @@ namespace GUI {
     return {heading, speed};
   }
 
-    /**
+  /**
     * @brief Converts joystick input to raw motor values for the rover.
     *
     * @param joy_x The x-coordinate of the joystick input.
@@ -113,14 +114,14 @@ namespace GUI {
     * @return A structure containing the calculated raw motor commands.
     */
   sRawMotors joystick_to_raw_motors(int joy_x, int joy_y) {
-    joy_x = joy_y < 0 ? -joy_x : joy_x; // Flip the x axis if the y axis is negative
+    joy_x = joy_y < 0 ? -joy_x : joy_x;// Flip the x axis if the y axis is negative
     int left_velocity = (joy_y + joy_x) * MAX_SPEED / (MAX_JOY_VAL * 2);
     int right_velocity = (joy_y - joy_x) * MAX_SPEED / (MAX_JOY_VAL * 2);
     return {direction_from_velocity(left_velocity), std::abs(left_velocity),
             direction_from_velocity(right_velocity), std::abs(right_velocity)};
   }
 
-    /**
+  /**
      * @brief Converts joystick input to camera tilt and pan commands.
      *
      * @param joy_x The x-coordinate of the joystick input.
@@ -134,7 +135,7 @@ namespace GUI {
     return {tilt, pan};
   }
 
-    /**
+  /**
     * @brief Creates a rover message based on input commands.
     *
     * Parses the input commands and creates a JSON message to control the rover.
