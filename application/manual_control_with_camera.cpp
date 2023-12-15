@@ -22,7 +22,7 @@ int main() {
 
   auto WebsocketServer = WSServer(12345);
   WebsocketServer.setMessageHandler([&](const std::string &msg) {
-    auto command {GUI::message_handler(msg)};
+    auto command = GUI::message_handler(msg);
     command_queue.enqueue(command);
   });
   WebsocketServer.start();
@@ -50,7 +50,7 @@ int main() {
   });
 
   auto handler_proto = [&](const std::string &message) {
-    cv::Mat decoded_frame {decodeImageFromProto(message)};
+    cv::Mat decoded_frame = decodeImageFromProto(message);
     Viewer.addFrame(decoded_frame);
   };
 

@@ -56,7 +56,7 @@ int main() {
     }
   });
 
-  auto handler_proto {[&](const std::string &message) {
+  auto handler_proto = [&](const std::string &message) {
     auto now = std::chrono::steady_clock::now();
     auto decoded_frame = decodeImageFromProto(message);
     if (ObjectDetector.running) {
@@ -95,7 +95,7 @@ int main() {
     }
 
     if (command.has_value()) {
-      auto json_command {GUI::message_handler(command.value())};
+      auto json_command = GUI::message_handler(command.value());
       command_queue.enqueue(json_command);
     }
 
@@ -103,7 +103,7 @@ int main() {
       ObjectDetector.drawDetections(decoded_frame, detection);
     }
     Viewer.addFrame(decoded_frame);
-  }};
+  };
 
   auto UDP = UDPServer(8080, handler_proto);
   UDP.start();
