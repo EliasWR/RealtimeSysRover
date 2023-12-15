@@ -33,7 +33,7 @@ Group number: 11 \
 * **/resources** - Resources such yolo-data
 
 ### Class structure
-![img.svg](resources/images/uml_class_diagram.png)
+![img.svg](doc/images/uml_class_diagram.png)
 
 ### Conventions
 

@@ -7,9 +7,9 @@
  * Loads the model and the class names.
  */
 ObjectDetection::ObjectDetection() {
-  _categoryPath = "../../resources/yolo/coco.names";
-  _modelPath = "../../resources/yolo/yolov3-tiny.weights";
-  _configPath = "../../resources/yolo/yolov3-tiny.cfg";
+  _categoryPath = "../resources/yolo/coco.names";
+  _modelPath = "../resources/yolo/yolov3-tiny.weights";
+  _configPath = "../resources/yolo/yolov3-tiny.cfg";
   _classNames = loadFileToVector(_categoryPath);
   _net = cv::dnn::readNet(_modelPath, _configPath);
 }

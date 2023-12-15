@@ -51,27 +51,3 @@ target_link_libraries(automated_driving_command PUBLIC
         autonomous_driving)
 target_include_directories(automated_driving_command PUBLIC
         "${CMAKE_BINARY_DIR}/generated")
-
-# Autonomous driving example
-add_executable(automated_driving executables/automated_driving.cpp)
-target_link_libraries(automated_driving PUBLIC
-        udp_server_lib
-        video_viewer_lib
-        proto_c
-        object_detection
-        autonomous_driving
-        tcp_server_lib)
-target_include_directories(automated_driving PUBLIC
-        "${CMAKE_BINARY_DIR}/generated")
-
-# Manual control with camera viewer
-add_executable(manual_control_with_camera executables/manual_control_with_camera.cpp)
-target_link_libraries(manual_control_with_camera PUBLIC
-        tcp_server_lib
-        ws_server_lib
-        video_viewer_lib
-        proto_c
-        udp_server_lib)
-target_include_directories(manual_control_with_camera PUBLIC
-        ${CMAKE_SOURCE_DIR}/include
-        "${CMAKE_BINARY_DIR}/generated")
