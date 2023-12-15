@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 
-#include "my_messages.pb.h"
 #include "object_detection/object_detection.hpp"
 #include "udp_server/udp_server.hpp"
 #include "video_viewer/video_viewer.hpp"
