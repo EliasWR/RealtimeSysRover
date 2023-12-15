@@ -1,5 +1,7 @@
 #include "video_viewer/video_viewer.hpp"
 
+#include <thread>
+
 int main() {
   VideoViewer viewer;
 
