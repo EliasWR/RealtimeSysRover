@@ -162,7 +162,7 @@ void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
  * @return The latest detection.
  */
 std::optional<Detection> ObjectDetection::getLatestDetection() {
-  if (std::chrono::steady_clock::now() - _last_detection_time >= std::chrono::milliseconds(MAX_DETECTION_AGE)) {
+  if (std::chrono::steady_clock::now() - _last_detection_time >= std::chrono::milliseconds(_MAX_DETECTION_AGE)) {
     return std::nullopt;
   }
   return _latest_detection;

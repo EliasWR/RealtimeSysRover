@@ -1,8 +1,6 @@
 #ifndef REALTIMESYSROVER_OBJECT_DETECTION_HPP
 #define REALTIMESYSROVER_OBJECT_DETECTION_HPP
 
-#include "helpers/detection_helper.hpp"
-#include "helpers/read_file_helper.hpp"
 #include <condition_variable>
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
@@ -10,6 +8,9 @@
 #include <string>
 #include <thread>
 #include <vector>
+
+#include "helpers/detection_helper.hpp"
+#include "helpers/read_file_helper.hpp"
 
 class ObjectDetection {
 public:
@@ -39,7 +40,7 @@ private:
   bool _new_frame_available = false;
   Detection _latest_detection;
   std::chrono::steady_clock::time_point _last_detection_time;
-  const int MAX_DETECTION_AGE = 1000;//seconds
+  const int _MAX_DETECTION_AGE = 1000;//seconds
 };
 
 #endif//REALTIMESYSROVER_OBJECT_DETECTION_HPP
