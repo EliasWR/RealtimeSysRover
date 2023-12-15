@@ -12,43 +12,43 @@
 #include "video_viewer/video_viewer.hpp"
 
 int main() {
-  auto AutonomousDriver = std::make_unique<AutonomousDriving>();
-  auto Viewer = std::make_unique<VideoViewer>();
-  auto ObjectDetector = std::make_unique<ObjectDetection>();
+  auto AutonomousDriver = AutonomousDriving();
+  auto Viewer = VideoViewer();
+  auto ObjectDetector = ObjectDetection();
 
-  ObjectDetector->run();
-  AutonomousDriver->run();
+  ObjectDetector.run();
+  AutonomousDriver.run();
 
   auto handler_proto = [&](const std::string &message) {
     cv::Mat decoded_frame = decodeImageFromProto(message);
-    if (ObjectDetector->running)
-      ObjectDetector->addLatestFrame(decoded_frame);
+    if (ObjectDetector.running)
+      ObjectDetector.addLatestFrame(decoded_frame);
 
-    auto detection = ObjectDetector->getLatestDetection();
+    auto detection = ObjectDetector.getLatestDetection();
 
-    AutonomousDriver->addLatestDetection(detection);
-    auto command = AutonomousDriver->getLatestCommand();
+    AutonomousDriver.addLatestDetection(detection);
+    auto command = AutonomousDriver.getLatestCommand();
     if (command.has_value()) {
       std::cout << command.value() << std::endl;
     }
 
     if (detection != std::nullopt) {
-      decoded_frame = ObjectDetector->drawDetections(decoded_frame, detection);
+      decoded_frame = ObjectDetector.drawDetections(decoded_frame, detection);
       std::cout << "Added detection to frame" << std::endl;
     }
-    Viewer->addFrame(decoded_frame);
+    Viewer.addFrame(decoded_frame);
   };
 
-  auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
-
-  udp_server->start();
+  auto UDP = UDPServer(8080, handler_proto);
+  UDP.start();
 
   int fps = 30;
   auto frame_interval = std::chrono::milliseconds(1000 / fps);
   while (true) {
-    Viewer->display();
+    Viewer.display();
     if (cv::waitKey(static_cast<int>(frame_interval.count())) >= 0) break;
   }
   std::cout << "Stopping camera feed" << std::endl;
-  ObjectDetector->stop();
+  ObjectDetector.stop();
+  UDP.stop()
 }

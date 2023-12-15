@@ -55,7 +55,6 @@ std::tuple<std::string, udp::endpoint> UDPServer::receiveMessage() {
   return std::make_tuple(recv_message, remote_endpoint);
 }
 
-
 /**
  * @brief Receives the size of the incoming message.
  *
@@ -65,16 +64,16 @@ std::tuple<std::string, udp::endpoint> UDPServer::receiveMessage() {
  * @return The size of the incoming message, or an error if the size cannot be determined.
  */
 [[maybe_unused]] int UDPServer::receiveMessageSize() {
-    std::vector<char> recv_buffer(4);
-    size_t len = _socket.receive(asio::buffer(recv_buffer));
-    std::string data(recv_buffer.begin(), recv_buffer.begin() + len);
-    try {
-        return std::stoi(data);
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-    }
+  std::vector<char> recv_buffer(4);
+  size_t len = _socket.receive(asio::buffer(recv_buffer));
+  std::string data(recv_buffer.begin(), recv_buffer.begin() + len);
+  try {
+    return std::stoi(data);
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  }
+  return 0;
 }
-
 
 /**
  * @brief Sends a message to a client.
@@ -82,8 +81,8 @@ std::tuple<std::string, udp::endpoint> UDPServer::receiveMessage() {
  * @param message The message to send.
  * @param remote_endpoint The endpoint of the client.
  */
-[[maybe_unused]] void UDPServer::sendMessage(const std::string& message, const udp::endpoint& remote_endpoint) {
-    _socket.send_to(asio::buffer(message), remote_endpoint);
+[[maybe_unused]] void UDPServer::sendMessage(const std::string &message, const udp::endpoint &remote_endpoint) {
+  _socket.send_to(asio::buffer(message), remote_endpoint);
 }
 
 /**

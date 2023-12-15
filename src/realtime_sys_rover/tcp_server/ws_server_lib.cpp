@@ -74,7 +74,7 @@ void WSServer::start() {
     try {
       while (_is_running) {
 
-        tcp::socket socket{_ioc};
+        tcp::socket socket {_ioc};
         _acceptor.accept(socket);//blocking operation
 
         std::cout << "Websocket connected to client at " << socket.remote_endpoint().address().to_string() << std::endl;
@@ -96,6 +96,7 @@ void WSServer::start() {
     }
   });
 }
+
 /**
 *   @brief Stops the server.
 *   Stops the acceptor thread and the io_context.

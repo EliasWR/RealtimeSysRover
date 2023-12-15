@@ -11,8 +11,6 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('127.0.0.1', 8080)
 MAX_UDP_PACKET_SIZE = 65507
 
-
-
 while True:
     frame = np.zeros((480, 640, 3), np.uint8)
     cv2.putText(frame, "Hello From udp!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)

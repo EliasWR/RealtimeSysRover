@@ -2,9 +2,8 @@
 #define REALTIMESYSROVER_Detection_HPP
 
 #include <opencv2/opencv.hpp>
-#include <vector>
 #include <thread>
-
+#include <vector>
 
 struct Detection {
   std::vector<cv::Rect> boxes;

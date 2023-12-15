@@ -31,14 +31,13 @@ while True:
         if not is_success:
             print("Failed to encode image!")
             break
-        
+
         encoded_image = base64.b64encode(buffer).decode('utf-8')
-  
+
         video_feed = {"image": encoded_image}
 
-        
         serialized_video_feed = json.dumps(video_feed).encode("utf-8")
-     
+
         if len(serialized_video_feed) <= MAX_UDP_PACKET_SIZE:
             break
         scale_factor -= 0.1
