@@ -1,3 +1,6 @@
+# An initial sketch was inspired by Networking Demo by Lars Ivar Hatledal:
+# https://github.com/AIS2203-H-2023/networking_demo/blob/master/tcp/python/py_tcp_client.py
+
 import socket
 import cv2
 from resources.protobuf.my_messages_pb2 import VideoFeed

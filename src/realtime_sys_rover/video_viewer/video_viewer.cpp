@@ -31,7 +31,6 @@ VideoViewer::~VideoViewer() {
 void VideoViewer::addFrame(const cv::Mat &frame) {
   std::unique_lock<std::mutex> guard(queue_mutex);
   if (!frame.empty()) {
-    accept_frames = false;
     if (!frame_queue.empty()) {
       frame_queue.pop();
     }

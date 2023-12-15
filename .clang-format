@@ -1,3 +1,4 @@
+# Inspired by Threepp library: https://github.com/markaren/threepp/blob/master/.github/workflows/config.yml
 BasedOnStyle: LLVM
 AccessModifierOffset: -2
 AlignAfterOpenBracket: Align

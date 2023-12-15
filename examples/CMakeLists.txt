@@ -1,5 +1,5 @@
 # Picamera server tcp
-add_executable(picamera_server_tcp executables/picamera_server.cpp)
+add_executable(picamera_server_tcp executables/picamera_server_tcp.cpp)
 target_link_libraries(picamera_server_tcp PUBLIC ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 target_include_directories(picamera_server_tcp PUBLIC
         ${OpenCV_INCLUDE_DIRS}
