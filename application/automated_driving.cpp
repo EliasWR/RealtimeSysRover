@@ -1,7 +1,6 @@
 #include <chrono>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "nlohmann/json.hpp"
 
@@ -21,22 +20,30 @@ int main() {
   std::chrono::steady_clock::time_point last_detection_time;
   std::optional<std::string> last_command;
   std::optional<Detection> last_detection;
-  const std::chrono::milliseconds command_duration{50};
-  const std::chrono::milliseconds detection_duration{0};
+  const std::chrono::milliseconds command_duration {50};
+  const std::chrono::milliseconds detection_duration {0};
 
   SafeQueue<std::string> command_queue;
-  std::atomic<bool> stop_comm_thread{false};
+  std::atomic<bool> stop_comm_thread {false};
 
-  auto TCP = TCP::TCPServer(9091);
+  auto TCP {TCP::TCPServer(9091)};
+  auto AutonomousDriver {AutonomousDriving()};
+  auto Viewer {VideoViewer()};
+  auto ObjectDetector {ObjectDetection()};
+
   TCP.start();
+  AutonomousDriver.run();
+  ObjectDetector.run();
 
   auto internal_comm_thread = std::thread([&] {
-    auto last_msg_time = std::chrono::steady_clock::now();
+    auto last_msg_time {std::chrono::steady_clock::now()};
+
     while (!stop_comm_thread) {
-      auto now = std::chrono::steady_clock::now();
-      auto cmd = command_queue.dequeue();
+      auto now {std::chrono::steady_clock::now()};
+      auto cmd {command_queue.dequeue()};
+
       if (cmd.has_value()) {
-        json j = json::parse(cmd.value());
+        json j {json::parse(cmd.value())};
 
         if (j["command"] == "stop") {
           last_msg_time = now;
@@ -50,20 +57,14 @@ int main() {
     }
   });
 
-  auto AutonomousDriver = std::make_unique<AutonomousDriving>();
-  auto Viewer = std::make_unique<VideoViewer>();
-  auto ObjectDetector = std::make_unique<ObjectDetection>();
-
-  ObjectDetector->run();
-  AutonomousDriver->run();
-
   auto handler_proto = [&](const std::string &message) {
-    auto now = std::chrono::steady_clock::now();
-    cv::Mat decoded_frame = decodeImageFromProto(message);
-    if (ObjectDetector->_running)
-      ObjectDetector->addLatestFrame(decoded_frame);
+    auto now {std::chrono::steady_clock::now()};
+    auto decoded_frame {decodeImageFromProto(message)};
+    if (ObjectDetector._running) {
+      ObjectDetector.addLatestFrame(decoded_frame);
+    }
 
-    auto detection = ObjectDetector->getLatestDetection();
+    auto detection {ObjectDetector.getLatestDetection()};
 
     // Only use last detection if it is not too old
     if (detection.has_value()) {
@@ -78,8 +79,8 @@ int main() {
       last_detection.reset();
     }
 
-    AutonomousDriver->addLatestDetection(detection);
-    auto command = AutonomousDriver->getLatestCommand();
+    AutonomousDriver.addLatestDetection(detection);
+    auto command {AutonomousDriver.getLatestCommand()};
 
     // Only use last command if it is not too old
     if (command.has_value()) {
@@ -95,31 +96,32 @@ int main() {
     }
 
     if (command.has_value()) {
-      auto json_command = GUI::message_handler(command.value());
+      auto json_command {GUI::message_handler(command.value())};
       command_queue.enqueue(json_command);
     }
 
     if (detection != std::nullopt) {
-      ObjectDetector->drawDetections(decoded_frame, detection);
-      std::cout << "Added detection to frame" << std::endl;
+      ObjectDetector.drawDetections(decoded_frame, detection);
     }
-    Viewer->addFrame(decoded_frame);
+    Viewer.addFrame(decoded_frame);
   };
 
-  auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
+  auto UDP {UDPServer(8080, handler_proto)};
+  UDP.start();
 
-  udp_server->start();
-
-  auto fps = 30;
-  auto frame_interval = std::chrono::milliseconds(1000 / fps);
+  auto fps {30};
+  auto frame_interval {std::chrono::milliseconds(1000 / fps)};
   while (true) {
-    Viewer->display();
+    Viewer.display();
     if (cv::waitKey(frame_interval.count()) >= 0) break;
   }
-  std::cout << "Stopping camera feed" << std::endl;
+
+  std::cout << "Stopping program" << std::endl;
   stop_comm_thread = true;
-  ObjectDetector->stop();
   TCP.stop();
-  udp_server->stop();
+  ObjectDetector.stop();
+  UDP.stop();
   internal_comm_thread.join();
+
+  return 0;
 }
