@@ -50,5 +50,5 @@ int main() {
   }
   std::cout << "Stopping camera feed" << std::endl;
   ObjectDetector.stop();
-  UDP.stop()
+  UDP.stop();
 }
