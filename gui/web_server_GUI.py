@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 import netifaces
 
+# Add your interface GUID here
 INTERFACE = '{98FF9398-32A3-4162-8A1F-4D66F8420747}'  # GUID for wifi-interface on Martin's Computer
 # INTERFACE = '{b28e8efd-ddbe-4b84-8074-d3a30bb615f2}' # GUID for wifi-interface on Elias's Computer
 
