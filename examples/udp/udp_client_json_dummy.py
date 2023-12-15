@@ -1,3 +1,6 @@
+# An initial sketch was inspired by Networking Demo by Lars Ivar Hatledal:
+# https://github.com/AIS2203-H-2023/networking_demo/blob/master/tcp/python/py_tcp_client.py
+
 import socket
 import base64
 import json
@@ -17,7 +20,6 @@ while True:
     cv2.putText(frame, timestamp, (100, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
     cv2.imshow("Python", frame)
-
 
     scale_factor = 1.0
     while True:

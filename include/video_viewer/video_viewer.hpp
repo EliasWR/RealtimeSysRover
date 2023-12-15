@@ -6,7 +6,6 @@
 #include <atomic>
 #include <mutex>
 #include <queue>
-#include <thread>
 
 class VideoViewer {
 public:
@@ -14,7 +13,6 @@ public:
   ~VideoViewer();
   void addFrame(const cv::Mat &frame);
   void display();
-  bool accept_frames{false};
 
 private:
   std::queue<cv::Mat> frame_queue;

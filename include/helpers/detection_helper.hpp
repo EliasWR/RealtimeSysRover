@@ -5,6 +5,7 @@
 #include <vector>
 #include <thread>
 
+
 struct Detection {
   std::vector<cv::Rect> boxes;
   std::vector<float> confidences;

@@ -1,3 +1,6 @@
+# Inspired by Networking demo written by Lars Ivar Hatledal
+# https://github.com/AIS2203-H-2023/serialization_demo/tree/master/protobuf
+
 find_program(PROTOC NAMES protoc)
 
 add_custom_command(
