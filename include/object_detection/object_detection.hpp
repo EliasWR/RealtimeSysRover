@@ -40,7 +40,7 @@ private:
   bool _new_frame_available = false;
   Detection _latest_detection;
   std::chrono::steady_clock::time_point _last_detection_time;
-  const int _MAX_DETECTION_AGE = 1000;//seconds
+  const int MAX_DETECTION_AGE = 1000;//seconds
 };
 
 #endif//REALTIMESYSROVER_OBJECT_DETECTION_HPP
