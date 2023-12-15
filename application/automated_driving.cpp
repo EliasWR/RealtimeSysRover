@@ -16,14 +16,14 @@
 using json = nlohmann::json;
 
 int main() {
-  std::chrono::steady_clock::time_point last_command_time;
-  std::chrono::steady_clock::time_point last_detection_time;
-  std::optional<std::string> last_command;
-  std::optional<Detection> last_detection;
+  std::chrono::steady_clock::time_point last_command_time {};
+  std::chrono::steady_clock::time_point last_detection_time {};
+  std::optional<std::string> last_command {};
+  std::optional<Detection> last_detection {};
   const std::chrono::milliseconds command_duration {50};
   const std::chrono::milliseconds detection_duration {0};
 
-  SafeQueue<std::string> command_queue;
+  SafeQueue<std::string> command_queue {};
   std::atomic<bool> stop_comm_thread {false};
 
   auto TCP {TCP::TCPServer(9091)};
@@ -35,7 +35,7 @@ int main() {
   AutonomousDriver.run();
   ObjectDetector.run();
 
-  auto internal_comm_thread = std::thread([&] {
+  auto internal_comm_thread {std::thread([&] {
     auto last_msg_time {std::chrono::steady_clock::now()};
 
     while (!stop_comm_thread) {
@@ -55,9 +55,9 @@ int main() {
         }
       }
     }
-  });
+  })};
 
-  auto handler_proto = [&](const std::string &message) {
+  auto handler_proto {[&](const std::string &message) {
     auto now {std::chrono::steady_clock::now()};
     auto decoded_frame {decodeImageFromProto(message)};
     if (ObjectDetector._running) {
@@ -104,7 +104,7 @@ int main() {
       ObjectDetector.drawDetections(decoded_frame, detection);
     }
     Viewer.addFrame(decoded_frame);
-  };
+  }};
 
   auto UDP {UDPServer(8080, handler_proto)};
   UDP.start();

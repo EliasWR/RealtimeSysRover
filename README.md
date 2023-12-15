@@ -74,14 +74,16 @@ However, during the entire development of this project, Github Copilot has been 
 * Use namespaces to group related classes.
 * Using IFNDEF as header guards.
 * Use const whenever possible.
+* For initializing variables prefer {} over =
 
 #### Code comments:
 * Variable names should be self-explanatory.
 * Documentation following Doxygen standard:
 ``` c++
 /*
-* @ brief Sum numbers in a vector.
+* @brief Sum numbers in a vector.
 * 
+* @details
 * This sum is the arithmetic sum, not some other kind of sum that only
 * mathematicians have heard of.
 * 

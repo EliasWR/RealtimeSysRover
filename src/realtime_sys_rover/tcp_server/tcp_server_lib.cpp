@@ -19,7 +19,7 @@ void TCP::Connection::start() {
   _thread = std::thread([&] {
     try {
       while (_is_running) {
-        auto msg = receiveMessage();
+        auto msg {receiveMessage()};
         if (_message_handler) {
           _message_handler(msg);
         }
@@ -48,7 +48,7 @@ std::string TCP::Connection::getIPv4() {
  * @return int The size of the incoming message.
  */
 int TCP::Connection::receiveMessageSize() {
-  std::array<unsigned char, 4> buf{};
+  std::array<unsigned char, 4> buf {};
   boost::asio::read(_socket, boost::asio::buffer(buf), boost::asio::transfer_exactly(4));
   return bytes_to_int(buf);
 }
@@ -62,9 +62,9 @@ int TCP::Connection::receiveMessageSize() {
  * @return std::string The received message.
  */
 std::string TCP::Connection::receiveMessage() {
-  int len = receiveMessageSize();
-  boost::asio::streambuf buf;
-  boost::system::error_code err;
+  int len {receiveMessageSize()};
+  boost::asio::streambuf buf {};
+  boost::system::error_code err {};
 
   boost::asio::read(_socket, buf, boost::asio::transfer_exactly(len), err);
   if (err) {
@@ -82,7 +82,7 @@ std::string TCP::Connection::receiveMessage() {
  * @param msg The message to be sent.
  */
 void TCP::Connection::writeMessage(const std::string &msg) {
-  int msgSize = static_cast<int>(msg.size());
+  int msgSize {static_cast<int>(msg.size())};
 
   _socket.send(boost::asio::buffer(int_to_bytes(msgSize), 4));
   _socket.send(boost::asio::buffer(msg));
@@ -143,8 +143,8 @@ void TCP::TCPServer::start() {
   _is_running = true;
   std::cout << "TCP Server running on port: " << _port << std::endl;
 
-  stop_task_thread = false;
-  tasks_thread = std::thread(&TCP::TCPServer::processTasks, this);
+  _stop_task_thread = false;
+  _tasks_thread = std::thread(&TCP::TCPServer::processTasks, this);
 
   _acceptor_thread = std::thread([&] {
     try {
@@ -178,22 +178,16 @@ void TCP::TCPServer::start() {
  */
 void TCP::TCPServer::stop() {
   if (_is_running) {
-    std::cout << "Stopping TCP Server..\n";
     _is_running = false;
 
     _acceptor.cancel();
     _acceptor.close();
     _acceptor_thread.join();
 
-    std::cout << "Acceptor closed.\n";
-
-    {
-      std::lock_guard<std::mutex> lock(_task_m);
-      stop_task_thread = true;
-    }
-    tasks_cond.notify_one();
-    if (tasks_thread.joinable()) {
-      tasks_thread.join();
+    _stop_task_thread = true;
+    _tasks_cond.notify_one();
+    if (_tasks_thread.joinable()) {
+      _tasks_thread.join();
     }
 
     {
@@ -204,11 +198,7 @@ void TCP::TCPServer::stop() {
       _clients.clear();
     }
 
-    std::cout << "Clients disconnected.\n";
-
     _io_context.stop();
-
-    std::cout << "DONE" << std::endl;
   }
 }
 
@@ -261,8 +251,8 @@ void TCP::TCPServer::writeToAllClients(const std::string &msg) {
  */
 void TCP::TCPServer::handleDisconnection(Connection *conn) {
   {
-    std::lock_guard<std::mutex> lock(_task_m);
-    tasks.push([this, conn]() {
+    std::lock_guard<std::mutex> lock {_task_m};
+    tasks.emplace([this, conn]() {
       auto connection_itr = std::find_if(_clients.begin(), _clients.end(),
                                          [conn](const std::unique_ptr<Connection> &client) {
                                            return client.get() == conn;
@@ -274,7 +264,7 @@ void TCP::TCPServer::handleDisconnection(Connection *conn) {
       }
     });
   }
-  tasks_cond.notify_one();
+  _tasks_cond.notify_one();
 }
 
 /**
@@ -285,13 +275,13 @@ void TCP::TCPServer::handleDisconnection(Connection *conn) {
  */
 void TCP::TCPServer::processTasks() {
   while (true) {
-    std::function<void()> task;
+    std::function<void()> task {};
     {
-      std::unique_lock<std::mutex> lock(_task_m);
-      tasks_cond.wait(lock, [this] {
-        return stop_task_thread || !tasks.empty();
+      std::unique_lock<std::mutex> lock {_task_m};
+      _tasks_cond.wait(lock, [this] {
+        return _stop_task_thread || !tasks.empty();
       });
-      if (stop_task_thread && tasks.empty()) {
+      if (_stop_task_thread && tasks.empty()) {
         break;
       }
       task = std::move(tasks.front());

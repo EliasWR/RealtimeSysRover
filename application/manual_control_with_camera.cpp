@@ -15,28 +15,28 @@
 using json = nlohmann::json;
 
 int main() {
-  SafeQueue<std::string> command_queue;
+  SafeQueue<std::string> command_queue{};
   std::atomic<bool> stop_comm_thread{false};
 
-  auto Viewer = std::make_unique<VideoViewer>("Camera View");
+  auto Viewer {std::make_unique<VideoViewer>("Camera View")};
 
   auto WebsocketServer{WSServer(12345)};
   WebsocketServer.setMessageHandler([&](const std::string &msg) {
-    auto command = GUI::message_handler(msg);
+    auto command {GUI::message_handler(msg)};
     command_queue.enqueue(command);
   });
   WebsocketServer.start();
 
-  auto TCPServer = TCP::TCPServer(9091);
+  auto TCPServer {TCP::TCPServer(9091)};
   TCPServer.start();
 
-  auto internal_comm_thread = std::thread([&] {
-    auto last_msg_time = std::chrono::steady_clock::now();
+  auto internal_comm_thread {std::thread([&] {
+    auto last_msg_time {std::chrono::steady_clock::now()};
     while (!stop_comm_thread) {
-      auto now = std::chrono::steady_clock::now();
-      auto cmd = command_queue.dequeue();
+      auto now {std::chrono::steady_clock::now()};
+      auto cmd {command_queue.dequeue()};
       if (cmd.has_value()) {
-        json j = json::parse(cmd.value());
+        json j {json::parse(cmd.value())};
 
         if (j["command"] == "stop" or j["command"] == "reset_camera") {
           TCPServer.writeToAllClients(cmd.value());
@@ -47,7 +47,7 @@ int main() {
         }
       }
     }
-  });
+  })};
 
   auto handler_proto = [&](const std::string &message) {
     cv::Mat decoded_frame = decodeImageFromProto(message);
