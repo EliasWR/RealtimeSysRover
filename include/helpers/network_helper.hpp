@@ -3,9 +3,9 @@
 
 #include <array>
 
+#include "my_messages.pb.h"
 #include "nlohmann/json.hpp"
 #include "opencv2/opencv.hpp"
-#include "my_messages.pb.h"
 
 enum class byte_order {
   LITTLE,
@@ -20,7 +20,7 @@ enum class byte_order {
  * @return The byte array
  */
 inline std::array<unsigned char, 4> int_to_bytes(int n, byte_order order = byte_order::LITTLE) {
-  std::array<unsigned char, 4> bytes{};
+  std::array<unsigned char, 4> bytes {};
 
   if (order == byte_order::LITTLE) {
     bytes[0] = n & 0xFF;
@@ -108,10 +108,10 @@ inline cv::Mat decodeImageFromProto(const std::string &frame) {
 inline cv::Mat decodeImageFromJson(const std::string &jsonString) {
   // Parse the JSON
   auto json = nlohmann::json::parse(jsonString);
-  std::string encodedImage = json["image"];
+  std::string encoded_image = json["image"];
 
   // Base64 Decode
-  std::string decodedImageData = base64_decode(encodedImage);
+  std::string decodedImageData = base64_decode(encoded_image);
 
   // Convert to vector of bytes
   std::vector<uchar> data(decodedImageData.begin(), decodedImageData.end());
@@ -121,8 +121,6 @@ inline cv::Mat decodeImageFromJson(const std::string &jsonString) {
 
   return image;
 }
-
-
 
 
 #endif//REALTIMESYSROVER_NETWORK_HELPER_HPP

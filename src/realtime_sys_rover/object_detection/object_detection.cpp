@@ -7,11 +7,11 @@
  * Loads the model and the class names.
  */
 ObjectDetection::ObjectDetection() {
-  _categoryPath = "../resources/yolo/coco.names";
-  _modelPath = "../resources/yolo/yolov3-tiny.weights";
-  _configPath = "../resources/yolo/yolov3-tiny.cfg";
-  _classNames = loadFileToVector(_categoryPath);
-  _net = cv::dnn::readNet(_modelPath, _configPath);
+  _category_path = "../resources/yolo/coco.names";
+  _model_path = "../resources/yolo/yolov3-tiny.weights";
+  _config_path = "../resources/yolo/yolov3-tiny.cfg";
+  _class_names = loadFileToVector(_category_path);
+  _net = cv::dnn::readNet(_model_path, _config_path);
 }
 
 /**
@@ -21,11 +21,11 @@ ObjectDetection::ObjectDetection() {
  * @param blob The blob to store the preprocessed frame in.
  */
 void ObjectDetection::preprocess(const cv::Mat &frame, cv::Mat &blob) {
-  double scale_factor = 1 / 255.0;
-  cv::Size size = cv::Size(416, 416);
-  cv::Scalar mean = cv::Scalar(0, 0, 0);
-  bool swapRB = true;
-  bool crop = false;
+  double scale_factor {1 / 255.0};
+  cv::Size size {cv::Size(416, 416)};
+  cv::Scalar mean {cv::Scalar(0, 0, 0)};
+  bool swapRB {true};
+  bool crop {false};
   cv::dnn::blobFromImage(frame, blob, scale_factor, size, mean, swapRB, crop);
 }
 
@@ -56,8 +56,8 @@ void ObjectDetection::runModel(const cv::Mat &blob, std::vector<cv::Mat> &output
 void ObjectDetection::postprocess(const std::vector<cv::Mat> &outputs, const cv::Mat &frame, Detection &detection) {
   auto &boxes = detection.boxes;
   auto &confidences = detection.confidences;
-  auto &classIds = detection.classIds;
-  auto &frameSize = detection.frameSize;
+  auto &classIds = detection.class_ids;
+  auto &frameSize = detection.frame_size;
 
   double detection_threshold = 0.3;
   for (auto &output : outputs) {
@@ -98,7 +98,7 @@ cv::Mat ObjectDetection::drawDetections(cv::Mat &frame, std::optional<Detection>
 
   auto &boxes = detection.value().boxes;
   auto &confidences = detection.value().confidences;
-  auto &classIds = detection.value().classIds;
+  auto &class_ids = detection.value().class_ids;
 
   std::vector<int> indices;
   cv::dnn::NMSBoxes(boxes, confidences, 0.3, 0.4, indices);
@@ -107,19 +107,19 @@ cv::Mat ObjectDetection::drawDetections(cv::Mat &frame, std::optional<Detection>
     cv::Rect box = boxes[idx];
     cv::rectangle(frame, box, cv::Scalar(0, 255, 0), 3);
     std::string label = "";
-    if (classIds[idx] < _classNames.size()) {
-      label = _classNames[classIds[idx]];
+    if (class_ids[idx] < _class_names.size()) {
+      label = _class_names[class_ids[idx]];
     }
     else {
-      std::cerr << "Class ID " << classIds[idx] << " is out of range." << std::endl;
+      std::cerr << "Class ID " << class_ids[idx] << " is out of range." << std::endl;
     }
     label += ": " + cv::format("%.2f", confidences[idx]);
 
-    int baseLine;
-    cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
-    int top = std::max(box.y, labelSize.height);
-    cv::rectangle(frame, cv::Point(box.x, top - labelSize.height),
-                  cv::Point(box.x + labelSize.width, top + baseLine),
+    int base_line;
+    cv::Size label_size = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &base_line);
+    int top = std::max(box.y, label_size.height);
+    cv::rectangle(frame, cv::Point(box.x, top - label_size.height),
+                  cv::Point(box.x + label_size.width, top + base_line),
                   cv::Scalar(255, 255, 255), cv::FILLED);
     cv::putText(frame, label, cv::Point(box.x, box.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
   }
@@ -150,10 +150,10 @@ Detection ObjectDetection::detectObjects(const cv::Mat &frame) {
  * @param frame The latest frame.
  */
 void ObjectDetection::addLatestFrame(const cv::Mat &frame) {
-  std::unique_lock<std::mutex> guard(mutex);
+  std::unique_lock<std::mutex> guard(_mutex);
   _latest_frame = frame;
-  new_frame_available = true;
-  cv.notify_one();
+  _new_frame_available = true;
+  _cv.notify_one();
 }
 
 /**
@@ -176,23 +176,23 @@ std::optional<Detection> ObjectDetection::getLatestDetection() {
  * The latest detection is stored in the _latest_detection variable.
  */
 void ObjectDetection::run() {
-  _running = true;
+  running = true;
   _t = std::thread([&]() {
-    while (_running) {
-      std::unique_lock<std::mutex> guard(mutex);
-      cv.wait(guard, [this] {
-        return new_frame_available || !_running;
+    while (running) {
+      std::unique_lock<std::mutex> guard(_mutex);
+      _cv.wait(guard, [this] {
+        return _new_frame_available || !running;
       });
 
-      if (!_running) break;
+      if (!running) break;
 
       if (_latest_frame.empty()) {
-        new_frame_available = false;
+        _new_frame_available = false;
         continue;
       }
 
       auto detection = detectObjects(_latest_frame);
-      new_frame_available = false;
+      _new_frame_available = false;
 
       if (!detection.boxes.empty()) {
         _last_detection_time = std::chrono::steady_clock::now();
@@ -209,6 +209,6 @@ void ObjectDetection::run() {
  * Stops the object detection thread.
  */
 void ObjectDetection::stop() {
-  _running = false;
+  running = false;
   _t.join();
 }

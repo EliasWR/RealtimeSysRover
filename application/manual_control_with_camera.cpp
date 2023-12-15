@@ -16,11 +16,11 @@ using json = nlohmann::json;
 
 int main() {
   SafeQueue<std::string> command_queue;
-  std::atomic<bool> stop_comm_thread{false};
+  std::atomic<bool> stop_comm_thread = false;
 
-  auto Viewer = std::make_unique<VideoViewer>("Camera View");
+  auto Viewer = VideoViewer("Camera View");
 
-  auto WebsocketServer{WSServer(12345)};
+  auto WebsocketServer = WSServer(12345);
   WebsocketServer.setMessageHandler([&](const std::string &msg) {
     auto command = GUI::message_handler(msg);
     command_queue.enqueue(command);
@@ -51,19 +51,18 @@ int main() {
 
   auto handler_proto = [&](const std::string &message) {
     cv::Mat decoded_frame = decodeImageFromProto(message);
-    Viewer->addFrame(decoded_frame);
+    Viewer.addFrame(decoded_frame);
   };
 
-  auto udp_server{UDPServer(8080, handler_proto)};
-
-  udp_server.start();
+  auto UDP = UDPServer(8080, handler_proto);
+  UDP.start();
 
   auto fps = 30;
   auto frame_interval = std::chrono::milliseconds(1000 / fps);
 
   std::cout << "Press any key while in Camera View to end..." << std::endl;
   while (true) {
-    Viewer->display();
+    Viewer.display();
     if (cv::waitKey(frame_interval.count()) >= 0) break;
   }
 
@@ -72,10 +71,9 @@ int main() {
 
   WebsocketServer.stop();
   TCPServer.stop();
-  udp_server.stop();
+  UDP.stop();
 
   internal_comm_thread.join();
-
 
   return 0;
 }

@@ -5,7 +5,7 @@
 int main() {
   VideoViewer viewer;
 
-  std::atomic<bool> stop_flag(false);
+  std::atomic<bool> stop_flag = false;
 
   std::thread frame_grabber([&]() {
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -17,7 +17,6 @@ int main() {
 
   while (true) {
     viewer.display();
-
     if (cv::waitKey(10) >= 0) break;
   }
   stop_flag = true;

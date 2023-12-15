@@ -8,8 +8,8 @@ AutonomousDriving::AutonomousDriving() = default;
  * @param detection The latest detection.
  */
 void AutonomousDriving::addLatestDetection(std::optional<Detection> &detection) {
-    std::unique_lock<std::mutex> guard(_mutex);
-    _latest_detection = detection;
+  std::unique_lock<std::mutex> guard(_mutex);
+  _latest_detection = detection;
 }
 
 /**
@@ -18,8 +18,8 @@ void AutonomousDriving::addLatestDetection(std::optional<Detection> &detection) 
  * @param command The latest command.
  */
 void AutonomousDriving::setLatestCommand(std::string &command) {
-    std::unique_lock<std::mutex> guard(_mutex);
-    _latest_command = command;
+  std::unique_lock<std::mutex> guard(_mutex);
+  _latest_command = command;
 }
 
 /**
@@ -28,8 +28,8 @@ void AutonomousDriving::setLatestCommand(std::string &command) {
  * @return std::optional<std::string> The latest command if available, otherwise nullopt.
  */
 std::optional<std::string> AutonomousDriving::getLatestCommand() {
-    std::unique_lock<std::mutex> guard(_mutex);
-    return _latest_command;
+  std::unique_lock<std::mutex> guard(_mutex);
+  return _latest_command;
 }
 
 /**
@@ -40,17 +40,17 @@ std::optional<std::string> AutonomousDriving::getLatestCommand() {
  *
  * @param x The x coordinate of the joystick command.
  * @param y The y coordinate of the joystick command.
- * @param radiusLimit The radius limit.
+ * @param radius_limit The radius limit.
  * @return std::pair<int, int> The x and y coordinates of the joystick command.
  */
-std::pair<int, int> AutonomousDriving::limitRadius(int x, int y, int radiusLimit) {
-    double distance = std::sqrt(x * x + y * y);
-    if (distance > radiusLimit) {
-        double scale = radiusLimit / distance;
-        x = static_cast<int>(x * scale);
-        y = static_cast<int>(y * scale);
-    }
-    return {x, y};
+std::pair<int, int> AutonomousDriving::limitRadius(int x, int y, int radius_limit) {
+  double distance = std::sqrt(x * x + y * y);
+  if (distance > radius_limit) {
+    double scale = radius_limit / distance;
+    x = static_cast<int>(x * scale);
+    y = static_cast<int>(y * scale);
+  }
+  return {x, y};
 }
 
 /**
@@ -65,28 +65,28 @@ std::pair<int, int> AutonomousDriving::limitRadius(int x, int y, int radiusLimit
  */
 
 double AutonomousDriving::calculateAngle(int x, int y) {
-    double angle = std::atan2(y, x) * 180.0 / std::numbers::pi;
-    return angle < 0 ? angle + 360 : angle;
+  double angle = std::atan2(y, x) * 180.0 / std::numbers::pi;
+  return angle < 0 ? angle + 360 : angle;
 }
 
 /**
  * @brief Checking if the angle is within the angle limits.
  *
  * @param angle
- * @param angleLimitDeg
+ * @param angle_limit_deg
  * @return
  */
-bool AutonomousDriving::isAngleWithinLimits(double angle, int angleLimitDeg) {
-    const int referenceAngles[] = {90, 270};
-    for (int referenceAngle: referenceAngles) {
-        double lowerBoundDeg = referenceAngle - angleLimitDeg;
-        double upperBoundDeg = referenceAngle + angleLimitDeg;
+bool AutonomousDriving::isAngleWithinLimits(double angle, int angle_limit_deg) {
+  const int referenceAngles[] = {90, 270};
+  for (int referenceAngle : referenceAngles) {
+    double lowerBoundDeg = referenceAngle - angle_limit_deg;
+    double upperBoundDeg = referenceAngle + angle_limit_deg;
 
-        if (angle >= lowerBoundDeg && angle <= upperBoundDeg) {
-            return true;
-        }
+    if (angle >= lowerBoundDeg && angle <= upperBoundDeg) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 /**
@@ -96,40 +96,40 @@ bool AutonomousDriving::isAngleWithinLimits(double angle, int angleLimitDeg) {
  * This function prevents the rover from turning too hard.
  *
  * @param angle
- * @param angleLimitDeg
+ * @param angle_limit_deg
  * @return
  */
-double AutonomousDriving::adjustAngleToBoundary(double angle, int angleLimitDeg) {
-    std::pair<int, int> reference_angles = {90, 270};
-    double new_angle = angle;
+double AutonomousDriving::adjustAngleToBoundary(double angle, int angle_limit_deg) {
+  std::pair<int, int> reference_angles = {90, 270};
+  double new_angle = angle;
 
-    if (angle < 0) {
-        angle += 360;
+  if (angle < 0) {
+    angle += 360;
+  }
+
+  double closest_difference = 1000.0;
+
+  for (int reference_angle : {reference_angles.first, reference_angles.second}) {
+    double lower_boundary = reference_angle - angle_limit_deg;
+    double upper_boundary = reference_angle + angle_limit_deg;
+
+    if (angle >= lower_boundary && angle <= upper_boundary) {
+      return angle;
     }
 
-    double closest_difference = 1000.0;
+    double lower_difference = std::abs(angle - lower_boundary);
+    double upper_difference = std::abs(angle - upper_boundary);
 
-    for (int reference_angle: {reference_angles.first, reference_angles.second}) {
-        double lower_boundary = reference_angle - angleLimitDeg;
-        double upper_boundary = reference_angle + angleLimitDeg;
-
-        if (angle >= lower_boundary && angle <= upper_boundary) {
-            return angle;
-        }
-
-        double lower_difference = std::abs(angle - lower_boundary);
-        double upper_difference = std::abs(angle - upper_boundary);
-
-        if (lower_difference < closest_difference) {
-            closest_difference = lower_difference;
-            new_angle = lower_boundary;
-        }
-        if (upper_difference < closest_difference) {
-            closest_difference = upper_difference;
-            new_angle = upper_boundary;
-        }
+    if (lower_difference < closest_difference) {
+      closest_difference = lower_difference;
+      new_angle = lower_boundary;
     }
-    return new_angle;
+    if (upper_difference < closest_difference) {
+      closest_difference = upper_difference;
+      new_angle = upper_boundary;
+    }
+  }
+  return new_angle;
 }
 
 /**
@@ -143,10 +143,10 @@ double AutonomousDriving::adjustAngleToBoundary(double angle, int angleLimitDeg)
  * @return std::pair<int, int> The x and y coordinates of the joystick command.
  */
 std::pair<int, int> AutonomousDriving::convertToCartesian(int radius, double angle) {
-    double radAngle = angle * std::numbers::pi / 180.0;
-    int x = static_cast<int>(radius * std::cos(radAngle));
-    int y = static_cast<int>(radius * std::sin(radAngle));
-    return {x, y};
+  double angle_rad = angle * std::numbers::pi / 180.0;
+  int x = static_cast<int>(radius * std::cos(angle_rad));
+  int y = static_cast<int>(radius * std::sin(angle_rad));
+  return {x, y};
 }
 
 /**
@@ -158,26 +158,26 @@ std::pair<int, int> AutonomousDriving::convertToCartesian(int radius, double ang
  *
  * @param x The x coordinate of the joystick command.
  * @param y The y coordinate of the joystick command.
- * @param radiusLimit The radius limit.
- * @param angleLimitDeg The angle limit.
+ * @param radius_limit The radius limit.
+ * @param angle_limit_deg The angle limit.
  * @return std::pair<int, int> The x and y coordinates of the joystick command.
  */
-std::pair<int, int> AutonomousDriving::checkLimits(int &x, int &y, const int &radiusLimit, const int &angleLimitDeg) {
-    bool xIsZero = (x == 0);
-    bool yIsZero = (y == 0);
+std::pair<int, int> AutonomousDriving::checkLimits(int x, int y, int radius_limit, int angle_limit_deg) {
+  bool x_is_zero = (x == 0);
+  bool y_is_zero = (y == 0);
 
-    std::tie(x, y) = limitRadius(x, y, radiusLimit);
-    double angle = calculateAngle(x, y);
+  auto x_y = limitRadius(x, y, radius_limit);
+  double angle = calculateAngle(x_y.first, x_y.second);
 
-    if (!isAngleWithinLimits(angle, angleLimitDeg)) {
-        angle = adjustAngleToBoundary(angle, angleLimitDeg);
-    }
+  if (!isAngleWithinLimits(angle, angle_limit_deg)) {
+    angle = adjustAngleToBoundary(angle, angle_limit_deg);
+  }
 
-    if (!xIsZero || !yIsZero) {
-        std::tie(x, y) = convertToCartesian(radiusLimit, angle);
-    }
+  if (!x_is_zero || !y_is_zero) {
+    x_y = convertToCartesian(radius_limit, angle);
+  }
 
-    return std::make_pair(x, y);
+  return x_y;
 }
 
 /**
@@ -190,11 +190,11 @@ std::pair<int, int> AutonomousDriving::checkLimits(int &x, int &y, const int &ra
  * @param y The y coordinate of the joystick command.
  * @return std::string The formatted joystick command.
  */
-std::string AutonomousDriving::formatCommand(int &x, int &y) const {
-    std::string command;
-    checkLimits(x, y, _speedLim, _angleLim);
-    command = "joystick_rover_" + std::to_string(x) + "_" + std::to_string(y);
-    return command;
+std::string AutonomousDriving::formatCommand(int x, int y) const {
+  std::string command;
+  checkLimits(x, y, _speed_lim, _angle_lim);
+  command = "joystick_rover_" + std::to_string(x) + "_" + std::to_string(y);
+  return command;
 }
 
 /**
@@ -207,21 +207,21 @@ std::string AutonomousDriving::formatCommand(int &x, int &y) const {
  * @return std::pair<int, int> The center of the bounding box with a x and y coordinate.
  */
 std::pair<int, int> AutonomousDriving::calculateBoxCenter(const cv::Rect &box) {
-    int centerX = box.x + box.width / 2;
-    int centerY = box.y + box.height / 2;
-    return {centerX, centerY};
+  int centerX = box.x + box.width / 2;
+  int centerY = box.y + box.height / 2;
+  return {centerX, centerY};
 }
 
 /**
  * @brief Check if object is centered in the frame.
  *
- * @param boxCenterX
- * @param frameSize
- * @param centerThreshold
+ * @param box_center_x
+ * @param frame_size
+ * @param center_threshold
  * @return bool True if the object is centered, false otherwise.
  */
-bool AutonomousDriving::isObjectCentered(int boxCenterX, const std::pair<int, int> &frameSize, double centerThreshold) {
-    return std::abs(boxCenterX - frameSize.first / 2) < centerThreshold * frameSize.first;
+bool AutonomousDriving::isObjectCentered(int box_center_x, const std::pair<int, int> &frame_size, double center_threshold) {
+  return std::abs(box_center_x - frame_size.first / 2) < center_threshold * frame_size.first;
 }
 
 /**
@@ -230,15 +230,15 @@ bool AutonomousDriving::isObjectCentered(int boxCenterX, const std::pair<int, in
  * @details
  * Used for determining if the rover needs to back up or drive forward.
  *
- * @param boxWidth The width of the bounding box.
- * @param frameSize The size of the frame.
- * @param minThreshold The minimum threshold for the size of the bounding box.
- * @param maxThreshold The maximum threshold for the size of the bounding box.
+ * @param box_width The width of the bounding box.
+ * @param frame_size The size of the frame.
+ * @param min_threshold The minimum threshold for the size of the bounding box.
+ * @param max_threshold The maximum threshold for the size of the bounding box.
  * @return bool True if the size of the bounding box is within range, false otherwise.
  */
-bool AutonomousDriving::isSizeInRange(int boxWidth, const std::pair<int, int> &frameSize, double minThreshold,
-                                      double maxThreshold) {
-    return boxWidth >= frameSize.first * minThreshold && boxWidth <= frameSize.first * maxThreshold;
+bool AutonomousDriving::isSizeInRange(int box_width, const std::pair<int, int> &frame_size, double min_threshold,
+                                      double max_threshold) {
+  return box_width >= (frame_size.first * min_threshold) && box_width <= (frame_size.first * max_threshold);
 }
 
 /**
@@ -247,39 +247,40 @@ bool AutonomousDriving::isSizeInRange(int boxWidth, const std::pair<int, int> &f
  * @details
  * Calculating the joystick position based on center of the bounding box.
  *
- * @param boxCenterX The x coordinate of the center of the bounding box.
- * @param boxCenterY The y coordinate of the center of the bounding box.
- * @param frameSize The size of the frame.
+ * @param box_center_x The x coordinate of the center of the bounding box.
+ * @param box_center_y The y coordinate of the center of the bounding box.
+ * @param frame_size The size of the frame.
  * @return std::pair<int, int> The x and y coordinates of the joystick command.
  */
 std::pair<int, int>
-AutonomousDriving::calculateJoystickPosition(int boxCenterX, int boxCenterY, const std::pair<int, int> &frameSize) {
-    int displacementX = frameSize.first / 2 - boxCenterX;
-    int displacementY = frameSize.second / 2 - boxCenterY;
-    int joystickX = -static_cast<int>((static_cast<double>(displacementX) / frameSize.first) * 100);
-    int joystickY = static_cast<int>((static_cast<double>(displacementY) / frameSize.second) * 100);
-    return {joystickX, joystickY};
+AutonomousDriving::calculateJoystickPosition(int box_center_x, int box_center_y, const std::pair<int, int> &frame_size) {
+  int displacementX = frame_size.first / 2 - box_center_x;
+  int displacementY = frame_size.second / 2 - box_center_y;
+  int joystick_x = -static_cast<int>((static_cast<double>(displacementX) / frame_size.first) * 100);
+  int joystick_y = static_cast<int>((static_cast<double>(displacementY) / frame_size.second) * 100);
+  return {joystick_x, joystick_y};
 }
-
 
 /**
  * @brief Determining joystick command based result of other functions.
  *
- * @param isCentered
- * @param isSizeInRange
+ * @param is_centered
+ * @param is_size_in_range
  * @param joystick
  * @return std::pair<int, int> The x and y coordinates of the joystick command.
  */
 std::pair<int, int>
-AutonomousDriving::determineJoystickAction(bool isCentered, bool isSizeInRange, const std::pair<int, int> &joystick) {
-    if (isCentered && isSizeInRange) {
-        return {0, 0};
-    } else if (isCentered) {
-        return {0, joystick.second};
-    } else if (isSizeInRange) {
-        return {joystick.first, 0};
-    }
-    return joystick;
+AutonomousDriving::determineJoystickAction(bool is_centered, bool is_size_in_range, const std::pair<int, int> &joystick) {
+  if (is_centered && is_size_in_range) {
+    return {0, 0};
+  }
+  else if (is_centered) {
+    return {0, joystick.second};
+  }
+  else if (is_size_in_range) {
+    return {joystick.first, 0};
+  }
+  return joystick;
 }
 
 /**
@@ -292,29 +293,29 @@ AutonomousDriving::determineJoystickAction(bool isCentered, bool isSizeInRange, 
  * @return std::pair<int, int> The x and y coordinates of the joystick command.
  */
 std::pair<int, int> AutonomousDriving::interpretLatestDetection(Detection &detection) {
-    if (detection.boxes.empty()) {
-        return {0, 0};
-    }
-
-    const double centerThreshold = 0.1;
-    const double sizeMinThreshold = 0.1;
-    const double sizeMaxThreshold = 0.4;
-
-    for (int idx = 0; idx < detection.classIds.size(); idx++) {
-        auto label = detection.classIds[idx];
-        if (label == 39) { // bottle
-            auto box = detection.boxes[idx];
-            auto [boxCenterX, boxCenterY] = calculateBoxCenter(box);
-
-            bool isCentered = isObjectCentered(boxCenterX, detection.frameSize, centerThreshold);
-            bool sizeInRange = isSizeInRange(box.width, detection.frameSize, sizeMinThreshold, sizeMaxThreshold);
-            auto joystick = calculateJoystickPosition(boxCenterX, boxCenterY, detection.frameSize);
-
-            return determineJoystickAction(isCentered, sizeInRange, joystick);
-        }
-    }
-
+  if (detection.boxes.empty()) {
     return {0, 0};
+  }
+
+  const double center_threshold = 0.1;
+  const double size_min_threshold = 0.1;
+  const double size_max_threshold = 0.4;
+
+  for (int idx = 0; idx < detection.class_ids.size(); idx++) {
+    auto label = detection.class_ids[idx];
+    if (label == 39) {// bottle
+      auto box = detection.boxes[idx];
+      auto [boxCenterX, boxCenterY] = calculateBoxCenter(box);
+
+      bool isCentered = isObjectCentered(boxCenterX, detection.frame_size, center_threshold);
+      bool sizeInRange = isSizeInRange(box.width, detection.frame_size, size_min_threshold, size_max_threshold);
+      auto joystick = calculateJoystickPosition(boxCenterX, boxCenterY, detection.frame_size);
+
+      return determineJoystickAction(isCentered, sizeInRange, joystick);
+    }
+  }
+
+  return {0, 0};
 }
 
 /**
@@ -324,19 +325,20 @@ std::pair<int, int> AutonomousDriving::interpretLatestDetection(Detection &detec
  * Running command that starts separate thread for interpreting the latest detection.
  */
 void AutonomousDriving::run() {
-    _running = true;
-    _t = std::thread([&]() {
-        while (_running) {
-            if (_latest_detection.has_value()) {
-                std::pair<int, int> joystick = interpretLatestDetection(_latest_detection.value());
-                std::string command = formatCommand(joystick.first, joystick.second);
-                setLatestCommand(command);
-            } else {
-                std::string command = "joystick_rover_0_0";
-                setLatestCommand(command);
-            }
-        }
-    });
+  _running = true;
+  _t = std::thread([&]() {
+    while (_running) {
+      if (_latest_detection.has_value()) {
+        std::pair<int, int> joystick = interpretLatestDetection(_latest_detection.value());
+        std::string command = formatCommand(joystick.first, joystick.second);
+        setLatestCommand(command);
+      }
+      else {
+        std::string command = "joystick_rover_0_0";
+        setLatestCommand(command);
+      }
+    }
+  });
 }
 
 /**
@@ -346,6 +348,6 @@ void AutonomousDriving::run() {
  * Joining the thread
  */
 void AutonomousDriving::stop() {
-    _running = false;
-    _t.join();
+  _running = false;
+  _t.join();
 }

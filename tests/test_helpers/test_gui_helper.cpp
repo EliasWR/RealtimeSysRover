@@ -1,5 +1,5 @@
-#include "helpers/gui_helper.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "helpers/gui_helper.hpp"
 
 TEST_CASE("Test SplitString") {
   std::string testString = "This is a test string";

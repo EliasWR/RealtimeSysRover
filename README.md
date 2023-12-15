@@ -25,7 +25,7 @@ We have made som videos showcasing the project. \
 [Autonomous driving 2](https://studntnu-my.sharepoint.com/:v:/g/personal/eliaswr_ntnu_no/EQAXbACmU9JHkahWcl4XfPUBKJYO0LnO-uvwaiEMVzMghw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=NOCe5m)
 
 The manual rover control involves a user friendly GUI. \
-![img.png](doc/images/GUI.png)
+![img.png](doc/images/gui.png)
 
 
 ## Project structure
@@ -51,10 +51,10 @@ The folder structure has partly been inspired by the Threepp library: \
 * **/resources** - Resources such yolo-data
 
 ### Class structure
-![img.png](doc/images/ClassDiagram.png)
+![img.png](doc/images/class_diagram.png)
 
 ### Data flow
-![img.png](doc/images/DataFlowDiagram.png)
+![img.png](doc/images/dataflow_diagram.png)
 
 ### Conventions
 
@@ -80,8 +80,9 @@ However, during the entire development of this project, Github Copilot has been 
 * Documentation following Doxygen standard:
 ``` c++
 /*
-* @ brief Sum numbers in a vector.
+* @brief Sum numbers in a vector.
 * 
+* @details
 * This sum is the arithmetic sum, not some other kind of sum that only
 * mathematicians have heard of.
 * 

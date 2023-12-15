@@ -12,29 +12,29 @@
 #include "video_viewer/video_viewer.hpp"
 
 int main() {
-  auto Viewer = std::make_unique<VideoViewer>();
-  auto ObjectDetector = std::make_unique<ObjectDetection>();
+  auto Viewer = VideoViewer();
+  auto ObjectDetector = ObjectDetection();
 
   auto handler_json = [&](const std::string &message) {
     cv::Mat decoded_frame = decodeImageFromJson(message);
-    Viewer->addFrame(decoded_frame);
+    Viewer.addFrame(decoded_frame);
   };
 
   auto handler_proto = [&](const std::string &message) {
     cv::Mat decoded_frame = decodeImageFromProto(message);
-    Viewer->addFrame(decoded_frame);
+    Viewer.addFrame(decoded_frame);
   };
 
-  auto udp_server = std::make_unique<UDPServer>(8080, handler_proto);
+  auto UDP = UDPServer(8080, handler_proto);
 
-  udp_server->start();
+  UDP.start();
 
   auto fps = 30;
   auto frame_interval = std::chrono::milliseconds(1000 / fps);
   while (true) {
-    Viewer->display();
+    Viewer.display();
     if (cv::waitKey(frame_interval.count()) >= 0) break;
   }
   std::cout << "Stopping camera feed" << std::endl;
-  udp_server->stop();
+  UDP.stop();
 }

@@ -41,7 +41,7 @@ namespace TCP {
     tcp::socket _socket;
     std::mutex _m;
     std::thread _thread;
-    std::atomic<bool> _is_running{false};
+    std::atomic<bool> _is_running = false;
   };
 
   class TCPServer {
@@ -56,11 +56,11 @@ namespace TCP {
     void processTasks();
 
   private:
-    std::queue<std::function<void()>> tasks;
+    std::queue<std::function<void()>> _tasks;
     std::mutex _task_m;
-    std::condition_variable tasks_cond;
-    std::thread tasks_thread;
-    bool stop_task_thread{false};
+    std::condition_variable _tasks_cond;
+    std::thread _tasks_thread;
+    std::atomic<bool> _stop_task_thread = false;
 
     std::vector<std::unique_ptr<Connection>> _clients;
 
@@ -72,7 +72,7 @@ namespace TCP {
 
     unsigned short _port;
     std::mutex _m;
-    std::atomic<bool> _is_running{false};
+    std::atomic<bool> _is_running = false;
   };
 }// namespace TCP
 

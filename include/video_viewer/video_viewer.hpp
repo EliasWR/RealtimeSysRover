@@ -15,10 +15,10 @@ public:
   void display();
 
 private:
-  std::queue<cv::Mat> frame_queue;
-  std::mutex queue_mutex;
-  cv::Mat dummy_frame;
-  std::chrono::steady_clock::time_point last_frame_time;
+  std::queue<cv::Mat> _frame_queue;
+  std::mutex _queue_mutex;
+  cv::Mat _dummy_frame;
+  std::chrono::steady_clock::time_point _last_frame_time;
   cv::Mat getLatestFrame();
   std::string _screen_name;
 };

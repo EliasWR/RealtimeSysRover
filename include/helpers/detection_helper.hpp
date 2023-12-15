@@ -2,15 +2,14 @@
 #define REALTIMESYSROVER_Detection_HPP
 
 #include <opencv2/opencv.hpp>
-#include <vector>
 #include <thread>
-
+#include <vector>
 
 struct Detection {
   std::vector<cv::Rect> boxes;
   std::vector<float> confidences;
-  std::vector<int> classIds;
-  std::pair<int, int> frameSize;
+  std::vector<int> class_ids;
+  std::pair<int, int> frame_size;
 };
 
 #endif//REALTIMESYSROVER_Detection_HPP

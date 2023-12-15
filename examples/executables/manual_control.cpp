@@ -1,32 +1,30 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <chrono>
+#include <iostream>
+
+#include "nlohmann/json.hpp"
 
 #include "helpers/gui_helper.hpp"
 #include "safe_queue/safe_queue.hpp"
 #include "tcp_server/tcp_server_lib.hpp"
 #include "tcp_server/ws_server_lib.hpp"
 
-#include "nlohmann/json.hpp"
-#include <iostream>
-
 using json = nlohmann::json;
 
 int main() {
   SafeQueue<std::string> command_queue;
-  std::atomic<bool> stop_comm_thread{false};
+  std::atomic<bool> stop_comm_thread = false;
 
-  auto WebsocketServer{WSServer(12345)};
+  auto WebsocketServer = WSServer(12345);
   WebsocketServer.setMessageHandler([&](const std::string &msg) {
-    /* Parses a message from the GUI and enqueues a JSON command to be sent to the rover */
     auto command = GUI::message_handler(msg);
     command_queue.enqueue(command);
   });
   WebsocketServer.start();
 
-  auto TCPServer{TCP::TCPServer(9091)};
+  auto TCPServer = TCP::TCPServer(9091);
   TCPServer.start();
   TCPServer.setMessageHandler([&](const std::string &msg) {
-    /* TCP messages from the rover are not used for anything yet.*/
     std::cout << "TCP Message: " << msg << std::endl;
   });
 

@@ -1,15 +1,16 @@
 #ifndef REALTIMESYSROVER_OBJECT_DETECTION_HPP
 #define REALTIMESYSROVER_OBJECT_DETECTION_HPP
 
+#include <condition_variable>
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
-#include <string>
-#include <vector>
-#include <thread>
-#include <condition_variable>
 #include <optional>
-#include "helpers/read_file_helper.hpp"
+#include <string>
+#include <thread>
+#include <vector>
+
 #include "helpers/detection_helper.hpp"
+#include "helpers/read_file_helper.hpp"
 
 class ObjectDetection {
 public:
@@ -23,20 +24,20 @@ public:
   void run();
   void stop();
   void addLatestFrame(const cv::Mat &frame);
-  bool _running{false};
+  bool running = false;
 
 private:
   cv::dnn::Net _net;
-  std::string _categoryPath;
-  std::string _modelPath;
-  std::string _configPath;
-  std::vector<std::string> _classNames;
+  std::string _category_path;
+  std::string _model_path;
+  std::string _config_path;
+  std::vector<std::string> _class_names;
 
   std::thread _t;
   cv::Mat _latest_frame;
-  std::mutex mutex;
-  std::condition_variable cv;
-  bool new_frame_available = false;
+  std::mutex _mutex;
+  std::condition_variable _cv;
+  bool _new_frame_available = false;
   Detection _latest_detection;
   std::chrono::steady_clock::time_point _last_detection_time;
   const int MAX_DETECTION_AGE = 1000;//seconds
