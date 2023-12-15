@@ -103,6 +103,6 @@ ssh MartinElias@10.25.46.36
 
 ### Main inspiration
 * [Threepp by Lars Ivar Hatledal](https://github.com/markaren/threepp) \
-* [AIS2202 examples on NTNU blackboard by Lars Ivar Hatledal](https://ntnu.blackboard.com/ultra/courses/_44683_1/cl/outline) \
+* [AIS2202 examples on NTNU blackboard by Lars Ivar Hatledal](https://github.com/AIS2203-H-2023/) \
 * [Yolov3-tiny cfg](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3-tiny.cfg) \
 * [Yolov3-tiny weights](https://pjreddie.com/media/files/yolov3-tiny.weights)
