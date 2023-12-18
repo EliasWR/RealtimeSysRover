@@ -24,10 +24,10 @@ UDPServer::UDPServer(int port, std::function<void(const std::string &)> handler)
  */
 void UDPServer::start() {
   std::cout << "Server is listening on port " << _port << std::endl;
-
+  running = true;
   _thread = std::thread([&] {
     try {
-      while (true) {
+      while (running) {
         auto [message, endpoint] = receiveMessage();
         _messageHandler(message);
         //standardResponse(endpoint);
@@ -92,6 +92,7 @@ std::tuple<std::string, udp::endpoint> UDPServer::receiveMessage() {
  * This method ensures a clean shutdown of the server.
  */
 void UDPServer::stop() {
+  running = false;
   _socket.close();
   _io_context.stop();
   _thread.join();

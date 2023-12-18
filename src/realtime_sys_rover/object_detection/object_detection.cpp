@@ -210,5 +210,6 @@ void ObjectDetection::run() {
  */
 void ObjectDetection::stop() {
   running = false;
+  _cv.notify_all();
   _t.join();
 }

@@ -118,9 +118,12 @@ int main() {
   std::cout << "Stopping program" << std::endl;
   stop_comm_thread = true;
   TCP.stop();
+  std::cout << "TCP stopped" << std::endl;
   ObjectDetector.stop();
+  std::cout << "ObjectDetector stopped" << std::endl;
   UDP.stop();
+  std::cout << "UDP stopped" << std::endl;
   internal_comm_thread.join();
-
+  std::cout << "internal_comm_thread stopped" << std::endl;
   return 0;
 }

@@ -24,7 +24,7 @@ public:
   void run();
   void stop();
   void addLatestFrame(const cv::Mat &frame);
-  bool running = false;
+  std::atomic<bool> running = false;
 
 private:
   cv::dnn::Net _net;

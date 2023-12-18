@@ -16,6 +16,7 @@ public:
   void stop();
   [[maybe_unused]] void sendMessage(const std::string &message, const boost::asio::ip::udp::endpoint &remote_endpoint);
   std::tuple<std::string, udp::endpoint> receiveMessage();
+  std::atomic<bool> running = false;
 
 private:
   std::function<void(const std::string &)> _messageHandler;
