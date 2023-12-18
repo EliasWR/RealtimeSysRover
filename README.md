@@ -49,12 +49,17 @@ The folder structure has partly been inspired by the Threepp library: \
 * **/gui** - GUI code
 * **/protobuf** - Protobuf files
 * **/resources** - Resources such yolo-data
+* 
+### Components communication
+![img.png](doc/images/components_communication.png)
 
 ### Class structure
 ![img.png](doc/images/class_diagram.png)
 
 ### Data flow
 ![img.png](doc/images/dataflow_diagram.png)
+
+
 
 ### Conventions
 
