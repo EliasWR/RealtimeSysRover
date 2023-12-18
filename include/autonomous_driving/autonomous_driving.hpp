@@ -18,7 +18,7 @@ public:
   std::string formatCommand(int x, int y) const;
   void addLatestDetection(std::optional<Detection> &detection);
   static std::pair<int, int> interpretLatestDetection(Detection &detection);
-  bool _running {false};
+  std::atomic<bool> _running {false};
 
 private:
   static std::pair<int, int> limitRadius(int x, int y, int radius_limit);
