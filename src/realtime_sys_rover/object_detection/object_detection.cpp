@@ -21,11 +21,11 @@ ObjectDetection::ObjectDetection() {
  * @param blob The blob to store the preprocessed frame in.
  */
 void ObjectDetection::preprocess(const cv::Mat &frame, cv::Mat &blob) {
-  double scale_factor {1 / 255.0};
-  cv::Size size {cv::Size(416, 416)};
-  cv::Scalar mean {cv::Scalar(0, 0, 0)};
-  bool swapRB {true};
-  bool crop {false};
+  double scale_factor = 1 / 255.0;
+  cv::Size size = cv::Size(416, 416);
+  cv::Scalar mean = cv::Scalar(0, 0, 0);
+  bool swapRB = true;
+  bool crop = false;
   cv::dnn::blobFromImage(frame, blob, scale_factor, size, mean, swapRB, crop);
 }
 

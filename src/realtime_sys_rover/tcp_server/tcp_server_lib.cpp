@@ -19,7 +19,7 @@ void TCP::Connection::start() {
   _thread = std::thread([&] {
     try {
       while (_is_running) {
-        auto msg {receiveMessage()};
+        auto msg = receiveMessage();
         if (_message_handler) {
           _message_handler(msg);
         }
